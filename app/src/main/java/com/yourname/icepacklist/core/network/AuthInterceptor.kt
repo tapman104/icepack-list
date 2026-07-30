@@ -1,0 +1,30 @@
+package com.yourname.icepacklist.core.network
+
+import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import okhttp3.Interceptor
+import okhttp3.Response
+import javax.inject.Inject
+
+class AuthInterceptor @Inject constructor(
+    private val apiKeyDataStore: ApiKeyDataStore
+) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        
+        // Read the API key synchronously
+        val apiKey = runBlocking { apiKeyDataStore.apiKey.first() }
+
+        val url = request.url.newBuilder()
+        if (!apiKey.isNullOrBlank()) {
+            url.addQueryParameter("api_key", apiKey)
+        }
+        
+        val newRequest = request.newBuilder()
+            .url(url.build())
+            .build()
+            
+        return chain.proceed(newRequest)
+    }
+}
