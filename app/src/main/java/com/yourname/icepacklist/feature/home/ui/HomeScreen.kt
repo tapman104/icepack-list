@@ -28,7 +28,8 @@ private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    onMovieClick: (Int) -> Unit = {}
 ) {
     val movies = viewModel.popularMovies.collectAsLazyPagingItems()
 
@@ -40,13 +41,13 @@ fun HomeScreen(
         when (val refresh = movies.loadState.refresh) {
             is LoadState.Loading -> FullScreenLoading()
             is LoadState.Error   -> FullScreenError(refresh.error.localizedMessage ?: "Unknown error")
-            else                 -> MovieGrid(movies)
+            else                 -> MovieGrid(movies, onMovieClick)
         }
     }
 }
 
 @Composable
-private fun MovieGrid(movies: LazyPagingItems<Movie>) {
+private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 120.dp),
         contentPadding = PaddingValues(12.dp),
@@ -60,7 +61,7 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>) {
         ) { index ->
             val movie = movies[index]
             if (movie != null) {
-                MoviePosterCard(movie = movie)
+                MoviePosterCard(movie = movie, onClick = { onMovieClick(movie.id) })
             } else {
                 PosterPlaceholder()
             }
@@ -86,8 +87,9 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>) {
 }
 
 @Composable
-private fun MoviePosterCard(movie: Movie) {
+private fun MoviePosterCard(movie: Movie, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(2f / 3f),
