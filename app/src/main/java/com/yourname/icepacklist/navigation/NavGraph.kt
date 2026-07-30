@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.yourname.icepacklist.feature.detail.ui.DetailScreen
 import com.yourname.icepacklist.feature.home.ui.HomeScreen
-import com.yourname.icepacklist.feature.search.SearchScreen
+import com.yourname.icepacklist.feature.search.ui.SearchScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
 
 /**
@@ -46,7 +46,11 @@ fun IcepackNavGraph(modifier: Modifier = Modifier) {
             }
 
             composable(Routes.Search.route) {
-                SearchScreen()
+                SearchScreen(
+                    onMovieClick = { movieId ->
+                        navController.navigate(Routes.Detail.buildRoute(movieId))
+                    }
+                )
             }
 
             composable(Routes.Settings.route) {
