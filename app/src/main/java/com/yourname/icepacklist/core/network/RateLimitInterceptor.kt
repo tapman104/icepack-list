@@ -23,7 +23,7 @@ class RateLimitInterceptor @Inject constructor(
                 timestamps.poll()
             }
             if (timestamps.size >= maxRequests) {
-                val oldest = timestamps.peek()!!
+                val oldest = requireNotNull(timestamps.peek())
                 val sleepMs = windowMs - (now - oldest) + 50
                 if (sleepMs > 0) Thread.sleep(sleepMs)
             }
