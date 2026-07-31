@@ -1,4 +1,4 @@
-package com.yourname.icepacklist.navigation
+﻿package com.yourname.icepacklist.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.yourname.icepacklist.feature.detail.ui.DetailScreen
 import com.yourname.icepacklist.feature.home.ui.HomeScreen
+import com.yourname.icepacklist.feature.home.ui.CategoryListScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
 import androidx.lifecycle.ViewModel
@@ -19,18 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 
-/**
- * Root navigation graph.
- *
- * Hosts four destinations:
- *  - [Routes.Home]    — movie discovery grid (start destination)
- *  - [Routes.Search]  — global search
- *  - [Routes.Settings] — TMDB API key management
- *  - [Routes.Detail]  — movie detail page (takes a movieId argument)
- *
- * The [navController] is created here and threaded down to
- * [IcepackScaffold], which renders the bottom navigation bar.
- */
 @HiltViewModel
 class NavViewModel @Inject constructor(
     apiKeyDataStore: ApiKeyDataStore
@@ -43,7 +32,6 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
     val navController = rememberNavController()
     val apiKey by navViewModel.apiKey.collectAsState(initial = null)
     
-    // We wait for the key to load. If it's genuinely blank, we go to Settings.
     val startDestination = if (apiKey.isNullOrBlank()) Routes.Settings.route else Routes.Home.route
 
     IcepackScaffold(
@@ -59,6 +47,9 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 HomeScreen(
                     onMovieClick = { movieId ->
                         navController.navigate(Routes.Detail.buildRoute(movieId))
+                    },
+                    onViewCategory = { category ->
+                        navController.navigate(Routes.CategoryList.createRoute(category))
                     }
                 )
             }
@@ -84,6 +75,15 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 )
             ) {
                 DetailScreen()
+            }
+
+            composable(
+                route = Routes.CategoryList.route,
+                arguments = listOf(
+                    navArgument(Routes.CategoryList.CATEGORY_ARG) { type = NavType.StringType }
+                )
+            ) {
+                CategoryListScreen(onBack = { navController.popBackStack() })
             }
         }
     }
