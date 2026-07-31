@@ -12,9 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +44,8 @@ fun TvDetailScreen(
     onTvShowClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isInWatchlist by viewModel.isInWatchlist.collectAsState()
+    val watchlistStatus by viewModel.watchlistStatus.collectAsState()
 
     Box(
         modifier = Modifier
@@ -90,6 +90,11 @@ fun TvDetailScreen(
                     credits = state.credits,
                     videos = state.videos,
                     similar = state.similar,
+                    isInWatchlist = isInWatchlist,
+                    watchlistStatus = watchlistStatus,
+                    onAddToWatchlist = { viewModel.addToWatchlist("watching") },
+                    onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
+                    onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
                     onTvShowClick = onTvShowClick
                 )
@@ -104,10 +109,16 @@ private fun TvDetailContent(
     credits: CreditsResponse,
     videos: List<VideoResult>,
     similar: List<TvShow>,
+    isInWatchlist: Boolean,
+    watchlistStatus: String?,
+    onAddToWatchlist: () -> Unit,
+    onUpdateWatchlistStatus: (String) -> Unit,
+    onRemoveFromWatchlist: () -> Unit,
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit
 ) {
     val context = LocalContext.current
+    var watchlistMenuExpanded by remember { mutableStateOf(false) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
@@ -189,6 +200,65 @@ private fun TvDetailContent(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
+                        }
+                    }
+                }
+
+                // Watchlist Button Row between genre chips and overview
+                Spacer(modifier = Modifier.height(16.dp))
+                if (!isInWatchlist) {
+                    Button(
+                        onClick = onAddToWatchlist,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("+ My List", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { watchlistMenuExpanded = true },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("✓ In My List", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+
+                        DropdownMenu(
+                            expanded = watchlistMenuExpanded,
+                            onDismissRequest = { watchlistMenuExpanded = false },
+                            modifier = Modifier.background(Color(0xFF2C2C2E))
+                        ) {
+                            listOf(
+                                "Watching" to "watching",
+                                "Completed" to "completed",
+                                "Paused" to "paused",
+                                "Dropped" to "dropped"
+                            ).forEach { (label, status) ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            color = if (watchlistStatus == status) Color(0xFFE50914) else Color.White,
+                                            fontWeight = if (watchlistStatus == status) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    onClick = {
+                                        watchlistMenuExpanded = false
+                                        onUpdateWatchlistStatus(status)
+                                    }
+                                )
+                            }
+                            HorizontalDivider(color = Color(0xFF444444))
+                            DropdownMenuItem(
+                                text = { Text("Remove from List", color = Color(0xFFFF453A)) },
+                                onClick = {
+                                    watchlistMenuExpanded = false
+                                    onRemoveFromWatchlist()
+                                }
+                            )
                         }
                     }
                 }

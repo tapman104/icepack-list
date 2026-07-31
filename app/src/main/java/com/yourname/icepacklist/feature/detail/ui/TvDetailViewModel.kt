@@ -3,18 +3,23 @@ package com.yourname.icepacklist.feature.detail.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yourname.icepacklist.core.database.WatchlistEntity
 import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
+import com.yourname.icepacklist.feature.watchlist.data.WatchlistRepository
 import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,6 +37,7 @@ sealed interface TvDetailUiState {
 @HiltViewModel
 class TvDetailViewModel @Inject constructor(
     private val apiService: TmdbApiService,
+    private val watchlistRepository: WatchlistRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -39,6 +45,14 @@ class TvDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<TvDetailUiState>(TvDetailUiState.Loading)
     val uiState: StateFlow<TvDetailUiState> = _uiState.asStateFlow()
+
+    val isInWatchlist: StateFlow<Boolean> = watchlistRepository.getAll()
+        .map { list -> list.any { it.id == tvId && it.mediaType == "tv" } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val watchlistStatus: StateFlow<String?> = watchlistRepository.getAll()
+        .map { list -> list.firstOrNull { it.id == tvId && it.mediaType == "tv" }?.status }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
         loadData()
@@ -84,6 +98,37 @@ class TvDetailViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.value = TvDetailUiState.Error(e.localizedMessage ?: "Unknown error occurred")
             }
+        }
+    }
+
+    fun addToWatchlist(status: String = "watching") {
+        val currentState = _uiState.value
+        if (currentState is TvDetailUiState.Success) {
+            val tvShow = currentState.tvShow
+            val entity = WatchlistEntity(
+                id = tvShow.id,
+                mediaType = "tv",
+                title = tvShow.name,
+                posterPath = tvShow.posterPath,
+                voteAverage = tvShow.voteAverage,
+                year = tvShow.firstAirDate?.take(4),
+                status = status
+            )
+            viewModelScope.launch {
+                watchlistRepository.add(entity)
+            }
+        }
+    }
+
+    fun removeFromWatchlist() {
+        viewModelScope.launch {
+            watchlistRepository.remove(tvId, "tv")
+        }
+    }
+
+    fun updateWatchlistStatus(status: String) {
+        viewModelScope.launch {
+            watchlistRepository.updateStatus(tvId, "tv", status)
         }
     }
 }
