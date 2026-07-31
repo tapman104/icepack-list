@@ -14,5 +14,11 @@ data class MovieDetail(
     @Json(name = "release_date") val releaseDate: String?,
     @Json(name = "runtime") val runtime: Int?,
     @Json(name = "genres") val genres: List<Genre> = emptyList(),
-    @Json(name = "status") val status: String?
+    @Json(name = "status") val status: String? = null,
+    @Json(name = "original_language") val originalLanguage: String? = null,
+    @Json(name = "origin_country") val originCountry: List<String> = emptyList(),
+    val director: String = "",
+    val videos: List<VideoResult> = emptyList(),
+    val similar: List<Movie> = emptyList()
 )
+
