@@ -1,10 +1,13 @@
-package com.yourname.icepacklist.feature.detail.ui
+﻿package com.yourname.icepacklist.feature.detail.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,7 +28,8 @@ private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
 
 @Composable
 fun DetailScreen(
-    viewModel: DetailViewModel = hiltViewModel()
+    viewModel: DetailViewModel = hiltViewModel(),
+    onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -47,7 +51,7 @@ fun DetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "⚠\uFE0F Error loading details",
+                        text = "âš \uFE0F Error loading details",
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -89,7 +93,7 @@ private fun DetailContent(movie: MovieDetail) {
                     modifier = Modifier.fillMaxSize()
                 )
                 // Gradient overlay at the bottom of the image
-                Box(
+                                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
@@ -100,6 +104,15 @@ private fun DetailContent(movie: MovieDetail) {
                             )
                         )
                 )
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .padding(top = 32.dp, start = 16.dp)
+                        .align(Alignment.TopStart)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                }
             }
         }
 
@@ -121,7 +134,7 @@ private fun DetailContent(movie: MovieDetail) {
                 ) {
                     val ratingStr = String.format("%.1f", movie.voteAverage)
                     Text(
-                        text = "★ $ratingStr",
+                        text = "â˜… $ratingStr",
                         color = Color(0xFFFFC107),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
@@ -173,3 +186,4 @@ private fun DetailContent(movie: MovieDetail) {
         }
     }
 }
+

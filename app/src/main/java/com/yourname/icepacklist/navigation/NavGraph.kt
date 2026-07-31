@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.yourname.icepacklist.feature.detail.ui.DetailScreen
+import com.yourname.icepacklist.feature.detail.ui.TvDetailScreen
 import com.yourname.icepacklist.feature.home.ui.HomeScreen
 import com.yourname.icepacklist.feature.home.ui.CategoryListScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
@@ -66,7 +67,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 SettingsScreen()
             }
 
-            composable(
+                        composable(
                 route = Routes.Detail.route,
                 arguments = listOf(
                     navArgument(Routes.Detail.ARG_MOVIE_ID) {
@@ -74,7 +75,16 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     }
                 )
             ) {
-                DetailScreen()
+                DetailScreen(onBack = { navController.popBackStack() })
+            }
+
+            composable(
+                route = Routes.TvDetail.route,
+                arguments = listOf(
+                    navArgument(Routes.TvDetail.ARG_TV_ID) { type = NavType.IntType }
+                )
+            ) {
+                TvDetailScreen(onBack = { navController.popBackStack() })
             }
 
             composable(
@@ -88,3 +98,4 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
         }
     }
 }
+
