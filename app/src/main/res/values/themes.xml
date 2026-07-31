@@ -6,5 +6,9 @@
         <item name="postSplashScreenTheme">@style/Theme.IcepackList</item>
     </style>
 
+<<<<<<< HEAD
     <style name="Theme.IcepackList" parent="android:Theme.Material.NoActionBar" />
+=======
+    <style name="Theme.IcepackList" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+>>>>>>> fad9f5150b69446bd7753b344129e1e6cb4c1376
 </resources>

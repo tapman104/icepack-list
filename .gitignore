@@ -4,20 +4,20 @@
 *.ap_
 *.aab
 
-# Files for the ART/DALVIK VM
+ Files for the ART/DALVIK VM
 *.dex
 
-# Java class files
+ Java class files
 *.class
 
-# Generated files
+ Generated files
 bin/
 gen/
 out/
 build/
 app/build/
 
-# Gradle files
+ Gradle files
 .gradle/
 build/
 
