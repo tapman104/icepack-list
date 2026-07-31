@@ -23,6 +23,7 @@ import com.yourname.icepacklist.core.ui.TvShowCard
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onMovieClick: (Int) -> Unit = {},
+    onTvShowClick: (Int) -> Unit = {},
     onViewCategory: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -159,7 +160,7 @@ fun HomeScreen(
                                         title = "Trending Shows",
                                         items = uiState.trendingTvShows,
                                         onViewAll = { onViewCategory("trending_tv") },
-                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                     )
                                 }
                             }
@@ -169,7 +170,7 @@ fun HomeScreen(
                                         title = "Popular Shows",
                                         items = uiState.popularTvShows,
                                         onViewAll = { onViewCategory("popular_tv") },
-                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                     )
                                 }
                             }
@@ -179,7 +180,7 @@ fun HomeScreen(
                                         title = "Top Rated Shows",
                                         items = uiState.topRatedTvShows,
                                         onViewAll = { onViewCategory("top_rated_tv") },
-                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                     )
                                 }
                             }
@@ -189,7 +190,7 @@ fun HomeScreen(
                                         title = "Airing Today",
                                         items = uiState.airingTodayTvShows,
                                         onViewAll = { onViewCategory("airing_today") },
-                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                     )
                                 }
                             }
@@ -200,3 +201,4 @@ fun HomeScreen(
         }
     }
 }
+

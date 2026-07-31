@@ -45,9 +45,12 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             modifier = innerModifier
         ) {
             composable(Routes.Home.route) {
-                HomeScreen(
+                                HomeScreen(
                     onMovieClick = { movieId ->
                         navController.navigate(Routes.Detail.buildRoute(movieId))
+                    },
+                    onTvShowClick = { tvId ->
+                        navController.navigate(Routes.TvDetail.buildRoute(tvId))
                     },
                     onViewCategory = { category ->
                         navController.navigate(Routes.CategoryList.createRoute(category))
@@ -93,9 +96,14 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     navArgument(Routes.CategoryList.CATEGORY_ARG) { type = NavType.StringType }
                 )
             ) {
-                CategoryListScreen(onBack = { navController.popBackStack() })
+                                CategoryListScreen(
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { movieId -> navController.navigate(Routes.Detail.buildRoute(movieId)) },
+                    onTvShowClick = { tvId -> navController.navigate(Routes.TvDetail.buildRoute(tvId)) }
+                )
             }
         }
     }
 }
+
 

@@ -25,7 +25,9 @@ import com.yourname.icepacklist.feature.home.domain.TvShow
 @Composable
 fun CategoryListScreen(
     viewModel: CategoryListViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onMovieClick: (Int) -> Unit,
+    onTvShowClick: (Int) -> Unit
 ) {
     val items = viewModel.items.collectAsLazyPagingItems()
     val title = when (viewModel.category) {
@@ -88,9 +90,9 @@ fun CategoryListScreen(
                         items(items.itemCount) { index ->
                             val item = items[index]
                             if (item is Movie) {
-                                MovieCard(movie = item, onClick = { /* TODO navigate detail */ })
+                                MovieCard(movie = item, onClick = { onMovieClick(item.id) })
                             } else if (item is TvShow) {
-                                TvShowCard(tvShow = item, onClick = { /* TODO navigate detail */ })
+                                TvShowCard(tvShow = item, onClick = { onTvShowClick(item.id) })
                             }
                         }
                     }
@@ -99,3 +101,4 @@ fun CategoryListScreen(
         }
     }
 }
+
