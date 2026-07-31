@@ -1,4 +1,4 @@
-package com.yourname.icepacklist.navigation
+﻿package com.yourname.icepacklist.navigation
 
 sealed class Routes(val route: String) {
     data object Home : Routes("home")
@@ -7,6 +7,10 @@ sealed class Routes(val route: String) {
     data object Detail : Routes("detail/{movieId}") {
         const val ARG_MOVIE_ID = "movieId"
         fun buildRoute(movieId: Int): String = "detail/$movieId"
+    }
+    data object TvDetail : Routes("tv_detail/{tvId}") {
+        const val ARG_TV_ID = "tvId"
+        fun buildRoute(tvId: Int): String = "tv_detail/$tvId"
     }
     data object CategoryList : Routes("category_list/{category}") {
         const val CATEGORY_ARG = "category"
