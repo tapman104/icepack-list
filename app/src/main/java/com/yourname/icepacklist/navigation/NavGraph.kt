@@ -1,4 +1,4 @@
-﻿package com.yourname.icepacklist.navigation
+package com.yourname.icepacklist.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -78,7 +78,10 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     }
                 )
             ) {
-                DetailScreen(onBack = { navController.popBackStack() })
+                DetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) }
+                )
             }
 
             composable(
@@ -87,7 +90,10 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     navArgument(Routes.TvDetail.ARG_TV_ID) { type = NavType.IntType }
                 )
             ) {
-                TvDetailScreen(onBack = { navController.popBackStack() })
+                TvDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) }
+                )
             }
 
             composable(
