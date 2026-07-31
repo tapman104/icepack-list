@@ -13,6 +13,7 @@ import com.yourname.icepacklist.feature.home.ui.HomeScreen
 import com.yourname.icepacklist.feature.home.ui.CategoryListScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
+import com.yourname.icepacklist.feature.watchlist.ui.WatchlistScreen
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -45,7 +46,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             modifier = innerModifier
         ) {
             composable(Routes.Home.route) {
-                                HomeScreen(
+                HomeScreen(
                     onMovieClick = { movieId ->
                         navController.navigate(Routes.Detail.buildRoute(movieId))
                     },
@@ -54,6 +55,9 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     },
                     onViewCategory = { category ->
                         navController.navigate(Routes.CategoryList.createRoute(category))
+                    },
+                    onSettingsClick = {
+                        navController.navigate(Routes.Settings.route)
                     }
                 )
             }
@@ -66,11 +70,18 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 )
             }
 
+            composable(Routes.Watchlist.route) {
+                WatchlistScreen(
+                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) },
+                    onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) }
+                )
+            }
+
             composable(Routes.Settings.route) {
                 SettingsScreen()
             }
 
-                        composable(
+            composable(
                 route = Routes.Detail.route,
                 arguments = listOf(
                     navArgument(Routes.Detail.ARG_MOVIE_ID) {
@@ -102,7 +113,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     navArgument(Routes.CategoryList.CATEGORY_ARG) { type = NavType.StringType }
                 )
             ) {
-                                CategoryListScreen(
+                CategoryListScreen(
                     onBack = { navController.popBackStack() },
                     onMovieClick = { movieId -> navController.navigate(Routes.Detail.buildRoute(movieId)) },
                     onTvShowClick = { tvId -> navController.navigate(Routes.TvDetail.buildRoute(tvId)) }
@@ -111,5 +122,3 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
         }
     }
 }
-
-
