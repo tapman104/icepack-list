@@ -1,5 +1,7 @@
-﻿package com.yourname.icepacklist.feature.detail.ui
+package com.yourname.icepacklist.feature.detail.ui
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,15 +21,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.yourname.icepacklist.core.ui.UiState
-import com.yourname.icepacklist.feature.home.domain.TvShowDetail
+import com.yourname.icepacklist.core.ui.TvShowCard
 import com.yourname.icepacklist.feature.home.domain.CreditsResponse
+import com.yourname.icepacklist.feature.home.domain.TvShow
+import com.yourname.icepacklist.feature.home.domain.TvShowDetail
+import com.yourname.icepacklist.feature.home.domain.VideoResult
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
 private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
@@ -35,24 +42,39 @@ private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
 @Composable
 fun TvDetailScreen(
     viewModel: TvDetailViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit = {},
+    onTvShowClick: (Int) -> Unit = {}
 ) {
-    val tvState by viewModel.tvShowState.collectAsState()
-    val creditsState by viewModel.creditsState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))) {
-        when (val state = tvState) {
-            is UiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color(0xFFE50914))
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D0D0D))
+    ) {
+        when (val state = uiState) {
+            is TvDetailUiState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Color(0xFFE50914)
+                )
             }
-            is UiState.Error -> {
+            is TvDetailUiState.Error -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("⚠\uFE0F Error loading details", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "⚠️ Error loading details",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(state.message, color = Color(0xFF888888), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = state.message,
+                        color = Color(0xFF888888),
+                        style = MaterialTheme.typography.bodySmall
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { viewModel.loadData() },
@@ -62,18 +84,38 @@ fun TvDetailScreen(
                     }
                 }
             }
-            is UiState.Success -> {
-                TvDetailContent(tvShow = state.data, creditsState = creditsState, onBack = onBack)
+            is TvDetailUiState.Success -> {
+                TvDetailContent(
+                    tvShow = state.tvShow,
+                    credits = state.credits,
+                    videos = state.videos,
+                    similar = state.similar,
+                    onBack = onBack,
+                    onTvShowClick = onTvShowClick
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TvDetailContent(tvShow: TvShowDetail, creditsState: UiState<CreditsResponse>, onBack: () -> Unit) {
+private fun TvDetailContent(
+    tvShow: TvShowDetail,
+    credits: CreditsResponse,
+    videos: List<VideoResult>,
+    similar: List<TvShow>,
+    onBack: () -> Unit,
+    onTvShowClick: (Int) -> Unit
+) {
+    val context = LocalContext.current
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
-            Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+            ) {
                 AsyncImage(
                     model = tvShow.backdropPath?.let { "$TMDB_BACKDROP_BASE$it" },
                     contentDescription = "Backdrop for ${tvShow.name}",
@@ -85,7 +127,11 @@ private fun TvDetailContent(tvShow: TvShowDetail, creditsState: UiState<CreditsR
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
                         .height(100.dp)
-                        .background(Brush.verticalGradient(colors = listOf(Color.Transparent, Color(0xFF0D0D0D))))
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color(0xFF0D0D0D))
+                            )
+                        )
                 )
                 IconButton(
                     onClick = onBack,
@@ -113,8 +159,9 @@ private fun TvDetailContent(tvShow: TvShowDetail, creditsState: UiState<CreditsR
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    val ratingStr = String.format(Locale.US, "%.1f", tvShow.voteAverage)
                     Text(
-                        text = "★ ",
+                        text = "★ $ratingStr",
                         color = Color(0xFFFFC107),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
@@ -123,10 +170,10 @@ private fun TvDetailContent(tvShow: TvShowDetail, creditsState: UiState<CreditsR
                         Text(text = it.take(4), color = Color(0xFF888888), fontSize = 14.sp)
                     }
                     tvShow.numberOfSeasons?.let {
-                        Text(text = "${it} Seasons", color = Color(0xFF888888), fontSize = 14.sp)
+                        Text(text = "$it Seasons", color = Color(0xFF888888), fontSize = 14.sp)
                     }
                 }
-                
+
                 if (tvShow.genres.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -153,54 +200,157 @@ private fun TvDetailContent(tvShow: TvShowDetail, creditsState: UiState<CreditsR
                     fontSize = 15.sp,
                     lineHeight = 22.sp
                 )
-                
-                Spacer(modifier = Modifier.height(24.dp))
+
+                // Cast Section — circular cards LazyRow, max 15
+                if (credits.cast.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Cast",
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(credits.cast.take(15)) { person ->
+                            Column(
+                                modifier = Modifier.width(72.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                AsyncImage(
+                                    model = person.profilePath?.let { "$TMDB_PROFILE_BASE$it" },
+                                    contentDescription = person.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = person.name,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = person.character ?: "",
+                                    color = Color(0xFF888888),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Details Section
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Cast",
+                    text = "Details",
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                when (creditsState) {
-                    is UiState.Success -> {
-                        val cast = creditsState.data.cast.take(15)
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(cast) { person ->
-                                Column(modifier = Modifier.width(100.dp)) {
-                                    AsyncImage(
-                                        model = person.profilePath?.let { "$TMDB_PROFILE_BASE$it" },
-                                        contentDescription = person.name,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxWidth().aspectRatio(2f/3f).clip(RoundedCornerShape(8.dp))
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = person.name,
-                                        color = Color.White,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = person.character ?: "",
-                                        color = Color(0xFF888888),
-                                        fontSize = 12.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
+                DetailRow(label = "First Air Date", value = formatDate(tvShow.firstAirDate))
+                if (!tvShow.lastAirDate.isNullOrBlank()) {
+                    DetailRow(label = "Last Air Date", value = formatDate(tvShow.lastAirDate))
+                }
+                if (!tvShow.status.isNullOrBlank()) {
+                    DetailRow(label = "Status", value = tvShow.status)
+                }
+                if (tvShow.originCountry.isNotEmpty()) {
+                    DetailRow(label = "Country", value = tvShow.originCountry.joinToString(", "))
+                }
+                if (!tvShow.originalLanguage.isNullOrBlank()) {
+                    DetailRow(label = "Language", value = tvShow.originalLanguage.uppercase())
+                }
+                tvShow.numberOfSeasons?.let {
+                    DetailRow(label = "Seasons", value = "$it")
+                }
+                tvShow.numberOfEpisodes?.let {
+                    DetailRow(label = "Episodes", value = "$it")
+                }
+                val networkNames = tvShow.networks.ifEmpty { tvShow.networksList.map { it.name } }
+                if (networkNames.isNotEmpty()) {
+                    DetailRow(label = "Network", value = networkNames.joinToString(", "))
+                }
+                val createdBy = tvShow.createdBy.ifEmpty { tvShow.createdByList.map { it.name }.joinToString(", ") }
+                if (createdBy.isNotBlank()) {
+                    DetailRow(label = "Created By", value = createdBy)
+                }
+
+                // Trailer Section
+                if (videos.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://www.youtube.com/watch?v=${videos.first().key}")
+                            )
+                            context.startActivity(intent)
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Watch Trailer", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Recommendations Section
+                if (similar.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "You May Also Like",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(similar) { simShow ->
+                            TvShowCard(tvShow = simShow, onClick = { onTvShowClick(simShow.id) })
                         }
                     }
-                    is UiState.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.padding(16.dp), color = Color(0xFFE50914))
-                    }
-                    else -> {}
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            color = Color(0xFF888888),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.width(120.dp)
+        )
+        Text(
+            text = value,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+private fun formatDate(dateStr: String?): String {
+    if (dateStr.isNullOrBlank()) return "N/A"
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+        val date = inputFormat.parse(dateStr)
+        if (date != null) outputFormat.format(date) else dateStr
+    } catch (e: Exception) {
+        dateStr
     }
 }
