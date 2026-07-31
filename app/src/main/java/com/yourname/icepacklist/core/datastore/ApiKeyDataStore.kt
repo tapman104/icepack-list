@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "icepack_prefs")
 
 @Singleton
 class ApiKeyDataStore @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
     companion object {
         private val API_KEY = stringPreferencesKey("tmdb_api_key")

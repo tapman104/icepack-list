@@ -49,7 +49,8 @@ class TmdbApiServiceTest {
                         "poster_path": "/pB8O4LaSqruRUPE49.jpg",
                         "backdrop_path": "/fCayJrkfRaCRCTh8GqN.jpg",
                         "vote_average": 8.4,
-                        "release_date": "1999-10-15"
+                        "release_date": "1999-10-15",
+                        "genre_ids": []
                     }
                 ],
                 "total_pages": 1,

@@ -38,10 +38,11 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Color(0xFF0D0D0D))
     ) {
-        when (val refresh = movies.loadState.refresh) {
-            is LoadState.Loading -> FullScreenLoading()
-            is LoadState.Error   -> FullScreenError(refresh.error.localizedMessage ?: "Unknown error")
-            else                 -> MovieGrid(movies, onMovieClick)
+        when {
+            movies.loadState.refresh is LoadState.Loading -> FullScreenLoading()
+            movies.loadState.refresh is LoadState.Error -> FullScreenError((movies.loadState.refresh as LoadState.Error).error.localizedMessage ?: "Unknown error")
+            movies.itemCount == 0 && movies.loadState.refresh is LoadState.NotLoading -> EmptyState()
+            else -> MovieGrid(movies, onMovieClick)
         }
     }
 }
@@ -137,6 +138,17 @@ private fun PosterPlaceholder() {
             .clip(RoundedCornerShape(10.dp))
             .background(Color(0xFF1C1C1E))
     )
+}
+
+@Composable
+private fun EmptyState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = "No movies available",
+            color = Color(0xFF888888),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @Composable
