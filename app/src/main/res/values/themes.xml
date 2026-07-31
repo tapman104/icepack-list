@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.IcepackList.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0D0D0D</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.IcepackList</item>
+    </style>
 
-    <style name="Theme.IcepackList" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.IcepackList" parent="android:Theme.Material.NoActionBar" />
 </resources>

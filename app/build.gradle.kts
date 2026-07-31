@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.icons.extended)
     debugImplementation(libs.compose.ui.tooling)
+    implementation(libs.splashscreen)
 
     // Lifecycle
     implementation(libs.lifecycle.runtime.compose)

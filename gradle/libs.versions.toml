@@ -20,6 +20,7 @@ turbine = "1.1.0"
 androidx-test-ext = "1.2.1"
 espresso = "3.6.1"
 hilt-testing = "2.52"
+splashscreen = "1.0.1"
 
 [libraries]
 # Compose BOM
@@ -32,6 +33,7 @@ compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 # Lifecycle
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
