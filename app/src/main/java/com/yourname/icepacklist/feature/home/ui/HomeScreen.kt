@@ -6,9 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +26,8 @@ fun HomeScreen(
     onViewCategory: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val tabs = listOf("All", "Movies", "TV Shows")
 
     Scaffold(
         topBar = {
@@ -44,123 +45,154 @@ fun HomeScreen(
         },
         modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFF0D0D0D))
                 .padding(padding)
         ) {
-            if (uiState.isLoading) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(3) {
-                        CategoryShimmerRow()
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = Color.White,
+                indicator = { tabPositions ->
+                    if (selectedTab < tabPositions.size) {
+                        TabRowDefaults.Indicator(
+                            Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
-            } else if (uiState.error != null) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = uiState.error ?: "Unknown error", color = Color.White)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { viewModel.refresh() }) {
-                        Text("Retry")
-                    }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = { Text(title) },
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = Color.LightGray
+                    )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    item {
-                        if (uiState.trendingMovies.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Trending This Week",
-                                items = uiState.trendingMovies,
-                                onViewAll = { onViewCategory("trending_movies") },
-                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                            )
+            }
+
+            Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                if (uiState.isLoading) {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(3) {
+                            CategoryShimmerRow()
                         }
                     }
-                    item {
-                        if (uiState.popularMovies.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Popular Movies",
-                                items = uiState.popularMovies,
-                                onViewAll = { onViewCategory("popular_movies") },
-                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                            )
+                } else if (uiState.error != null) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = uiState.error ?: "Unknown error", color = Color.White)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.refresh() }) {
+                            Text("Retry")
                         }
                     }
-                    item {
-                        if (uiState.nowPlayingMovies.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Now Playing",
-                                items = uiState.nowPlayingMovies,
-                                onViewAll = { onViewCategory("now_playing") },
-                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                            )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        if (selectedTab == 0 || selectedTab == 1) {
+                            item {
+                                if (uiState.trendingMovies.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Trending This Week",
+                                        items = uiState.trendingMovies,
+                                        onViewAll = { onViewCategory("trending_movies") },
+                                        itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.popularMovies.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Popular Movies",
+                                        items = uiState.popularMovies,
+                                        onViewAll = { onViewCategory("popular_movies") },
+                                        itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.nowPlayingMovies.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Now Playing",
+                                        items = uiState.nowPlayingMovies,
+                                        onViewAll = { onViewCategory("now_playing") },
+                                        itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.upcomingMovies.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Upcoming",
+                                        items = uiState.upcomingMovies,
+                                        onViewAll = { onViewCategory("upcoming") },
+                                        itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.topRatedMovies.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Top Rated Movies",
+                                        items = uiState.topRatedMovies,
+                                        onViewAll = { onViewCategory("top_rated_movies") },
+                                        itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                    )
+                                }
+                            }
                         }
-                    }
-                    item {
-                        if (uiState.upcomingMovies.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Upcoming",
-                                items = uiState.upcomingMovies,
-                                onViewAll = { onViewCategory("upcoming") },
-                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                            )
-                        }
-                    }
-                    item {
-                        if (uiState.topRatedMovies.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Top Rated Movies",
-                                items = uiState.topRatedMovies,
-                                onViewAll = { onViewCategory("top_rated_movies") },
-                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                            )
-                        }
-                    }
-                    item {
-                        if (uiState.trendingTvShows.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Trending Shows",
-                                items = uiState.trendingTvShows,
-                                onViewAll = { onViewCategory("trending_tv") },
-                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO TvShowDetail */ }) }
-                            )
-                        }
-                    }
-                    item {
-                        if (uiState.popularTvShows.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Popular Shows",
-                                items = uiState.popularTvShows,
-                                onViewAll = { onViewCategory("popular_tv") },
-                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
-                            )
-                        }
-                    }
-                    item {
-                        if (uiState.topRatedTvShows.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Top Rated Shows",
-                                items = uiState.topRatedTvShows,
-                                onViewAll = { onViewCategory("top_rated_tv") },
-                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
-                            )
-                        }
-                    }
-                    item {
-                        if (uiState.airingTodayTvShows.isNotEmpty()) {
-                            CategoryRow(
-                                title = "Airing Today",
-                                items = uiState.airingTodayTvShows,
-                                onViewAll = { onViewCategory("airing_today") },
-                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
-                            )
+
+                        if (selectedTab == 0 || selectedTab == 2) {
+                            item {
+                                if (uiState.trendingTvShows.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Trending Shows",
+                                        items = uiState.trendingTvShows,
+                                        onViewAll = { onViewCategory("trending_tv") },
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.popularTvShows.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Popular Shows",
+                                        items = uiState.popularTvShows,
+                                        onViewAll = { onViewCategory("popular_tv") },
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.topRatedTvShows.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Top Rated Shows",
+                                        items = uiState.topRatedTvShows,
+                                        onViewAll = { onViewCategory("top_rated_tv") },
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                    )
+                                }
+                            }
+                            item {
+                                if (uiState.airingTodayTvShows.isNotEmpty()) {
+                                    CategoryRow(
+                                        title = "Airing Today",
+                                        items = uiState.airingTodayTvShows,
+                                        onViewAll = { onViewCategory("airing_today") },
+                                        itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
