@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.yourname.icepacklist.core.database.IcepackDatabase
 import com.yourname.icepacklist.core.database.MovieDao
 import com.yourname.icepacklist.core.database.RemoteKeyDao
+import com.yourname.icepacklist.core.database.WatchlistDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,5 +41,11 @@ object DatabaseModule {
     @Singleton
     fun provideRemoteKeyDao(database: IcepackDatabase): RemoteKeyDao {
         return database.remoteKeyDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideWatchlistDao(database: IcepackDatabase): WatchlistDao {
+        return database.watchlistDao()
     }
 }
