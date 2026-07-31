@@ -1,4 +1,4 @@
-﻿package com.yourname.icepacklist.feature.detail.ui
+package com.yourname.icepacklist.feature.detail.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -71,14 +71,14 @@ fun DetailScreen(
                 }
             }
             is UiState.Success -> {
-                DetailContent(movie = state.data)
+                DetailContent(movie = state.data, onBack = onBack)
             }
         }
     }
 }
 
 @Composable
-private fun DetailContent(movie: MovieDetail) {
+private fun DetailContent(movie: MovieDetail, onBack: () -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
             Box(
