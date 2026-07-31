@@ -1,193 +1,169 @@
-package com.yourname.icepacklist.feature.home.ui
+﻿package com.yourname.icepacklist.feature.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.AsyncImage
-import com.yourname.icepacklist.core.ui.ShimmerGrid
-import com.yourname.icepacklist.feature.home.domain.Movie
+import com.yourname.icepacklist.core.ui.CategoryRow
+import com.yourname.icepacklist.core.ui.CategoryShimmerRow
+import com.yourname.icepacklist.core.ui.MovieCard
+import com.yourname.icepacklist.core.ui.TvShowCard
 
-private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onMovieClick: (Int) -> Unit = {}
+    onMovieClick: (Int) -> Unit = {},
+    onViewCategory: (String) -> Unit = {}
 ) {
-    val movies = viewModel.popularMovies.collectAsLazyPagingItems()
+    val uiState by viewModel.uiState.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
-    ) {
-        when {
-            movies.loadState.refresh is LoadState.Loading -> ShimmerGrid()
-            movies.loadState.refresh is LoadState.Error -> {
-                val error = (movies.loadState.refresh as LoadState.Error).error
-                FullScreenError(
-                    message = error.localizedMessage ?: "Unknown error",
-                    onRetry = { movies.retry() }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Icepack List", color = Color.White) },
+                actions = {
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF0D0D0D)
                 )
-            }
-            movies.itemCount == 0 && movies.loadState.refresh is LoadState.NotLoading -> EmptyState()
-            else -> MovieGrid(movies, onMovieClick)
-        }
-    }
-}
-
-@Composable
-private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 120.dp),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(
-            count = movies.itemCount,
-            key = { index -> movies.peek(index)?.id ?: index }
-        ) { index ->
-            val movie = movies[index]
-            if (movie != null) {
-                MoviePosterCard(movie = movie, onClick = { onMovieClick(movie.id) })
-            } else {
-                PosterPlaceholder()
-            }
-        }
-
-        // Append loading indicator
-        if (movies.loadState.append is LoadState.Loading) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = Color(0xFFE50914),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MoviePosterCard(movie: Movie, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(2f / 3f),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(
-                model = movie.posterPath?.let { "$TMDB_IMAGE_BASE$it" },
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
             )
-            // Gradient overlay with title
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color(0xCC000000))
-                        )
-                    )
-                    .padding(horizontal = 6.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = movie.title,
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PosterPlaceholder() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(2f / 3f)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color(0xFF1C1C1E))
-    )
-}
-
-@Composable
-private fun EmptyState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "No movies available",
-            color = Color(0xFF888888),
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-@Composable
-private fun FullScreenError(message: String, onRetry: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        },
+        modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF0D0D0D))
+                .padding(padding)
         ) {
-            Text(
-                text = "⚠\uFE0F Failed to load",
-                color = Color.White,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = message,
-                color = Color(0xFF888888),
-                style = MaterialTheme.typography.bodySmall
-            )
-            if (message.contains("401") || message.contains("403")) {
-                Text(
-                    text = "Check your API key in Settings.",
-                    color = Color(0xFFE50914),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onRetry,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
-            ) {
-                Text("Retry", color = Color.White)
+            if (uiState.isLoading) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(3) {
+                        CategoryShimmerRow()
+                    }
+                }
+            } else if (uiState.error != null) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = uiState.error ?: "Unknown error", color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.refresh() }) {
+                        Text("Retry")
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    item {
+                        if (uiState.trendingMovies.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Trending This Week",
+                                items = uiState.trendingMovies,
+                                onViewAll = { onViewCategory("trending_movies") },
+                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.popularMovies.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Popular Movies",
+                                items = uiState.popularMovies,
+                                onViewAll = { onViewCategory("popular_movies") },
+                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.nowPlayingMovies.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Now Playing",
+                                items = uiState.nowPlayingMovies,
+                                onViewAll = { onViewCategory("now_playing") },
+                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.upcomingMovies.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Upcoming",
+                                items = uiState.upcomingMovies,
+                                onViewAll = { onViewCategory("upcoming") },
+                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.topRatedMovies.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Top Rated Movies",
+                                items = uiState.topRatedMovies,
+                                onViewAll = { onViewCategory("top_rated_movies") },
+                                itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.trendingTvShows.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Trending Shows",
+                                items = uiState.trendingTvShows,
+                                onViewAll = { onViewCategory("trending_tv") },
+                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO TvShowDetail */ }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.popularTvShows.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Popular Shows",
+                                items = uiState.popularTvShows,
+                                onViewAll = { onViewCategory("popular_tv") },
+                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.topRatedTvShows.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Top Rated Shows",
+                                items = uiState.topRatedTvShows,
+                                onViewAll = { onViewCategory("top_rated_tv") },
+                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                            )
+                        }
+                    }
+                    item {
+                        if (uiState.airingTodayTvShows.isNotEmpty()) {
+                            CategoryRow(
+                                title = "Airing Today",
+                                items = uiState.airingTodayTvShows,
+                                onViewAll = { onViewCategory("airing_today") },
+                                itemContent = { tvShow -> TvShowCard(tvShow, onClick = { /* TODO */ }) }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
