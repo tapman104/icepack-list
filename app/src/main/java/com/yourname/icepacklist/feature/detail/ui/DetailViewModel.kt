@@ -13,11 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class DetailUiState {
-    data object Loading : DetailUiState()
-    data class Success(val movie: MovieDetail) : DetailUiState()
-    data class Error(val message: String) : DetailUiState()
-}
+import com.yourname.icepacklist.core.ui.UiState
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
@@ -27,8 +23,8 @@ class DetailViewModel @Inject constructor(
 
     private val movieId: Int = checkNotNull(savedStateHandle[Routes.Detail.ARG_MOVIE_ID])
 
-    private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
-    val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<MovieDetail>>(UiState.Loading)
+    val uiState: StateFlow<UiState<MovieDetail>> = _uiState.asStateFlow()
 
     init {
         loadMovieDetail()
@@ -36,12 +32,12 @@ class DetailViewModel @Inject constructor(
 
     fun loadMovieDetail() {
         viewModelScope.launch {
-            _uiState.value = DetailUiState.Loading
+            _uiState.value = UiState.Loading
             val result = repository.getMovieDetails(movieId)
             result.onSuccess { movie ->
-                _uiState.value = DetailUiState.Success(movie)
+                _uiState.value = UiState.Success(movie)
             }.onFailure { error ->
-                _uiState.value = DetailUiState.Error(error.localizedMessage ?: "Unknown error occurred")
+                _uiState.value = UiState.Error(error.localizedMessage ?: "Unknown error occurred")
             }
         }
     }

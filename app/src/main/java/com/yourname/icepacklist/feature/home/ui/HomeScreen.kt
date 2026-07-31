@@ -22,6 +22,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.yourname.icepacklist.core.ui.ShimmerGrid
 import com.yourname.icepacklist.feature.home.domain.Movie
 
 private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
@@ -39,8 +40,14 @@ fun HomeScreen(
             .background(Color(0xFF0D0D0D))
     ) {
         when {
-            movies.loadState.refresh is LoadState.Loading -> FullScreenLoading()
-            movies.loadState.refresh is LoadState.Error -> FullScreenError((movies.loadState.refresh as LoadState.Error).error.localizedMessage ?: "Unknown error")
+            movies.loadState.refresh is LoadState.Loading -> ShimmerGrid()
+            movies.loadState.refresh is LoadState.Error -> {
+                val error = (movies.loadState.refresh as LoadState.Error).error
+                FullScreenError(
+                    message = error.localizedMessage ?: "Unknown error",
+                    onRetry = { movies.retry() }
+                )
+            }
             movies.itemCount == 0 && movies.loadState.refresh is LoadState.NotLoading -> EmptyState()
             else -> MovieGrid(movies, onMovieClick)
         }
@@ -152,14 +159,7 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun FullScreenLoading() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = Color(0xFFE50914))
-    }
-}
-
-@Composable
-private fun FullScreenError(message: String) {
+private fun FullScreenError(message: String, onRetry: () -> Unit) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -175,6 +175,20 @@ private fun FullScreenError(message: String) {
                 color = Color(0xFF888888),
                 style = MaterialTheme.typography.bodySmall
             )
+            if (message.contains("401") || message.contains("403")) {
+                Text(
+                    text = "Check your API key in Settings.",
+                    color = Color(0xFFE50914),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
+            ) {
+                Text("Retry", color = Color.White)
+            }
         }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.yourname.icepacklist.core.ui.UiState
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
@@ -34,13 +35,13 @@ fun DetailScreen(
             .background(Color(0xFF0D0D0D))
     ) {
         when (val state = uiState) {
-            is DetailUiState.Loading -> {
+            is UiState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
                     color = Color(0xFFE50914)
                 )
             }
-            is DetailUiState.Error -> {
+            is UiState.Error -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -65,8 +66,8 @@ fun DetailScreen(
                     }
                 }
             }
-            is DetailUiState.Success -> {
-                DetailContent(movie = state.movie)
+            is UiState.Success -> {
+                DetailContent(movie = state.data)
             }
         }
     }
