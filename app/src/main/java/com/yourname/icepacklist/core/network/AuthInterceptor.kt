@@ -17,9 +17,10 @@ class AuthInterceptor @Inject constructor(
         val apiKey = runBlocking { apiKeyDataStore.apiKey.first() }
 
         val url = request.url.newBuilder()
-        if (!apiKey.isNullOrBlank()) {
-            url.addQueryParameter("api_key", apiKey)
+        if (apiKey.isNullOrBlank()) {
+            throw IllegalStateException("No API key configured")
         }
+        url.addQueryParameter("api_key", apiKey)
         
         val newRequest = request.newBuilder()
             .url(url.build())

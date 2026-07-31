@@ -11,6 +11,13 @@ import com.yourname.icepacklist.feature.detail.ui.DetailScreen
 import com.yourname.icepacklist.feature.home.ui.HomeScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 
 /**
  * Root navigation graph.
@@ -24,9 +31,20 @@ import com.yourname.icepacklist.feature.settings.SettingsScreen
  * The [navController] is created here and threaded down to
  * [IcepackScaffold], which renders the bottom navigation bar.
  */
+@HiltViewModel
+class NavViewModel @Inject constructor(
+    apiKeyDataStore: ApiKeyDataStore
+) : ViewModel() {
+    val apiKey = apiKeyDataStore.apiKey
+}
+
 @Composable
-fun IcepackNavGraph(modifier: Modifier = Modifier) {
+fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = hiltViewModel()) {
     val navController = rememberNavController()
+    val apiKey by navViewModel.apiKey.collectAsState(initial = null)
+    
+    // We wait for the key to load. If it's genuinely blank, we go to Settings.
+    val startDestination = if (apiKey.isNullOrBlank()) Routes.Settings.route else Routes.Home.route
 
     IcepackScaffold(
         navController = navController,
@@ -34,7 +52,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier) {
     ) { innerModifier ->
         NavHost(
             navController = navController,
-            startDestination = Routes.Home.route,
+            startDestination = startDestination,
             modifier = innerModifier
         ) {
             composable(Routes.Home.route) {
