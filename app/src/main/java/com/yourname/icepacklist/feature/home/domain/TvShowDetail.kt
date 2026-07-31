@@ -4,6 +4,18 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
+data class Network(
+    @Json(name = "id") val id: Int,
+    @Json(name = "name") val name: String
+)
+
+@JsonClass(generateAdapter = true)
+data class CreatedBy(
+    @Json(name = "id") val id: Int,
+    @Json(name = "name") val name: String
+)
+
+@JsonClass(generateAdapter = true)
 data class TvShowDetail(
     @Json(name = "id") val id: Int,
     @Json(name = "name") val name: String,
@@ -15,5 +27,14 @@ data class TvShowDetail(
     @Json(name = "number_of_seasons") val numberOfSeasons: Int?,
     @Json(name = "number_of_episodes") val numberOfEpisodes: Int?,
     @Json(name = "genres") val genres: List<Genre> = emptyList(),
-    @Json(name = "status") val status: String?
+    @Json(name = "status") val status: String? = null,
+    @Json(name = "original_language") val originalLanguage: String? = null,
+    @Json(name = "origin_country") val originCountry: List<String> = emptyList(),
+    @Json(name = "networks") val networksList: List<Network> = emptyList(),
+    @Json(name = "created_by") val createdByList: List<CreatedBy> = emptyList(),
+    @Json(name = "last_air_date") val lastAirDate: String? = null,
+    val networks: List<String> = emptyList(),
+    val createdBy: String = "",
+    val videos: List<VideoResult> = emptyList(),
+    val similar: List<TvShow> = emptyList()
 )
