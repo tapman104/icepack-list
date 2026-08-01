@@ -32,8 +32,7 @@ import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
 import com.yourname.icepacklist.core.database.WatchStatus
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.yourname.icepacklist.core.util.formatDate
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
 private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
@@ -417,14 +416,4 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
-private fun formatDate(dateStr: String?): String {
-    if (dateStr.isNullOrBlank()) return "N/A"
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
-        val date = inputFormat.parse(dateStr)
-        if (date != null) outputFormat.format(date) else dateStr
-    } catch (e: Exception) {
-        dateStr
-    }
-}
+
