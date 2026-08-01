@@ -31,6 +31,7 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
+import com.yourname.icepacklist.core.database.WatchStatus
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -92,7 +93,7 @@ fun DetailScreen(
                     similar = state.similar,
                     isInWatchlist = isInWatchlist,
                     watchlistStatus = watchlistStatus,
-                    onAddToWatchlist = { viewModel.addToWatchlist("watching") },
+                    onAddToWatchlist = { viewModel.addToWatchlist(WatchStatus.WATCHING) },
                     onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
                     onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
@@ -110,9 +111,9 @@ private fun DetailContent(
     videos: List<VideoResult>,
     similar: List<Movie>,
     isInWatchlist: Boolean,
-    watchlistStatus: String?,
+    watchlistStatus: WatchStatus?,
     onAddToWatchlist: () -> Unit,
-    onUpdateWatchlistStatus: (String) -> Unit,
+    onUpdateWatchlistStatus: (WatchStatus) -> Unit,
     onRemoveFromWatchlist: () -> Unit,
     onBack: () -> Unit,
     onMovieClick: (Int) -> Unit
@@ -242,10 +243,10 @@ private fun DetailContent(
                             modifier = Modifier.background(Color(0xFF2C2C2E))
                         ) {
                             listOf(
-                                "Watching" to "watching",
-                                "Completed" to "completed",
-                                "Paused" to "paused",
-                                "Dropped" to "dropped"
+                                "Watching" to WatchStatus.WATCHING,
+                                "Completed" to WatchStatus.COMPLETED,
+                                "Paused" to WatchStatus.PAUSED,
+                                "Dropped" to WatchStatus.DROPPED
                             ).forEach { (label, status) ->
                                 DropdownMenuItem(
                                     text = {

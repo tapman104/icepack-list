@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yourname.icepacklist.core.database.WatchlistEntity
+import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.core.database.WatchStatus
 import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
@@ -47,11 +49,11 @@ class TvDetailViewModel @Inject constructor(
     val uiState: StateFlow<TvDetailUiState> = _uiState.asStateFlow()
 
     val isInWatchlist: StateFlow<Boolean> = watchlistRepository.getAll()
-        .map { list -> list.any { it.id == tvId && it.mediaType == "tv" } }
+        .map { list -> list.any { it.id == tvId && it.mediaType == MediaType.TV } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val watchlistStatus: StateFlow<String?> = watchlistRepository.getAll()
-        .map { list -> list.firstOrNull { it.id == tvId && it.mediaType == "tv" }?.status }
+    val watchlistStatus: StateFlow<WatchStatus?> = watchlistRepository.getAll()
+        .map { list -> list.firstOrNull { it.id == tvId && it.mediaType == MediaType.TV }?.status }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
@@ -101,13 +103,13 @@ class TvDetailViewModel @Inject constructor(
         }
     }
 
-    fun addToWatchlist(status: String = "watching") {
+    fun addToWatchlist(status: WatchStatus = WatchStatus.WATCHING) {
         val currentState = _uiState.value
         if (currentState is TvDetailUiState.Success) {
             val tvShow = currentState.tvShow
             val entity = WatchlistEntity(
                 id = tvShow.id,
-                mediaType = "tv",
+                mediaType = MediaType.TV,
                 title = tvShow.name,
                 posterPath = tvShow.posterPath,
                 voteAverage = tvShow.voteAverage,
@@ -122,13 +124,13 @@ class TvDetailViewModel @Inject constructor(
 
     fun removeFromWatchlist() {
         viewModelScope.launch {
-            watchlistRepository.remove(tvId, "tv")
+            watchlistRepository.remove(tvId, MediaType.TV)
         }
     }
 
-    fun updateWatchlistStatus(status: String) {
+    fun updateWatchlistStatus(status: WatchStatus) {
         viewModelScope.launch {
-            watchlistRepository.updateStatus(tvId, "tv", status)
+            watchlistRepository.updateStatus(tvId, MediaType.TV, status)
         }
     }
 }

@@ -3,11 +3,14 @@ package com.yourname.icepacklist.core.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
+import androidx.room.TypeConverters
+
 @Database(
     entities = [MovieEntity::class, RemoteKeyEntity::class, WatchlistEntity::class],
     version = 2,
     exportSchema = false
 )
+@TypeConverters(WatchlistConverters::class)
 abstract class IcepackDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
     abstract fun remoteKeyDao(): RemoteKeyDao

@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yourname.icepacklist.core.database.WatchlistEntity
+import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.core.database.WatchStatus
 import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.detail.data.DetailRepository
 import com.yourname.icepacklist.feature.home.domain.CreditsResponse
@@ -49,11 +51,11 @@ class DetailViewModel @Inject constructor(
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
     val isInWatchlist: StateFlow<Boolean> = watchlistRepository.getAll()
-        .map { list -> list.any { it.id == movieId && it.mediaType == "movie" } }
+        .map { list -> list.any { it.id == movieId && it.mediaType == MediaType.MOVIE } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val watchlistStatus: StateFlow<String?> = watchlistRepository.getAll()
-        .map { list -> list.firstOrNull { it.id == movieId && it.mediaType == "movie" }?.status }
+    val watchlistStatus: StateFlow<WatchStatus?> = watchlistRepository.getAll()
+        .map { list -> list.firstOrNull { it.id == movieId && it.mediaType == MediaType.MOVIE }?.status }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
@@ -100,13 +102,13 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun addToWatchlist(status: String = "watching") {
+    fun addToWatchlist(status: WatchStatus = WatchStatus.WATCHING) {
         val currentState = _uiState.value
         if (currentState is DetailUiState.Success) {
             val movie = currentState.movie
             val entity = WatchlistEntity(
                 id = movie.id,
-                mediaType = "movie",
+                mediaType = MediaType.MOVIE,
                 title = movie.title,
                 posterPath = movie.posterPath,
                 voteAverage = movie.voteAverage,
@@ -121,13 +123,13 @@ class DetailViewModel @Inject constructor(
 
     fun removeFromWatchlist() {
         viewModelScope.launch {
-            watchlistRepository.remove(movieId, "movie")
+            watchlistRepository.remove(movieId, MediaType.MOVIE)
         }
     }
 
-    fun updateWatchlistStatus(status: String) {
+    fun updateWatchlistStatus(status: WatchStatus) {
         viewModelScope.launch {
-            watchlistRepository.updateStatus(movieId, "movie", status)
+            watchlistRepository.updateStatus(movieId, MediaType.MOVIE, status)
         }
     }
 }

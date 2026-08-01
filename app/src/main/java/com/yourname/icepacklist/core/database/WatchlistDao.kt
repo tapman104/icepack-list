@@ -19,11 +19,11 @@ interface WatchlistDao {
     fun getAll(): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY addedAt DESC")
-    fun getByStatus(status: String): Flow<List<WatchlistEntity>>
+    fun getByStatus(status: WatchStatus): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist WHERE id = :id AND mediaType = :mediaType LIMIT 1")
-    suspend fun getItem(id: Int, mediaType: String): WatchlistEntity?
+    suspend fun getItem(id: Int, mediaType: MediaType): WatchlistEntity?
 
     @Query("UPDATE watchlist SET status = :status WHERE id = :id AND mediaType = :mediaType")
-    suspend fun updateStatus(id: Int, mediaType: String, status: String)
+    suspend fun updateStatus(id: Int, mediaType: MediaType, status: WatchStatus)
 }

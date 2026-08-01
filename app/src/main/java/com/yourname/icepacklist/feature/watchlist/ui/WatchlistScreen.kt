@@ -24,20 +24,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.yourname.icepacklist.core.database.WatchlistEntity
+import com.yourname.icepacklist.core.database.WatchStatus
+import com.yourname.icepacklist.core.database.MediaType
 import java.util.Locale
 
 private const val TMDB_POSTER_BASE = "https://image.tmdb.org/t/p/w185"
 
 private data class WatchlistTab(
     val title: String,
-    val status: String
+    val status: WatchStatus
 )
 
 private val tabs = listOf(
-    WatchlistTab("Watching", "watching"),
-    WatchlistTab("Completed", "completed"),
-    WatchlistTab("Paused", "paused"),
-    WatchlistTab("Dropped", "dropped")
+    WatchlistTab("Watching", WatchStatus.WATCHING),
+    WatchlistTab("Completed", WatchStatus.COMPLETED),
+    WatchlistTab("Paused", WatchStatus.PAUSED),
+    WatchlistTab("Dropped", WatchStatus.DROPPED)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,7 +119,7 @@ fun WatchlistScreen(
                             WatchlistItemRow(
                                 item = item,
                                 onClick = {
-                                    if (item.mediaType == "movie") {
+                                    if (item.mediaType == MediaType.MOVIE) {
                                         onMovieClick(item.id)
                                     } else {
                                         onTvShowClick(item.id)
@@ -144,7 +146,7 @@ private fun WatchlistItemRow(
     item: WatchlistEntity,
     onClick: () -> Unit,
     onRemove: () -> Unit,
-    onUpdateStatus: (String) -> Unit
+    onUpdateStatus: (WatchStatus) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -186,7 +188,7 @@ private fun WatchlistItemRow(
                 Spacer(modifier = Modifier.height(4.dp))
                 val subText = listOfNotNull(
                     item.year?.takeIf { it.isNotBlank() },
-                    item.mediaType.uppercase(Locale.US)
+                    item.mediaType.name.uppercase(Locale.US)
                 ).joinToString(" • ")
                 Text(
                     text = subText,
