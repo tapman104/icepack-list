@@ -1,4 +1,4 @@
-﻿package com.yourname.icepacklist.feature.home.ui
+package com.yourname.icepacklist.feature.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,6 +20,8 @@ import com.yourname.icepacklist.core.ui.ShimmerGrid
 import com.yourname.icepacklist.core.ui.TvShowCard
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.TvShow
+import androidx.compose.ui.res.stringResource
+import com.yourname.icepacklist.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,16 +33,16 @@ fun CategoryListScreen(
 ) {
     val items = viewModel.items.collectAsLazyPagingItems()
     val title = when (viewModel.category) {
-        "trending_movies" -> "Trending This Week"
-        "popular_movies" -> "Popular Movies"
-        "now_playing" -> "Now Playing"
-        "upcoming" -> "Upcoming"
-        "top_rated_movies" -> "Top Rated Movies"
-        "trending_tv" -> "Trending Shows"
-        "popular_tv" -> "Popular Shows"
-        "top_rated_tv" -> "Top Rated Shows"
-        "airing_today" -> "Airing Today"
-        else -> "Category"
+        "trending_movies" -> stringResource(R.string.section_trending_week)
+        "popular_movies" -> stringResource(R.string.section_popular_movies)
+        "now_playing" -> stringResource(R.string.section_now_playing)
+        "upcoming" -> stringResource(R.string.section_upcoming)
+        "top_rated_movies" -> stringResource(R.string.section_top_rated_movies)
+        "trending_tv" -> stringResource(R.string.section_trending_shows)
+        "popular_tv" -> stringResource(R.string.section_popular_shows)
+        "top_rated_tv" -> stringResource(R.string.section_top_rated_shows)
+        "airing_today" -> stringResource(R.string.section_airing_today)
+        else -> stringResource(R.string.category_default)
     }
 
     Scaffold(
@@ -81,7 +83,7 @@ fun CategoryListScreen(
                 }
                 else -> {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
+                        columns = GridCells.Fixed(2),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
