@@ -67,6 +67,12 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 SearchScreen(
                     onMovieClick = { movieId ->
                         navController.navigate(Routes.Detail.buildRoute(movieId))
+                    },
+                    onTvShowClick = { tvId ->
+                        navController.navigate(Routes.TvDetail.buildRoute(tvId))
+                    },
+                    onPersonClick = { personId ->
+                        navController.navigate(Routes.PersonDetail.createRoute(personId))
                     }
                 )
             }

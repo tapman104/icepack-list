@@ -1,6 +1,7 @@
 package com.yourname.icepacklist.feature.search.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -28,9 +28,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
-import com.yourname.icepacklist.core.ui.MovieCard
 import com.yourname.icepacklist.core.ui.ShimmerGrid
-import com.yourname.icepacklist.feature.home.domain.Movie
+import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 
 private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
 
@@ -38,10 +37,12 @@ private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
-    onMovieClick: (Int) -> Unit = {}
+    onMovieClick: (Int) -> Unit = {},
+    onTvShowClick: (Int) -> Unit = {},
+    onPersonClick: (Int) -> Unit = {}
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
-    val movies = viewModel.searchResults.collectAsLazyPagingItems()
+    val results = viewModel.searchResults.collectAsLazyPagingItems()
 
     Column(
         modifier = Modifier
@@ -55,17 +56,17 @@ fun SearchScreen(
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                movies.loadState.refresh is LoadState.Loading && searchQuery.isNotBlank() -> ShimmerGrid()
-                movies.loadState.refresh is LoadState.Error -> {
-                    val error = (movies.loadState.refresh as LoadState.Error).error
+                results.loadState.refresh is LoadState.Loading && searchQuery.isNotBlank() -> ShimmerGrid()
+                results.loadState.refresh is LoadState.Error -> {
+                    val error = (results.loadState.refresh as LoadState.Error).error
                     FullScreenError(
                         message = error.localizedMessage ?: "Unknown error",
-                        onRetry = { movies.retry() }
+                        onRetry = { results.retry() }
                     )
                 }
                 searchQuery.isBlank() -> EmptySearchState()
-                movies.itemCount == 0 && movies.loadState.refresh is LoadState.NotLoading -> NoResultsState()
-                else -> MovieGrid(movies, onMovieClick)
+                results.itemCount == 0 && results.loadState.refresh is LoadState.NotLoading -> NoResultsState()
+                else -> SearchResultGrid(results, onMovieClick, onTvShowClick, onPersonClick)
             }
         }
     }
@@ -80,7 +81,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        placeholder = { Text("Search movies...", color = Color.Gray) },
+        placeholder = { Text("Search...", color = Color.Gray) },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color(0xFF1C1C1E),
@@ -128,7 +129,7 @@ private fun NoResultsState() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "No movies found",
+                text = "No results found",
                 color = Color(0xFF888888),
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -137,7 +138,12 @@ private fun NoResultsState() {
 }
 
 @Composable
-private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Unit) {
+private fun SearchResultGrid(
+    results: LazyPagingItems<MultiSearchResult>,
+    onMovieClick: (Int) -> Unit,
+    onTvShowClick: (Int) -> Unit,
+    onPersonClick: (Int) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 120.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -146,19 +152,27 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Uni
         modifier = Modifier.fillMaxSize()
     ) {
         items(
-            count = movies.itemCount,
-            key = { index -> movies.peek(index)?.id ?: index }
+            count = results.itemCount,
+            key = { index -> results.peek(index)?.id ?: index }
         ) { index ->
-            val movie = movies[index]
-            if (movie != null) {
-                MovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
+            val item = results[index]
+            if (item != null) {
+                SearchResultCard(
+                    item = item,
+                    onClick = {
+                        when (item.mediaType) {
+                            "movie" -> onMovieClick(item.id)
+                            "tv" -> onTvShowClick(item.id)
+                            "person" -> onPersonClick(item.id)
+                        }
+                    }
+                )
             } else {
                 PosterPlaceholder()
             }
         }
 
-        // Append loading indicator
-        if (movies.loadState.append is LoadState.Loading) {
+        if (results.loadState.append is LoadState.Loading) {
             item {
                 Box(
                     modifier = Modifier
@@ -172,6 +186,77 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Uni
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SearchResultCard(
+    item: MultiSearchResult,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f / 3f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFF1C1C1E))
+        ) {
+            if (item.displayPoster.isNotBlank()) {
+                AsyncImage(
+                    model = TMDB_IMAGE_BASE + item.displayPoster,
+                    contentDescription = item.displayTitle,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            
+            val chipColor = when (item.mediaType) {
+                "movie" -> Color(0xFF673AB7)
+                "tv" -> Color(0xFF009688)
+                "person" -> Color(0xFF757575)
+                else -> Color(0xFF333333)
+            }
+            
+            Box(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .background(chipColor.copy(alpha = 0.9f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .align(Alignment.TopStart)
+            ) {
+                Text(
+                    text = item.mediaType.uppercase(),
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = item.displayTitle,
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        
+        if (item.displayDate.isNotBlank()) {
+            Text(
+                text = item.displayDate.take(4),
+                color = Color(0xFF888888),
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1
+            )
         }
     }
 }

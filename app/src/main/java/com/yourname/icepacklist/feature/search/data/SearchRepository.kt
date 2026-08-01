@@ -4,14 +4,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.yourname.icepacklist.core.network.TmdbApiService
-import com.yourname.icepacklist.feature.home.domain.Movie
+import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class SearchRepository @Inject constructor(
     private val apiService: TmdbApiService
 ) {
-    fun searchMovies(query: String): Flow<PagingData<Movie>> {
+    fun searchMulti(query: String): Flow<PagingData<MultiSearchResult>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.yourname.icepacklist.feature.home.domain.Movie
+import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 import com.yourname.icepacklist.feature.search.data.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,11 +27,11 @@ class SearchViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val searchResults: Flow<PagingData<Movie>> = _searchQuery
+    val searchResults: Flow<PagingData<MultiSearchResult>> = _searchQuery
         .debounce(300)
         .filter { it.isNotBlank() }
         .flatMapLatest { query ->
-            repository.searchMovies(query)
+            repository.searchMulti(query)
         }
         .cachedIn(viewModelScope)
 
