@@ -1,3 +1,37 @@
 <resources>
     <string name="app_name">IcepackList</string>
+    <string name="error_loading_details">⚠️ Error loading details</string>
+    <string name="retry">Retry</string>
+    <string name="add_to_list">+ My List</string>
+    <string name="in_my_list">✓ In My List</string>
+    <string name="status_watching">Watching</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_dropped">Dropped</string>
+    <string name="remove_from_list">Remove from List</string>
+    <string name="cast">Cast</string>
+    <string name="director">Director</string>
+    <string name="details">Details</string>
+    <string name="release_date">Release Date</string>
+    <string name="status">Status</string>
+    <string name="country">Country</string>
+    <string name="language">Language</string>
+    <string name="runtime">Runtime</string>
+    <string name="watch_trailer">Watch Trailer</string>
+    <string name="you_may_also_like">You May Also Like</string>
+    
+    <string name="section_trending_week">Trending This Week</string>
+    <string name="section_popular_movies">Popular Movies</string>
+    <string name="section_now_playing">Now Playing</string>
+    <string name="section_upcoming">Upcoming</string>
+    <string name="section_top_rated_movies">Top Rated Movies</string>
+    <string name="section_trending_shows">Trending Shows</string>
+    <string name="section_popular_shows">Popular Shows</string>
+    <string name="section_top_rated_shows">Top Rated Shows</string>
+    <string name="section_airing_today">Airing Today</string>
+    <string name="home_title">Icepack List</string>
+    <string name="tab_all">All</string>
+    <string name="tab_movies">Movies</string>
+    <string name="tab_tv_shows">TV Shows</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

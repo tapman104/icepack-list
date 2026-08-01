@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,7 @@ import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
 import com.yourname.icepacklist.core.database.WatchStatus
 import com.yourname.icepacklist.core.util.formatDate
+import com.yourname.icepacklist.R
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
 private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
@@ -65,7 +68,7 @@ fun DetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "⚠️ Error loading details",
+                        text = stringResource(R.string.error_loading_details),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -80,7 +83,7 @@ fun DetailScreen(
                         onClick = { viewModel.loadMovieDetail() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
                     ) {
-                        Text("Retry", color = Color.White)
+                        Text(stringResource(R.string.retry), color = Color.White)
                     }
                 }
             }
@@ -131,6 +134,8 @@ private fun DetailContent(
                     model = movie.backdropPath?.let { "$TMDB_BACKDROP_BASE$it" },
                     contentDescription = "Backdrop for ${movie.title}",
                     contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_image_placeholder),
+                    error = painterResource(R.drawable.ic_image_placeholder),
                     modifier = Modifier.fillMaxSize()
                 )
                 Box(
@@ -223,7 +228,7 @@ private fun DetailContent(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("+ My List", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.add_to_list), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 } else {
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -233,7 +238,7 @@ private fun DetailContent(
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("✓ In My List", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.in_my_list), color = Color.White, fontWeight = FontWeight.Bold)
                         }
 
                         DropdownMenu(
@@ -242,10 +247,10 @@ private fun DetailContent(
                             modifier = Modifier.background(Color(0xFF2C2C2E))
                         ) {
                             listOf(
-                                "Watching" to WatchStatus.WATCHING,
-                                "Completed" to WatchStatus.COMPLETED,
-                                "Paused" to WatchStatus.PAUSED,
-                                "Dropped" to WatchStatus.DROPPED
+                                stringResource(R.string.status_watching) to WatchStatus.WATCHING,
+                                stringResource(R.string.status_completed) to WatchStatus.COMPLETED,
+                                stringResource(R.string.status_paused) to WatchStatus.PAUSED,
+                                stringResource(R.string.status_dropped) to WatchStatus.DROPPED
                             ).forEach { (label, status) ->
                                 DropdownMenuItem(
                                     text = {
@@ -263,7 +268,7 @@ private fun DetailContent(
                             }
                             HorizontalDivider(color = Color(0xFF444444))
                             DropdownMenuItem(
-                                text = { Text("Remove from List", color = Color(0xFFFF453A)) },
+                                text = { Text(stringResource(R.string.remove_from_list), color = Color(0xFFFF453A)) },
                                 onClick = {
                                     watchlistMenuExpanded = false
                                     onRemoveFromWatchlist()
@@ -286,7 +291,7 @@ private fun DetailContent(
                 if (credits.cast.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Cast",
+                        text = stringResource(R.string.cast),
                         color = Color.White,
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -301,6 +306,8 @@ private fun DetailContent(
                                     model = person.profilePath?.let { "$TMDB_PROFILE_BASE$it" },
                                     contentDescription = person.name,
                                     contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(R.drawable.ic_image_placeholder),
+                                    error = painterResource(R.drawable.ic_image_placeholder),
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(CircleShape)
@@ -328,30 +335,30 @@ private fun DetailContent(
                 // Director Section
                 if (movie.director.isNotBlank()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    DetailRow(label = "Director", value = movie.director)
+                    DetailRow(label = stringResource(R.string.director), value = movie.director)
                 }
 
                 // Details Section
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Details",
+                    text = stringResource(R.string.details),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                DetailRow(label = "Release Date", value = formatDate(movie.releaseDate))
+                DetailRow(label = stringResource(R.string.release_date), value = formatDate(movie.releaseDate))
                 if (!movie.status.isNullOrBlank()) {
-                    DetailRow(label = "Status", value = movie.status)
+                    DetailRow(label = stringResource(R.string.status), value = movie.status)
                 }
                 if (movie.originCountry.isNotEmpty()) {
-                    DetailRow(label = "Country", value = movie.originCountry.joinToString(", "))
+                    DetailRow(label = stringResource(R.string.country), value = movie.originCountry.joinToString(", "))
                 }
                 if (!movie.originalLanguage.isNullOrBlank()) {
-                    DetailRow(label = "Language", value = movie.originalLanguage.uppercase())
+                    DetailRow(label = stringResource(R.string.language), value = movie.originalLanguage.uppercase())
                 }
                 movie.runtime?.takeIf { it > 0 }?.let {
-                    DetailRow(label = "Runtime", value = "${it / 60}h ${it % 60}m")
+                    DetailRow(label = stringResource(R.string.runtime), value = "${it / 60}h ${it % 60}m")
                 }
 
                 // Trailer Section
@@ -369,7 +376,7 @@ private fun DetailContent(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Watch Trailer", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.watch_trailer), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -377,7 +384,7 @@ private fun DetailContent(
                 if (similar.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "You May Also Like",
+                        text = stringResource(R.string.you_may_also_like),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
