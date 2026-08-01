@@ -36,6 +36,7 @@ private data class WatchlistTab(
 )
 
 private val tabs = listOf(
+    WatchlistTab("Planning", WatchStatus.PLANNING),
     WatchlistTab("Watching", WatchStatus.WATCHING),
     WatchlistTab("Completed", WatchStatus.COMPLETED),
     WatchlistTab("Paused", WatchStatus.PAUSED),

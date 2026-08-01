@@ -5,7 +5,7 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
 enum class MediaType { MOVIE, TV }
-enum class WatchStatus { WATCHING, COMPLETED, PAUSED, DROPPED }
+enum class WatchStatus { PLANNING, WATCHING, COMPLETED, PAUSED, DROPPED }
 
 class WatchlistConverters {
     @TypeConverter fun fromMediaType(v: MediaType): String = v.name

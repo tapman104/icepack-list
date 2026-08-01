@@ -7,7 +7,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [MovieEntity::class, RemoteKeyEntity::class, WatchlistEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(WatchlistConverters::class)

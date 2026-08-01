@@ -102,7 +102,7 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun addToWatchlist(status: WatchStatus = WatchStatus.WATCHING) {
+    fun addToWatchlist(status: WatchStatus = WatchStatus.PLANNING) {
         val currentState = _uiState.value
         if (currentState is DetailUiState.Success) {
             val movie = currentState.movie

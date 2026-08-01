@@ -103,7 +103,7 @@ class TvDetailViewModel @Inject constructor(
         }
     }
 
-    fun addToWatchlist(status: WatchStatus = WatchStatus.WATCHING) {
+    fun addToWatchlist(status: WatchStatus = WatchStatus.PLANNING) {
         val currentState = _uiState.value
         if (currentState is TvDetailUiState.Success) {
             val tvShow = currentState.tvShow

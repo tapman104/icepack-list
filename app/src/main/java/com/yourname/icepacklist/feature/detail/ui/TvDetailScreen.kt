@@ -96,7 +96,7 @@ fun TvDetailScreen(
                     similar = state.similar,
                     isInWatchlist = isInWatchlist,
                     watchlistStatus = watchlistStatus,
-                    onAddToWatchlist = { viewModel.addToWatchlist(WatchStatus.WATCHING) },
+                    onAddToWatchlist = { viewModel.addToWatchlist(WatchStatus.PLANNING) },
                     onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
                     onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
