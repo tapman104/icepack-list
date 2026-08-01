@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -31,7 +33,9 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
-import java.text.SimpleDateFormat
+import com.yourname.icepacklist.core.database.WatchStatus
+import com.yourname.icepacklist.core.util.formatDate
+import com.yourname.icepacklist.R
 import java.util.Locale
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
@@ -65,7 +69,7 @@ fun TvDetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "⚠️ Error loading details",
+                        text = stringResource(R.string.error_loading_details),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -80,7 +84,7 @@ fun TvDetailScreen(
                         onClick = { viewModel.loadData() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
                     ) {
-                        Text("Retry", color = Color.White)
+                        Text(stringResource(R.string.retry), color = Color.White)
                     }
                 }
             }
@@ -92,7 +96,7 @@ fun TvDetailScreen(
                     similar = state.similar,
                     isInWatchlist = isInWatchlist,
                     watchlistStatus = watchlistStatus,
-                    onAddToWatchlist = { viewModel.addToWatchlist("watching") },
+                    onAddToWatchlist = { viewModel.addToWatchlist(WatchStatus.WATCHING) },
                     onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
                     onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
@@ -110,9 +114,9 @@ private fun TvDetailContent(
     videos: List<VideoResult>,
     similar: List<TvShow>,
     isInWatchlist: Boolean,
-    watchlistStatus: String?,
+    watchlistStatus: WatchStatus?,
     onAddToWatchlist: () -> Unit,
-    onUpdateWatchlistStatus: (String) -> Unit,
+    onUpdateWatchlistStatus: (WatchStatus) -> Unit,
     onRemoveFromWatchlist: () -> Unit,
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit
@@ -131,6 +135,8 @@ private fun TvDetailContent(
                     model = tvShow.backdropPath?.let { "$TMDB_BACKDROP_BASE$it" },
                     contentDescription = "Backdrop for ${tvShow.name}",
                     contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_image_placeholder),
+                    error = painterResource(R.drawable.ic_image_placeholder),
                     modifier = Modifier.fillMaxSize()
                 )
                 Box(
@@ -213,7 +219,7 @@ private fun TvDetailContent(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("+ My List", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.add_to_list), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 } else {
                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -223,7 +229,7 @@ private fun TvDetailContent(
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("✓ In My List", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.in_my_list), color = Color.White, fontWeight = FontWeight.Bold)
                         }
 
                         DropdownMenu(
@@ -232,10 +238,10 @@ private fun TvDetailContent(
                             modifier = Modifier.background(Color(0xFF2C2C2E))
                         ) {
                             listOf(
-                                "Watching" to "watching",
-                                "Completed" to "completed",
-                                "Paused" to "paused",
-                                "Dropped" to "dropped"
+                                stringResource(R.string.status_watching) to WatchStatus.WATCHING,
+                                stringResource(R.string.status_completed) to WatchStatus.COMPLETED,
+                                stringResource(R.string.status_paused) to WatchStatus.PAUSED,
+                                stringResource(R.string.status_dropped) to WatchStatus.DROPPED
                             ).forEach { (label, status) ->
                                 DropdownMenuItem(
                                     text = {
@@ -253,7 +259,7 @@ private fun TvDetailContent(
                             }
                             HorizontalDivider(color = Color(0xFF444444))
                             DropdownMenuItem(
-                                text = { Text("Remove from List", color = Color(0xFFFF453A)) },
+                                text = { Text(stringResource(R.string.remove_from_list), color = Color(0xFFFF453A)) },
                                 onClick = {
                                     watchlistMenuExpanded = false
                                     onRemoveFromWatchlist()
@@ -275,7 +281,7 @@ private fun TvDetailContent(
                 if (credits.cast.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Cast",
+                        text = stringResource(R.string.cast),
                         color = Color.White,
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -290,6 +296,8 @@ private fun TvDetailContent(
                                     model = person.profilePath?.let { "$TMDB_PROFILE_BASE$it" },
                                     contentDescription = person.name,
                                     contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(R.drawable.ic_image_placeholder),
+                                    error = painterResource(R.drawable.ic_image_placeholder),
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(CircleShape)
@@ -317,7 +325,7 @@ private fun TvDetailContent(
                 // Details Section
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Details",
+                    text = stringResource(R.string.details),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
@@ -328,13 +336,13 @@ private fun TvDetailContent(
                     DetailRow(label = "Last Air Date", value = formatDate(tvShow.lastAirDate))
                 }
                 if (!tvShow.status.isNullOrBlank()) {
-                    DetailRow(label = "Status", value = tvShow.status)
+                    DetailRow(label = stringResource(R.string.status), value = tvShow.status)
                 }
                 if (tvShow.originCountry.isNotEmpty()) {
-                    DetailRow(label = "Country", value = tvShow.originCountry.joinToString(", "))
+                    DetailRow(label = stringResource(R.string.country), value = tvShow.originCountry.joinToString(", "))
                 }
                 if (!tvShow.originalLanguage.isNullOrBlank()) {
-                    DetailRow(label = "Language", value = tvShow.originalLanguage.uppercase())
+                    DetailRow(label = stringResource(R.string.language), value = tvShow.originalLanguage.uppercase())
                 }
                 tvShow.numberOfSeasons?.let {
                     DetailRow(label = "Seasons", value = "$it")
@@ -366,7 +374,7 @@ private fun TvDetailContent(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Watch Trailer", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.watch_trailer), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -374,7 +382,7 @@ private fun TvDetailContent(
                 if (similar.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "You May Also Like",
+                        text = stringResource(R.string.you_may_also_like),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
@@ -413,14 +421,3 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
-private fun formatDate(dateStr: String?): String {
-    if (dateStr.isNullOrBlank()) return "N/A"
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
-        val date = inputFormat.parse(dateStr)
-        if (date != null) outputFormat.format(date) else dateStr
-    } catch (e: Exception) {
-        dateStr
-    }
-}
