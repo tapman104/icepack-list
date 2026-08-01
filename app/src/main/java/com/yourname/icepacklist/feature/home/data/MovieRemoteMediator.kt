@@ -92,18 +92,18 @@ class MovieRemoteMediator(
 
     private suspend fun getRemoteKeyForLastItem(state: PagingState<Int, MovieEntity>): RemoteKeyEntity? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
-            ?.let { movie -> remoteKeyDao.remoteKeysMovieId(movie.id) }
+            ?.let { movie -> remoteKeyDao.getRemoteKeyByMovieId(movie.id) }
     }
 
     private suspend fun getRemoteKeyForFirstItem(state: PagingState<Int, MovieEntity>): RemoteKeyEntity? {
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
-            ?.let { movie -> remoteKeyDao.remoteKeysMovieId(movie.id) }
+            ?.let { movie -> remoteKeyDao.getRemoteKeyByMovieId(movie.id) }
     }
 
     private suspend fun getRemoteKeyClosestToCurrentPosition(state: PagingState<Int, MovieEntity>): RemoteKeyEntity? {
         return state.anchorPosition?.let { position ->
             state.closestItemToPosition(position)?.id?.let { movieId ->
-                remoteKeyDao.remoteKeysMovieId(movieId)
+                remoteKeyDao.getRemoteKeyByMovieId(movieId)
             }
         }
     }
