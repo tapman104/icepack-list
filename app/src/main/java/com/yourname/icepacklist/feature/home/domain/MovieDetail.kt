@@ -4,6 +4,12 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
+data class ProductionCompany(
+    @Json(name = "id") val id: Int,
+    @Json(name = "name") val name: String
+)
+
+@JsonClass(generateAdapter = true)
 data class MovieDetail(
     @Json(name = "id") val id: Int,
     @Json(name = "title") val title: String,
@@ -17,6 +23,12 @@ data class MovieDetail(
     @Json(name = "status") val status: String? = null,
     @Json(name = "original_language") val originalLanguage: String? = null,
     @Json(name = "origin_country") val originCountry: List<String> = emptyList(),
+    @Json(name = "tagline") val tagline: String? = null,
+    @Json(name = "budget") val budget: Long? = null,
+    @Json(name = "revenue") val revenue: Long? = null,
+    @Json(name = "production_companies") val productionCompanies: List<ProductionCompany> = emptyList(),
+    @Json(name = "credits") val creditsResponse: CreditsResponse? = null,
+    @Json(name = "videos") val videoResponse: VideoResponse? = null,
     val director: String = "",
     val videos: List<VideoResult> = emptyList(),
     val similar: List<Movie> = emptyList()

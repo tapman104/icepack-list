@@ -45,7 +45,8 @@ private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
 fun TvDetailScreen(
     viewModel: TvDetailViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    onTvShowClick: (Int) -> Unit = {}
+    onTvShowClick: (Int) -> Unit = {},
+    onPersonClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isInWatchlist by viewModel.isInWatchlist.collectAsState()
@@ -100,7 +101,8 @@ fun TvDetailScreen(
                     onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
                     onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
-                    onTvShowClick = onTvShowClick
+                    onTvShowClick = onTvShowClick,
+                    onPersonClick = onPersonClick
                 )
             }
         }
@@ -119,7 +121,8 @@ private fun TvDetailContent(
     onUpdateWatchlistStatus: (WatchStatus) -> Unit,
     onRemoveFromWatchlist: () -> Unit,
     onBack: () -> Unit,
-    onTvShowClick: (Int) -> Unit
+    onTvShowClick: (Int) -> Unit,
+    onPersonClick: (Int) -> Unit
 ) {
     val context = LocalContext.current
     var watchlistMenuExpanded by remember { mutableStateOf(false) }
@@ -164,13 +167,37 @@ private fun TvDetailContent(
 
         item {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = tvShow.name,
-                    color = Color.White,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 34.sp
-                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    tvShow.posterPath?.let {
+                        AsyncImage(
+                            model = "https://image.tmdb.org/t/p/w342$it",
+                            contentDescription = "Poster",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(80.dp)
+                                .aspectRatio(2f / 3f)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = tvShow.name,
+                            color = Color.White,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 34.sp
+                        )
+                        if (!tvShow.tagline.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = tvShow.tagline,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +316,11 @@ private fun TvDetailContent(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(credits.cast.take(15)) { person ->
                             Column(
-                                modifier = Modifier.width(72.dp),
+                                modifier = Modifier
+                                    .width(72.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .androidx.compose.foundation.clickable { onPersonClick(person.id) }
+                                    .padding(4.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 AsyncImage(

@@ -36,4 +36,8 @@
     <string name="unknown_error">Unknown error</string>
     <string name="category_default">Category</string>
     <string name="status_planning">Planning</string>
+    <string name="detail_tagline">Tagline</string>
+    <string name="detail_budget">Budget</string>
+    <string name="detail_revenue">Revenue</string>
+    <string name="detail_writers">Writers</string>
 </resources>

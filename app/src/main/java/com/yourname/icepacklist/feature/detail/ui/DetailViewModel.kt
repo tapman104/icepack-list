@@ -67,21 +67,21 @@ class DetailViewModel @Inject constructor(
             _uiState.value = DetailUiState.Loading
             try {
                 val movieDef = async { apiService.getMovieDetails(movieId) }
-                val creditsDef = async { apiService.getMovieCredits(movieId) }
-                val videosDef = async { apiService.getMovieVideos(movieId) }
                 val similarDef = async { apiService.getSimilarMovies(movieId) }
 
-                awaitAll(movieDef, creditsDef, videosDef, similarDef)
+                awaitAll(movieDef, similarDef)
 
                 val movie = movieDef.await()
-                val credits = creditsDef.await()
-                val videosResponse = videosDef.await()
                 val similarResponse = similarDef.await()
+                
+                val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
+                val videosResponse = movie.videoResponse
 
                 val director = credits.crew.firstOrNull { it.job == "Director" }?.name ?: ""
-                val videoResults = videosResponse.results
-                    .filter { it.type == "Trailer" && it.site == "YouTube" }
-                    .map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                val videoResults = videosResponse?.results
+                    ?.filter { it.type == "Trailer" && it.site == "YouTube" }
+                    ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                    ?: emptyList()
                 val similarMovies = similarResponse.results.take(12)
 
                 val updatedMovie = movie.copy(

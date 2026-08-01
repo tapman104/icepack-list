@@ -65,20 +65,20 @@ class TvDetailViewModel @Inject constructor(
             _uiState.value = TvDetailUiState.Loading
             try {
                 val tvDef = async { apiService.getTvShowDetails(tvId) }
-                val creditsDef = async { apiService.getTvShowCredits(tvId) }
-                val videosDef = async { apiService.getTvShowVideos(tvId) }
                 val similarDef = async { apiService.getSimilarTvShows(tvId) }
 
-                awaitAll(tvDef, creditsDef, videosDef, similarDef)
+                awaitAll(tvDef, similarDef)
 
                 val tvShow = tvDef.await()
-                val credits = creditsDef.await()
-                val videosResponse = videosDef.await()
                 val similarResponse = similarDef.await()
+                
+                val credits = tvShow.creditsResponse ?: CreditsResponse(id = tvId)
+                val videosResponse = tvShow.videoResponse
 
-                val videoResults = videosResponse.results
-                    .filter { it.type == "Trailer" && it.site == "YouTube" }
-                    .map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                val videoResults = videosResponse?.results
+                    ?.filter { it.type == "Trailer" && it.site == "YouTube" }
+                    ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                    ?: emptyList()
                 val similarShows = similarResponse.results.take(12)
 
                 val networkNames = tvShow.networksList.map { it.name }
