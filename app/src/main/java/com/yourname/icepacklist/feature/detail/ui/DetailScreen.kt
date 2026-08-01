@@ -98,7 +98,7 @@ fun DetailScreen(
                     similar = state.similar,
                     isInWatchlist = isInWatchlist,
                     watchlistStatus = watchlistStatus,
-                    onAddToWatchlist = { viewModel.addToWatchlist(WatchStatus.PLANNING) },
+                    onAddToWatchlist = { viewModel.addToWatchlist(it) },
                     onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
                     onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
                     onBack = onBack,
@@ -118,7 +118,7 @@ private fun DetailContent(
     similar: List<Movie>,
     isInWatchlist: Boolean,
     watchlistStatus: WatchStatus?,
-    onAddToWatchlist: () -> Unit,
+    onAddToWatchlist: (WatchStatus) -> Unit,
     onUpdateWatchlistStatus: (WatchStatus) -> Unit,
     onRemoveFromWatchlist: () -> Unit,
     onBack: () -> Unit,
@@ -250,17 +250,17 @@ private fun DetailContent(
 
                 // Watchlist Button Row between genre chips and overview
                 Spacer(modifier = Modifier.height(16.dp))
-                if (!isInWatchlist) {
-                    Button(
-                        onClick = onAddToWatchlist,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.add_to_list), color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                } else {
-                    Box(modifier = Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    if (!isInWatchlist) {
+                        Button(
+                            onClick = { watchlistMenuExpanded = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.add_to_list), color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    } else {
                         OutlinedButton(
                             onClick = { watchlistMenuExpanded = true },
                             shape = RoundedCornerShape(8.dp),
@@ -269,32 +269,39 @@ private fun DetailContent(
                         ) {
                             Text(stringResource(R.string.in_my_list), color = Color.White, fontWeight = FontWeight.Bold)
                         }
+                    }
 
-                        DropdownMenu(
-                            expanded = watchlistMenuExpanded,
-                            onDismissRequest = { watchlistMenuExpanded = false },
-                            modifier = Modifier.background(Color(0xFF2C2C2E))
-                        ) {
-                            listOf(
-                                stringResource(R.string.status_watching) to WatchStatus.WATCHING,
-                                stringResource(R.string.status_completed) to WatchStatus.COMPLETED,
-                                stringResource(R.string.status_paused) to WatchStatus.PAUSED,
-                                stringResource(R.string.status_dropped) to WatchStatus.DROPPED
-                            ).forEach { (label, status) ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = label,
-                                            color = if (watchlistStatus == status) Color(0xFFE50914) else Color.White,
-                                            fontWeight = if (watchlistStatus == status) FontWeight.Bold else FontWeight.Normal
-                                        )
-                                    },
-                                    onClick = {
-                                        watchlistMenuExpanded = false
+                    DropdownMenu(
+                        expanded = watchlistMenuExpanded,
+                        onDismissRequest = { watchlistMenuExpanded = false },
+                        modifier = Modifier.background(Color(0xFF2C2C2E))
+                    ) {
+                        listOf(
+                            stringResource(R.string.status_planning) to WatchStatus.PLANNING,
+                            stringResource(R.string.status_watching) to WatchStatus.WATCHING,
+                            stringResource(R.string.status_completed) to WatchStatus.COMPLETED,
+                            stringResource(R.string.status_paused) to WatchStatus.PAUSED,
+                            stringResource(R.string.status_dropped) to WatchStatus.DROPPED
+                        ).forEach { (label, status) ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = label,
+                                        color = if (watchlistStatus == status) Color(0xFFE50914) else Color.White,
+                                        fontWeight = if (watchlistStatus == status) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                },
+                                onClick = {
+                                    watchlistMenuExpanded = false
+                                    if (isInWatchlist) {
                                         onUpdateWatchlistStatus(status)
+                                    } else {
+                                        onAddToWatchlist(status)
                                     }
-                                )
-                            }
+                                }
+                            )
+                        }
+                        if (isInWatchlist) {
                             HorizontalDivider(color = Color(0xFF444444))
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.remove_from_list), color = Color(0xFFFF453A)) },
