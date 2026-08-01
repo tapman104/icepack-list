@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 
     // Networking
     implementation(libs.retrofit)
@@ -93,6 +95,9 @@ dependencies {
     // Coroutines
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime)
 
     // Unit tests
     testImplementation(libs.junit)

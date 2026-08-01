@@ -6,6 +6,7 @@ import com.yourname.icepacklist.core.database.IcepackDatabase
 import com.yourname.icepacklist.core.database.MovieDao
 import com.yourname.icepacklist.core.database.RemoteKeyDao
 import com.yourname.icepacklist.core.database.WatchlistDao
+import com.yourname.icepacklist.core.database.dao.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,4 +49,29 @@ object DatabaseModule {
     fun provideWatchlistDao(database: IcepackDatabase): WatchlistDao {
         return database.watchlistDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideHomeListCacheDao(database: IcepackDatabase): HomeListCacheDao =
+        database.homeListCacheDao()
+
+    @Provides
+    @Singleton
+    fun provideMovieDetailCacheDao(database: IcepackDatabase): MovieDetailCacheDao =
+        database.movieDetailCacheDao()
+
+    @Provides
+    @Singleton
+    fun provideTvDetailCacheDao(database: IcepackDatabase): TvDetailCacheDao =
+        database.tvDetailCacheDao()
+
+    @Provides
+    @Singleton
+    fun providePersonCacheDao(database: IcepackDatabase): PersonCacheDao =
+        database.personCacheDao()
+
+    @Provides
+    @Singleton
+    fun provideSearchCacheDao(database: IcepackDatabase): SearchCacheDao =
+        database.searchCacheDao()
 }

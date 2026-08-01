@@ -21,6 +21,7 @@ androidx-test-ext = "1.2.1"
 espresso = "3.6.1"
 hilt-testing = "2.52"
 splashscreen = "1.0.1"
+workManager = "2.9.0"
 
 [libraries]
 # Compose BOM
@@ -89,6 +90,7 @@ turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine
 okhttp-mock-server = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 androidx-test-ext = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
