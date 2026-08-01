@@ -37,8 +37,8 @@ data class TvShowDetail(
     @Json(name = "production_companies") val productionCompanies: List<ProductionCompany> = emptyList(),
     @Json(name = "credits") val creditsResponse: CreditsResponse? = null,
     @Json(name = "videos") val videoResponse: VideoResponse? = null,
-    val networks: List<String> = emptyList(),
-    val createdBy: String = "",
-    val videos: List<VideoResult> = emptyList(),
-    val similar: List<TvShow> = emptyList()
+    @Json(ignore = true) val networks: List<String> = emptyList(),
+    @Json(ignore = true) val createdBy: String = "",
+    @Json(ignore = true) val videos: List<VideoResult> = emptyList(),
+    @Json(ignore = true) val similar: List<TvShow> = emptyList()
 )
