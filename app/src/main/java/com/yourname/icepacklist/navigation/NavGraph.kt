@@ -11,6 +11,7 @@ import com.yourname.icepacklist.feature.detail.ui.DetailScreen
 import com.yourname.icepacklist.feature.detail.ui.TvDetailScreen
 import com.yourname.icepacklist.feature.home.ui.HomeScreen
 import com.yourname.icepacklist.feature.home.ui.CategoryListScreen
+import com.yourname.icepacklist.feature.person.ui.PersonDetailScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
 import com.yourname.icepacklist.feature.watchlist.ui.WatchlistScreen
@@ -91,7 +92,8 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             ) {
                 DetailScreen(
                     onBack = { navController.popBackStack() },
-                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) }
+                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) },
+                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) }
                 )
             }
 
@@ -103,7 +105,8 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             ) {
                 TvDetailScreen(
                     onBack = { navController.popBackStack() },
-                    onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) }
+                    onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) },
+                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) }
                 )
             }
 
@@ -117,6 +120,18 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     onBack = { navController.popBackStack() },
                     onMovieClick = { movieId -> navController.navigate(Routes.Detail.buildRoute(movieId)) },
                     onTvShowClick = { tvId -> navController.navigate(Routes.TvDetail.buildRoute(tvId)) }
+                )
+            }
+
+            composable(
+                route = Routes.PersonDetail.route,
+                arguments = listOf(
+                    navArgument(Routes.PersonDetail.ARG_PERSON_ID) { type = NavType.IntType }
+                )
+            ) {
+                PersonDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) }
                 )
             }
         }

@@ -40,4 +40,8 @@
     <string name="detail_budget">Budget</string>
     <string name="detail_revenue">Revenue</string>
     <string name="detail_writers">Writers</string>
+    <string name="error_loading_person">Failed to load person details.</string>
+    <string name="person_biography">Biography</string>
+    <string name="person_known_for">Known For</string>
+    <string name="person_images">Images</string>
 </resources>

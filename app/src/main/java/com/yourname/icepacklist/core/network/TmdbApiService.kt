@@ -10,6 +10,8 @@ import com.yourname.icepacklist.feature.home.domain.TmdbResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResponse
+import com.yourname.icepacklist.feature.home.domain.PersonMovieCreditsResponse
+import com.yourname.icepacklist.feature.home.domain.PersonImagesResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -133,7 +135,12 @@ interface TmdbApiService {
     @GET("person/{person_id}/movie_credits")
     suspend fun getPersonMovieCredits(
         @Path("person_id") personId: Int
-    ): CreditsResponse
+    ): PersonMovieCreditsResponse
+
+    @GET("person/{person_id}/images")
+    suspend fun getPersonImages(
+        @Path("person_id") personId: Int
+    ): PersonImagesResponse
 
     // ── Genres ───────────────────────────────────────────────────────────────
 

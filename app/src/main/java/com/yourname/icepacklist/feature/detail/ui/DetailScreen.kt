@@ -3,6 +3,7 @@ package com.yourname.icepacklist.feature.detail.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -330,7 +331,7 @@ private fun DetailContent(
                                 modifier = Modifier
                                     .width(72.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .androidx.compose.foundation.clickable { onPersonClick(person.id) }
+                                    .clickable { onPersonClick(person.id) }
                                     .padding(4.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {

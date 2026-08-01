@@ -17,4 +17,8 @@ sealed class Routes(val route: String) {
         const val CATEGORY_ARG = "category"
         fun createRoute(category: String) = "category_list/$category"
     }
+    data object PersonDetail : Routes("person_detail/{personId}") {
+        const val ARG_PERSON_ID = "personId"
+        fun createRoute(personId: Int) = "person_detail/$personId"
+    }
 }
