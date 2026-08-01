@@ -29,8 +29,8 @@ data class MovieDetail(
     @Json(name = "production_companies") val productionCompanies: List<ProductionCompany> = emptyList(),
     @Json(name = "credits") val creditsResponse: CreditsResponse? = null,
     @Json(name = "videos") val videoResponse: VideoResponse? = null,
-    val director: String = "",
-    val videos: List<VideoResult> = emptyList(),
-    val similar: List<Movie> = emptyList()
+    @Transient val director: String = "",
+    @Transient val videos: List<VideoResult> = emptyList(),
+    @Transient val similar: List<Movie> = emptyList()
 )
 
