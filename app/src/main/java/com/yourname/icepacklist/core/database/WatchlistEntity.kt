@@ -5,13 +5,10 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
 enum class MediaType { MOVIE, TV }
-enum class WatchStatus { PLANNING, WATCHING, COMPLETED, PAUSED, DROPPED }
 
 class WatchlistConverters {
     @TypeConverter fun fromMediaType(v: MediaType): String = v.name
     @TypeConverter fun toMediaType(v: String): MediaType = MediaType.valueOf(v)
-    @TypeConverter fun fromWatchStatus(v: WatchStatus): String = v.name
-    @TypeConverter fun toWatchStatus(v: String): WatchStatus = WatchStatus.valueOf(v)
 }
 
 @Entity(tableName = "watchlist", primaryKeys = ["id", "mediaType"])
@@ -23,6 +20,11 @@ data class WatchlistEntity(
     val posterPath: String?,
     val voteAverage: Double,
     val year: String?,
-    val status: WatchStatus,
+    val status: String = "PLAN_TO_WATCH",
+    val rating: Float? = null,
+    val startDate: String? = null,
+    val finishDate: String? = null,
+    val notes: String? = null,
+    val episodesWatched: Int? = null,
     val addedAt: Long = System.currentTimeMillis()
 )

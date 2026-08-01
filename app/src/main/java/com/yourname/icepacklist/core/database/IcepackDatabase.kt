@@ -13,11 +13,23 @@ import com.yourname.icepacklist.core.database.dao.*
         HomeListCacheEntity::class, MovieDetailCacheEntity::class,
         TvDetailCacheEntity::class, PersonCacheEntity::class, SearchCacheEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(WatchlistConverters::class)
 abstract class IcepackDatabase : RoomDatabase() {
+    companion object {
+        val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN rating REAL")
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN startDate TEXT")
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN finishDate TEXT")
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN notes TEXT")
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN episodesWatched INTEGER")
+            }
+        }
+    }
+    
     abstract fun movieDao(): MovieDao
     abstract fun remoteKeyDao(): RemoteKeyDao
     abstract fun watchlistDao(): WatchlistDao

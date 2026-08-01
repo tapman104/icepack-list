@@ -28,23 +28,24 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.yourname.icepacklist.core.database.WatchlistEntity
-import com.yourname.icepacklist.core.database.WatchStatus
 import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
 import java.util.Locale
 
 private const val TMDB_POSTER_BASE = "https://image.tmdb.org/t/p/w185"
 
 private data class WatchlistTab(
     val title: String,
-    val status: WatchStatus
+    val status: WatchlistStatus
 )
 
 private val tabs = listOf(
-    WatchlistTab("Planning", WatchStatus.PLANNING),
-    WatchlistTab("Watching", WatchStatus.WATCHING),
-    WatchlistTab("Completed", WatchStatus.COMPLETED),
-    WatchlistTab("Paused", WatchStatus.PAUSED),
-    WatchlistTab("Dropped", WatchStatus.DROPPED)
+    WatchlistTab("Plan to Watch", WatchlistStatus.PLAN_TO_WATCH),
+    WatchlistTab("Watching", WatchlistStatus.WATCHING),
+    WatchlistTab("Completed", WatchlistStatus.COMPLETED),
+    WatchlistTab("Paused", WatchlistStatus.PAUSED),
+    WatchlistTab("Dropped", WatchlistStatus.DROPPED),
+    WatchlistTab("Rewatching", WatchlistStatus.REWATCHING)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +57,7 @@ fun WatchlistScreen(
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val currentTab = tabs[selectedTabIndex]
-    val itemsFlow = remember(currentTab.status) { viewModel.getByStatus(currentTab.status) }
+    val itemsFlow = remember(currentTab.status) { viewModel.getByStatus(currentTab.status.name) }
     val itemsList by itemsFlow.collectAsState(initial = emptyList())
 
     Scaffold(
@@ -134,7 +135,7 @@ fun WatchlistScreen(
                                     viewModel.remove(item.id, item.mediaType)
                                 },
                                 onUpdateStatus = { newStatus ->
-                                    viewModel.updateStatus(item.id, item.mediaType, newStatus)
+                                    viewModel.updateStatus(item.id, item.mediaType, newStatus.name)
                                 }
                             )
                         }
@@ -151,7 +152,7 @@ private fun WatchlistItemRow(
     item: WatchlistEntity,
     onClick: () -> Unit,
     onRemove: () -> Unit,
-    onUpdateStatus: (WatchStatus) -> Unit
+    onUpdateStatus: (WatchlistStatus) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -229,8 +230,8 @@ private fun WatchlistItemRow(
                     text = {
                         Text(
                             text = tab.title,
-                            color = if (item.status == tab.status) Color(0xFFE50914) else Color.White,
-                            fontWeight = if (item.status == tab.status) FontWeight.Bold else FontWeight.Normal
+                            color = if (item.status == tab.status.name) Color(0xFFE50914) else Color.White,
+                            fontWeight = if (item.status == tab.status.name) FontWeight.Bold else FontWeight.Normal
                         )
                     },
                     onClick = {

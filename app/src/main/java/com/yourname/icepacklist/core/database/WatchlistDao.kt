@@ -5,12 +5,16 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WatchlistDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: WatchlistEntity)
+
+    @Update
+    suspend fun update(item: WatchlistEntity)
 
     @Delete
     suspend fun delete(item: WatchlistEntity)
@@ -19,11 +23,14 @@ interface WatchlistDao {
     fun getAll(): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY addedAt DESC")
-    fun getByStatus(status: WatchStatus): Flow<List<WatchlistEntity>>
+    fun getByStatus(status: String): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist WHERE id = :id AND mediaType = :mediaType LIMIT 1")
     suspend fun getItem(id: Int, mediaType: MediaType): WatchlistEntity?
 
+    @Query("SELECT * FROM watchlist WHERE id = :id AND mediaType = :mediaType")
+    fun getEntry(id: Int, mediaType: MediaType): Flow<WatchlistEntity?>
+
     @Query("UPDATE watchlist SET status = :status WHERE id = :id AND mediaType = :mediaType")
-    suspend fun updateStatus(id: Int, mediaType: MediaType, status: WatchStatus)
+    suspend fun updateStatus(id: Int, mediaType: MediaType, status: String)
 }

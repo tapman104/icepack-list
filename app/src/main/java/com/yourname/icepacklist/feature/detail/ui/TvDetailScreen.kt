@@ -34,7 +34,9 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
-import com.yourname.icepacklist.core.database.WatchStatus
+import com.yourname.icepacklist.core.database.WatchlistEntity
+import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
 import com.yourname.icepacklist.core.util.formatDate
 import com.yourname.icepacklist.R
 import java.util.Locale
@@ -50,8 +52,7 @@ fun TvDetailScreen(
     onPersonClick: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isInWatchlist by viewModel.isInWatchlist.collectAsState()
-    val watchlistStatus by viewModel.watchlistStatus.collectAsState()
+    val entryState by viewModel.entryState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -96,11 +97,10 @@ fun TvDetailScreen(
                     credits = state.credits,
                     videos = state.videos,
                     similar = state.similar,
-                    isInWatchlist = isInWatchlist,
-                    watchlistStatus = watchlistStatus,
+                    entryState = entryState,
                     onAddToWatchlist = { viewModel.addToWatchlist(it) },
-                    onUpdateWatchlistStatus = { viewModel.updateWatchlistStatus(it) },
-                    onRemoveFromWatchlist = { viewModel.removeFromWatchlist() },
+                    onSaveEntry = { viewModel.saveEntry(it) },
+                    onRemoveEntry = { viewModel.removeEntry(it) },
                     onBack = onBack,
                     onTvShowClick = onTvShowClick,
                     onPersonClick = onPersonClick
@@ -116,17 +116,16 @@ private fun TvDetailContent(
     credits: CreditsResponse,
     videos: List<VideoResult>,
     similar: List<TvShow>,
-    isInWatchlist: Boolean,
-    watchlistStatus: WatchStatus?,
-    onAddToWatchlist: (WatchStatus) -> Unit,
-    onUpdateWatchlistStatus: (WatchStatus) -> Unit,
-    onRemoveFromWatchlist: () -> Unit,
+    entryState: WatchlistEntity?,
+    onAddToWatchlist: (String) -> Unit,
+    onSaveEntry: (WatchlistEntity) -> Unit,
+    onRemoveEntry: (WatchlistEntity) -> Unit,
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit,
     onPersonClick: (Int) -> Unit
 ) {
     val context = LocalContext.current
-    var watchlistMenuExpanded by remember { mutableStateOf(false) }
+    var showMyListSheet by remember { mutableStateOf(false) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
@@ -241,9 +240,12 @@ private fun TvDetailContent(
                 // Watchlist Button Row between genre chips and overview
                 Spacer(modifier = Modifier.height(16.dp))
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (!isInWatchlist) {
+                    if (entryState == null) {
                         Button(
-                            onClick = { watchlistMenuExpanded = true },
+                            onClick = {
+                                onAddToWatchlist(WatchlistStatus.PLAN_TO_WATCH.name)
+                                showMyListSheet = true
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.fillMaxWidth()
@@ -252,54 +254,12 @@ private fun TvDetailContent(
                         }
                     } else {
                         OutlinedButton(
-                            onClick = { watchlistMenuExpanded = true },
+                            onClick = { showMyListSheet = true },
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(stringResource(R.string.in_my_list), color = Color.White, fontWeight = FontWeight.Bold)
-                        }
-                    }
-
-                    DropdownMenu(
-                        expanded = watchlistMenuExpanded,
-                        onDismissRequest = { watchlistMenuExpanded = false },
-                        modifier = Modifier.background(Color(0xFF2C2C2E))
-                    ) {
-                        listOf(
-                            stringResource(R.string.status_planning) to WatchStatus.PLANNING,
-                            stringResource(R.string.status_watching) to WatchStatus.WATCHING,
-                            stringResource(R.string.status_completed) to WatchStatus.COMPLETED,
-                            stringResource(R.string.status_paused) to WatchStatus.PAUSED,
-                            stringResource(R.string.status_dropped) to WatchStatus.DROPPED
-                        ).forEach { (label, status) ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = label,
-                                        color = if (watchlistStatus == status) Color(0xFFE50914) else Color.White,
-                                        fontWeight = if (watchlistStatus == status) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                },
-                                onClick = {
-                                    watchlistMenuExpanded = false
-                                    if (isInWatchlist) {
-                                        onUpdateWatchlistStatus(status)
-                                    } else {
-                                        onAddToWatchlist(status)
-                                    }
-                                }
-                            )
-                        }
-                        if (isInWatchlist) {
-                            HorizontalDivider(color = Color(0xFF444444))
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.remove_from_list), color = Color(0xFFFF453A)) },
-                                onClick = {
-                                    watchlistMenuExpanded = false
-                                    onRemoveFromWatchlist()
-                                }
-                            )
                         }
                     }
                 }
@@ -435,6 +395,17 @@ private fun TvDetailContent(
                 }
             }
         }
+    }
+
+    if (showMyListSheet && entryState != null) {
+        MyListSheet(
+            entry = entryState,
+            mediaType = MediaType.TV,
+            totalEpisodes = tvShow.numberOfEpisodes,
+            onSave = onSaveEntry,
+            onRemove = { onRemoveEntry(entryState) },
+            onDismiss = { showMyListSheet = false }
+        )
     }
 }
 

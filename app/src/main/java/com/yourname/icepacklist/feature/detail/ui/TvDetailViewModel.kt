@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yourname.icepacklist.core.database.WatchlistEntity
 import com.yourname.icepacklist.core.database.MediaType
-import com.yourname.icepacklist.core.database.WatchStatus
+import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
 import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
@@ -52,7 +52,7 @@ class TvDetailViewModel @Inject constructor(
         .map { list -> list.any { it.id == tvId && it.mediaType == MediaType.TV } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val watchlistStatus: StateFlow<WatchStatus?> = watchlistRepository.getAll()
+    val watchlistStatus: StateFlow<String?> = watchlistRepository.getAll()
         .map { list -> list.firstOrNull { it.id == tvId && it.mediaType == MediaType.TV }?.status }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -103,7 +103,7 @@ class TvDetailViewModel @Inject constructor(
         }
     }
 
-    fun addToWatchlist(status: WatchStatus = WatchStatus.PLANNING) {
+    fun addToWatchlist(status: String = WatchlistStatus.PLAN_TO_WATCH.name) {
         val currentState = _uiState.value
         if (currentState is TvDetailUiState.Success) {
             val tvShow = currentState.tvShow
@@ -128,9 +128,24 @@ class TvDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateWatchlistStatus(status: WatchStatus) {
+    fun updateWatchlistStatus(status: String) {
         viewModelScope.launch {
             watchlistRepository.updateStatus(tvId, MediaType.TV, status)
+        }
+    }
+
+    val entryState: StateFlow<WatchlistEntity?> = watchlistRepository.getEntry(tvId, MediaType.TV)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun saveEntry(updated: WatchlistEntity) {
+        viewModelScope.launch {
+            watchlistRepository.update(updated)
+        }
+    }
+
+    fun removeEntry(entry: WatchlistEntity) {
+        viewModelScope.launch {
+            watchlistRepository.remove(entry.id, entry.mediaType)
         }
     }
 }
