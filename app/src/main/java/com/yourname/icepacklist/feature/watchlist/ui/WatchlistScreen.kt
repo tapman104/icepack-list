@@ -2,10 +2,14 @@ package com.yourname.icepacklist.feature.watchlist.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -74,27 +78,27 @@ fun WatchlistScreen(
                 .background(Color(0xFF0D0D0D))
                 .padding(padding)
         ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = Color(0xFF1C1C1E),
-                contentColor = Color.White,
-                indicator = { tabPositions ->
-                    if (selectedTabIndex < tabPositions.size) {
-                        TabRowDefaults.Indicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = Color(0xFFE50914)
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(tabs) { index, tab ->
+                    val isSelected = selectedTabIndex == index
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(if (isSelected) Color(0xFFE50914) else Color(0xFF1C1C1E))
+                            .clickable { selectedTabIndex = index }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = tab.title,
+                            color = if (isSelected) Color.White else Color(0xFF888888),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
-                }
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(tab.title) },
-                        selectedContentColor = Color(0xFFE50914),
-                        unselectedContentColor = Color(0xFF888888)
-                    )
                 }
             }
 
@@ -155,13 +159,14 @@ private fun WatchlistItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFF1C1C1E))
+                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = { menuExpanded = true }
                 )
-                .padding(8.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -181,7 +186,7 @@ private fun WatchlistItemRow(
             ) {
                 Text(
                     text = item.title,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -193,14 +198,14 @@ private fun WatchlistItemRow(
                 ).joinToString(" • ")
                 Text(
                     text = subText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF888888)
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                    color = Color(0xFFE50914)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 val ratingStr = String.format(Locale.US, "%.1f", item.voteAverage)
                 Text(
                     text = "★ $ratingStr",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = Color(0xFFFFC107)
                 )
             }

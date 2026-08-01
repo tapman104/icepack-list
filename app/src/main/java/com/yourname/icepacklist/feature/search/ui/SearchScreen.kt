@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +28,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.yourname.icepacklist.core.ui.MovieCard
 import com.yourname.icepacklist.core.ui.ShimmerGrid
 import com.yourname.icepacklist.feature.home.domain.Movie
 
@@ -88,7 +91,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = CircleShape,
         singleLine = true
     )
 }
@@ -96,22 +99,40 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 @Composable
 private fun EmptySearchState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "Type something to search",
-            color = Color(0xFF888888),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Outlined.Search,
+                contentDescription = null,
+                tint = Color(0xFF3A3A3C),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Type something to search",
+                color = Color(0xFF888888),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
 
 @Composable
 private fun NoResultsState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "No movies found",
-            color = Color(0xFF888888),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Outlined.Search,
+                contentDescription = null,
+                tint = Color(0xFF3A3A3C),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No movies found",
+                color = Color(0xFF888888),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }
 
@@ -119,9 +140,9 @@ private fun NoResultsState() {
 private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 120.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         items(
@@ -130,7 +151,7 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Uni
         ) { index ->
             val movie = movies[index]
             if (movie != null) {
-                MoviePosterCard(movie = movie, onClick = { onMovieClick(movie.id) })
+                MovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
             } else {
                 PosterPlaceholder()
             }
@@ -156,54 +177,12 @@ private fun MovieGrid(movies: LazyPagingItems<Movie>, onMovieClick: (Int) -> Uni
 }
 
 @Composable
-private fun MoviePosterCard(movie: Movie, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(2f / 3f),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(
-                model = movie.posterPath?.let { "$TMDB_IMAGE_BASE$it" },
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            // Gradient overlay with title
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color(0xCC000000))
-                        )
-                    )
-                    .padding(horizontal = 6.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = movie.title,
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun PosterPlaceholder() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(2f / 3f)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFF1C1C1E))
     )
 }

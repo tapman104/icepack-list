@@ -1,41 +1,64 @@
-﻿package com.yourname.icepacklist.core.ui
+package com.yourname.icepacklist.core.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.yourname.icepacklist.feature.home.domain.Movie
 
 @Composable
 fun MovieCard(movie: Movie, onClick: () -> Unit) {
-    Column(
-        modifier = Modifier.width(120.dp).clickable(onClick = onClick)
+    Card(
+        modifier = Modifier
+            .width(120.dp)
+            .aspectRatio(2f / 3f)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        AsyncImage(
-            model = movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" },
-            contentDescription = movie.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(8.dp))
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = movie.title,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" },
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            // Gradient overlay with title
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color(0xCC000000), Color(0xFF000000))
+                        )
+                    )
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = movie.title,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
+
