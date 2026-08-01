@@ -36,6 +36,7 @@ import com.yourname.icepacklist.feature.home.domain.VideoResult
 import com.yourname.icepacklist.core.database.WatchStatus
 import com.yourname.icepacklist.core.util.formatDate
 import com.yourname.icepacklist.R
+import java.util.Locale
 
 private const val TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w780"
 private const val TMDB_PROFILE_BASE = "https://image.tmdb.org/t/p/w185"
