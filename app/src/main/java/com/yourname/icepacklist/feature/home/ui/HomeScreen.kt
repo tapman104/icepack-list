@@ -132,7 +132,7 @@ fun HomeScreen(
                     ) {
                         when (selectedTab) {
                             0 -> {
-                                item {
+                                item(key = "all_trending_movies", contentType = "CategoryRow") {
                                     if (uiState.trendingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_trending_week),
@@ -143,7 +143,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_popular_movies", contentType = "CategoryRow") {
                                     if (uiState.popularMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_popular_movies),
@@ -154,7 +154,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_now_playing_movies", contentType = "CategoryRow") {
                                     if (uiState.nowPlayingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_now_playing),
@@ -165,7 +165,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_upcoming_movies", contentType = "CategoryRow") {
                                     if (uiState.upcomingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_upcoming),
@@ -176,7 +176,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_top_rated_movies", contentType = "CategoryRow") {
                                     if (uiState.topRatedMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_top_rated_movies),
@@ -187,7 +187,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_trending_tv", contentType = "CategoryRow") {
                                     if (uiState.trendingTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_trending_shows),
@@ -198,7 +198,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_popular_tv", contentType = "CategoryRow") {
                                     if (uiState.popularTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_popular_shows),
@@ -209,7 +209,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_top_rated_tv", contentType = "CategoryRow") {
                                     if (uiState.topRatedTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_top_rated_shows),
@@ -220,7 +220,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "all_airing_today_tv", contentType = "CategoryRow") {
                                     if (uiState.airingTodayTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_airing_today),
@@ -233,7 +233,7 @@ fun HomeScreen(
                                 }
                             }
                             1 -> {
-                                item {
+                                item(key = "movies_trending", contentType = "CategoryRow") {
                                     if (uiState.trendingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_trending_week),
@@ -244,7 +244,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "movies_popular", contentType = "CategoryRow") {
                                     if (uiState.popularMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_popular_movies),
@@ -255,7 +255,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "movies_now_playing", contentType = "CategoryRow") {
                                     if (uiState.nowPlayingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_now_playing),
@@ -266,7 +266,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "movies_upcoming", contentType = "CategoryRow") {
                                     if (uiState.upcomingMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_upcoming),
@@ -277,7 +277,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "movies_top_rated", contentType = "CategoryRow") {
                                     if (uiState.topRatedMovies.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_top_rated_movies),
@@ -290,7 +290,7 @@ fun HomeScreen(
                                 }
                             }
                             2 -> {
-                                item {
+                                item(key = "tv_trending", contentType = "CategoryRow") {
                                     if (uiState.trendingTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_trending_shows),
@@ -301,7 +301,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "tv_popular", contentType = "CategoryRow") {
                                     if (uiState.popularTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_popular_shows),
@@ -312,7 +312,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "tv_top_rated", contentType = "CategoryRow") {
                                     if (uiState.topRatedTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_top_rated_shows),
@@ -323,7 +323,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item {
+                                item(key = "tv_airing_today", contentType = "CategoryRow") {
                                     if (uiState.airingTodayTvShows.isNotEmpty()) {
                                         CategoryRow(
                                             title = stringResource(R.string.section_airing_today),
