@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +41,11 @@ fun FullCastScreen(
         }
     }
 
+    if (credits == null) {
+        LaunchedEffect(Unit) { onBack() }
+        return
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,12 +60,6 @@ fun FullCastScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        if (credits == null) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("No data available", color = MaterialTheme.colorScheme.onSurface)
-            }
-            return@Scaffold
-        }
         
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
