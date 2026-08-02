@@ -89,8 +89,8 @@ fun IcepackScaffold(
 
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
@@ -102,7 +102,7 @@ fun IcepackScaffold(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    Color(0xCC000000)
+                                    Color(0xEE000000)
                                 )
                             )
                         )
