@@ -9,6 +9,8 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,30 +34,50 @@ fun HomeScreen(
     onMovieClick: (Int) -> Unit = {},
     onTvShowClick: (Int) -> Unit = {},
     onViewCategory: (String) -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onScrollUp: (Boolean) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(stringResource(R.string.tab_all), stringResource(R.string.tab_movies), stringResource(R.string.tab_tv_shows))
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val listState = rememberLazyListState()
+
+    val isScrollingUp by remember {
+        derivedStateOf { listState.firstVisibleItemIndex == 0 || !listState.canScrollBackward }
+    }
+    
+    LaunchedEffect(isScrollingUp) {
+        onScrollUp(isScrollingUp)
+    }
+
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0D0D0D))
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.home_title), color = Color.White) },
-                actions = {
-                    IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
-                    }
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0D0D0D)
+            Box(modifier = Modifier.height(52.dp)) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.home_title), color = Color.White) },
+                    actions = {
+                        IconButton(onClick = { viewModel.refresh() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
+                        }
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    windowInsets = WindowInsets(0.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
-        },
-        modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -108,6 +130,7 @@ fun HomeScreen(
                     }
                 } else {
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {

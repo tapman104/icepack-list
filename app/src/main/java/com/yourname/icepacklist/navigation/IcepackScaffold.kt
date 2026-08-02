@@ -12,9 +12,23 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -51,6 +65,7 @@ private val bottomNavItems = listOf(
 @Composable
 fun IcepackScaffold(
     navController: NavController,
+    isScrollingUp: Boolean = true,
     modifier: Modifier = Modifier,
     content: @Composable (Modifier) -> Unit,
 ) {
@@ -61,15 +76,42 @@ fun IcepackScaffold(
         currentDestination?.hierarchy?.any { it.route == item.route } == true
     }
 
+    var bottomBarVisible by remember { mutableStateOf(true) }
+
+    LaunchedEffect(currentDestination?.route, isScrollingUp) {
+        if (currentDestination?.route == Routes.Home.route) {
+            bottomBarVisible = isScrollingUp
+        } else {
+            bottomBarVisible = true
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         containerColor = Color(0xFF0D0D0D),
+        contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = Color(0xFF1C1C1E),
-                    contentColor = Color(0xFFE50914),
+                AnimatedVisibility(
+                    visible = bottomBarVisible,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
                 ) {
+                    NavigationBar(
+                        containerColor = Color.Transparent,
+                        contentColor = Color(0xFFE50914),
+                        modifier = Modifier
+                            .height(56.dp)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color(0xFF1C1C1E).copy(alpha = 0.95f)
+                                    )
+                                )
+                            )
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                    ) {
                     bottomNavItems.forEach { item ->
                         val isSelected =
                             currentDestination?.hierarchy?.any { it.route == item.route } == true
@@ -101,6 +143,7 @@ fun IcepackScaffold(
                                 indicatorColor = Color(0xFF2C2C2E),
                             )
                         )
+                    }
                     }
                 }
             }

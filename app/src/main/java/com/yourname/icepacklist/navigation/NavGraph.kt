@@ -21,6 +21,9 @@ import javax.inject.Inject
 import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @HiltViewModel
@@ -36,9 +39,11 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
     val apiKey by navViewModel.apiKey.collectAsState(initial = null)
     
     val startDestination = if (apiKey.isNullOrBlank()) Routes.Settings.route else Routes.Home.route
+    var isScrollingUp by remember { mutableStateOf(true) }
 
     IcepackScaffold(
         navController = navController,
+        isScrollingUp = isScrollingUp,
         modifier = modifier
     ) { innerModifier ->
         NavHost(
@@ -59,6 +64,9 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     },
                     onSettingsClick = {
                         navController.navigate(Routes.Settings.route)
+                    },
+                    onScrollUp = { scrollingUp ->
+                        isScrollingUp = scrollingUp
                     }
                 )
             }

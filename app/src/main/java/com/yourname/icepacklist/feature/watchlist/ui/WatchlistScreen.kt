@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,19 +60,26 @@ fun WatchlistScreen(
     val currentTab = tabs[selectedTabIndex]
     val itemsFlow = remember(currentTab.status) { viewModel.getByStatus(currentTab.status.name) }
     val itemsList by itemsFlow.collectAsState(initial = emptyList())
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My List", color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF0D0D0D)
-                )
-            )
-        },
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0D0D0D))
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            Box(modifier = Modifier.height(52.dp)) {
+                TopAppBar(
+                    title = { Text("My List", color = Color.White) },
+                    scrollBehavior = scrollBehavior,
+                    windowInsets = WindowInsets(0.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
+                )
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
