@@ -3,6 +3,7 @@ package com.yourname.icepacklist.core.database
 import androidx.room.Entity
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.squareup.moshi.JsonClass
 
 enum class MediaType { MOVIE, TV }
 
@@ -13,6 +14,7 @@ class WatchlistConverters {
 
 @Entity(tableName = "watchlist", primaryKeys = ["id", "mediaType"])
 @TypeConverters(WatchlistConverters::class)
+@JsonClass(generateAdapter = true)
 data class WatchlistEntity(
     val id: Int,
     val mediaType: MediaType,

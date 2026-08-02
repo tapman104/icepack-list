@@ -15,6 +15,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SettingsScreen(
@@ -31,13 +36,47 @@ fun SettingsScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
+    val context = LocalContext.current
+    val backupState by viewModel.backupState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(backupState) {
+        when (val state = backupState) {
+            is BackupState.Success -> {
+                snackbarHostState.showSnackbar(state.message)
+                viewModel.resetBackupState()
+            }
+            is BackupState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+                viewModel.resetBackupState()
+            }
+            else -> {}
+        }
+    }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { viewModel.exportBackup(it, context.contentResolver) }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importBackup(it, context.contentResolver) }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
             text = "TMDB API Key",
             style = MaterialTheme.typography.titleLarge
         )
@@ -103,5 +142,48 @@ fun SettingsScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Divider()
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Data & Backup",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = "Export your watchlist to a JSON file, or import an existing backup. Importing will merge the data.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = { 
+                    val dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    exportLauncher.launch("icepack_watchlist_backup_$dateStr.json") 
+                },
+                modifier = Modifier.weight(1f),
+                enabled = backupState != BackupState.Loading
+            ) {
+                Text("Export Backup")
+            }
+
+            OutlinedButton(
+                onClick = { importLauncher.launch(arrayOf("application/json")) },
+                modifier = Modifier.weight(1f),
+                enabled = backupState != BackupState.Loading
+            ) {
+                Text("Import Backup")
+            }
+        }
+        
+        if (backupState == BackupState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
     }
+}
 }
