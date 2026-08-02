@@ -51,6 +51,7 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .statusBarsPadding()
     ) {
         SearchBar(
             query = searchQuery,
