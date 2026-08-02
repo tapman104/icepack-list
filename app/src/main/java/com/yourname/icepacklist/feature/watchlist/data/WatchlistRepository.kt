@@ -62,7 +62,9 @@ class WatchlistRepository @Inject constructor(private val dao: WatchlistDao) {
                 
                 val title = itemObj.optString("title", "")
                 val voteAverage = itemObj.optDouble("voteAverage", 0.0)
-                val posterPath = if (itemObj.isNull("posterPath")) null else itemObj.optString("posterPath")
+                val posterPath = itemObj.optString("posterPath").ifEmpty {
+                    itemObj.optString("poster_path")
+                }.ifEmpty { null }
                 val year = if (itemObj.isNull("year")) null else itemObj.optString("year")
                 val status = itemObj.optString("status", "PLAN_TO_WATCH")
                 val rating = if (itemObj.isNull("rating")) null else itemObj.optDouble("rating").toFloat()

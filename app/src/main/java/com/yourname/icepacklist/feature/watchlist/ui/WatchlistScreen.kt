@@ -206,7 +206,10 @@ private fun WatchlistItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = item.posterPath?.let { "$TMDB_POSTER_BASE$it" },
+                model = item.posterPath?.let {
+                    val path = if (it.startsWith("/")) it else "/$it"
+                    "$TMDB_POSTER_BASE$path"
+                },
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
