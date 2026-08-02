@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
 import com.yourname.icepacklist.navigation.IcepackNavGraph
+import com.yourname.icepacklist.ui.theme.IcepackTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 @AndroidEntryPoint
@@ -17,7 +18,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            IcepackNavGraph(modifier = Modifier.fillMaxSize())
+            IcepackTheme {
+                IcepackNavGraph(modifier = Modifier.fillMaxSize())
+            }
         }
     }
 }

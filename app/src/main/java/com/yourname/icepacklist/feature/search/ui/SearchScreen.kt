@@ -50,7 +50,6 @@ fun SearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
             .padding(paddingValues)
     ) {
         SearchBar(
@@ -85,16 +84,16 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        placeholder = { Text("Search...", color = Color.Gray) },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+        placeholder = { Text("Search...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFF1C1C1E),
-            unfocusedContainerColor = Color(0xFF1C1C1E),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Color(0xFFE50914),
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
         ),
         shape = CircleShape,
         singleLine = true
@@ -114,7 +113,7 @@ private fun EmptySearchState() {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Type something to search",
-                color = Color(0xFF888888),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -134,7 +133,7 @@ private fun NoResultsState() {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "No results found",
-                color = Color(0xFF888888),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -210,7 +209,7 @@ private fun SearchResultCard(
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF1C1C1E))
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             if (item.displayPoster.isNotBlank()) {
                 AsyncImage(
@@ -251,7 +250,7 @@ private fun SearchResultCard(
 
         Text(
             text = item.displayTitle,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -261,7 +260,7 @@ private fun SearchResultCard(
         if (item.displayDate.isNotBlank()) {
             Text(
                 text = item.displayDate.take(4),
-                color = Color(0xFF888888),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1
             )
@@ -276,7 +275,7 @@ private fun PosterPlaceholder() {
             .fillMaxWidth()
             .aspectRatio(2f / 3f)
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF1C1C1E))
+            .background(MaterialTheme.colorScheme.surface)
     )
 }
 
@@ -289,12 +288,12 @@ private fun FullScreenError(message: String, onRetry: () -> Unit) {
         ) {
             Text(
                 text = "⚠\uFE0F Failed to load",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = message,
-                color = Color(0xFF888888),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
             if (message.contains("401") || message.contains("403")) {

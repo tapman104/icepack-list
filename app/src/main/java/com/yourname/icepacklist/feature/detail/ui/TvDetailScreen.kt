@@ -57,7 +57,7 @@ fun TvDetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         when (val state = uiState) {
             is TvDetailUiState.Loading -> {
@@ -73,13 +73,13 @@ fun TvDetailScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.error_loading_details),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = state.message,
-                        color = Color(0xFF888888),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -149,7 +149,7 @@ private fun TvDetailContent(
                         .height(100.dp)
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color(0xFF0D0D0D))
+                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background)
                             )
                         )
                 )
@@ -160,7 +160,7 @@ private fun TvDetailContent(
                         .align(Alignment.TopStart)
                         .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }
@@ -182,7 +182,7 @@ private fun TvDetailContent(
                     Column {
                         Text(
                             text = tvShow.name,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 34.sp
@@ -224,11 +224,11 @@ private fun TvDetailContent(
                         tvShow.genres.take(3).forEach { genre ->
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
-                                color = Color(0xFF1C1C1E),
+                                color = MaterialTheme.colorScheme.surface,
                             ) {
                                 Text(
                                     text = genre.name,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 12.sp,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
@@ -267,7 +267,7 @@ private fun TvDetailContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = tvShow.overview,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     lineHeight = 22.sp
                 )
@@ -277,7 +277,7 @@ private fun TvDetailContent(
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = stringResource(R.string.cast),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -295,7 +295,7 @@ private fun TvDetailContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.details),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -352,7 +352,7 @@ private fun TvDetailContent(
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = stringResource(R.string.you_may_also_like),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -389,13 +389,13 @@ private fun DetailRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            color = Color(0xFF888888),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.width(120.dp)
         )
         Text(
             text = value,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -424,14 +424,14 @@ private fun CastItemCard(person: com.yourname.icepacklist.feature.home.domain.Ca
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = person.name,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
             text = person.character ?: "",
-            color = Color(0xFF888888),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

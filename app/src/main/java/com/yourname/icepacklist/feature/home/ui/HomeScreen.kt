@@ -56,17 +56,16 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets(0.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.home_title), color = Color.White) },
+                title = { Text(stringResource(R.string.home_title), color = MaterialTheme.colorScheme.onSurface) },
                 actions = {
                     IconButton(onClick = { viewModel.refresh() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = MaterialTheme.colorScheme.onSurface)
                     }
                     IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
+                        Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -80,7 +79,6 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0D0D0D))
                 .padding(padding)
         ) {
             Row(
@@ -94,13 +92,13 @@ fun HomeScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
-                            .background(if (isSelected) Color(0xFFE50914) else Color(0xFF1C1C1E))
+                            .background(if (isSelected) Color(0xFFE50914) else MaterialTheme.colorScheme.surface)
                             .clickable { selectedTab = index }
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = title,
-                            color = if (isSelected) Color.White else Color(0xFF888888),
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -120,7 +118,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = uiState.error ?: stringResource(R.string.unknown_error), color = Color.White)
+                        Text(text = uiState.error ?: stringResource(R.string.unknown_error), color = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.refresh() }) {
                             Text(stringResource(R.string.retry))

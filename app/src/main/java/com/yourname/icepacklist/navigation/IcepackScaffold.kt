@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -88,7 +89,7 @@ fun IcepackScaffold(
 
     Scaffold(
         modifier = modifier,
-        containerColor = Color(0xFF0D0D0D),
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         bottomBar = {
             if (showBottomBar) {
@@ -105,7 +106,7 @@ fun IcepackScaffold(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(
                                         Color.Transparent,
-                                        Color(0xFF1C1C1E).copy(alpha = 0.95f)
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                                     )
                                 )
                             )
@@ -139,7 +140,7 @@ fun IcepackScaffold(
                                 selectedTextColor = Color(0xFFE50914),
                                 unselectedIconColor = Color(0xFF888888),
                                 unselectedTextColor = Color(0xFF888888),
-                                indicatorColor = Color(0xFF2C2C2E),
+                                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         )
                     }

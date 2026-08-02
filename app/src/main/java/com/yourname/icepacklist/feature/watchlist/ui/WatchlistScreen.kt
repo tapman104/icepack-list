@@ -72,18 +72,17 @@ fun WatchlistScreen(
         contentWindowInsets = WindowInsets(0.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0D0D))
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("My List", color = Color.White) },
+                title = { Text("My List", color = MaterialTheme.colorScheme.onSurface) },
                 actions = {
                     val context = LocalContext.current
                     IconButton(onClick = { Toast.makeText(context, "Import feature coming soon", Toast.LENGTH_SHORT).show() }) {
-                        Icon(Icons.Default.FileDownload, contentDescription = "Import", tint = Color.White)
+                        Icon(Icons.Default.FileDownload, contentDescription = "Import", tint = MaterialTheme.colorScheme.onSurface)
                     }
                     IconButton(onClick = { Toast.makeText(context, "Export feature coming soon", Toast.LENGTH_SHORT).show() }) {
-                        Icon(Icons.Default.FileUpload, contentDescription = "Export", tint = Color.White)
+                        Icon(Icons.Default.FileUpload, contentDescription = "Export", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
                 scrollBehavior = scrollBehavior,
@@ -97,7 +96,6 @@ fun WatchlistScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF0D0D0D))
                 .padding(padding)
         ) {
             LazyRow(
@@ -123,7 +121,7 @@ fun WatchlistScreen(
                 if (itemsList.isEmpty()) {
                     Text(
                         text = "Nothing here yet",
-                        color = Color(0xFF888888),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -167,13 +165,13 @@ private fun WatchlistTabItem(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) Color(0xFFE50914) else Color(0xFF1C1C1E))
+            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
             text = tab.title,
-            color = if (isSelected) Color.White else Color(0xFF888888),
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
         )
     }
@@ -196,7 +194,7 @@ private fun WatchlistItemRow(
                 .clip(RoundedCornerShape(16.dp))
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(Color(0xFF1C1C1E), Color(0xFF28282B))
+                        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant)
                     )
                 )
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
@@ -225,7 +223,7 @@ private fun WatchlistItemRow(
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -269,7 +267,7 @@ private fun WatchlistItemRow(
                     Text(
                         text = ratingStr,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -290,14 +288,14 @@ private fun WatchlistItemRow(
         DropdownMenu(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
-            modifier = Modifier.background(Color(0xFF2C2C2E))
+            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             tabs.forEach { tab ->
                 DropdownMenuItem(
                     text = {
                         Text(
                             text = tab.title,
-                            color = if (item.status == tab.status.name) Color(0xFFE50914) else Color.White,
+                            color = if (item.status == tab.status.name) Color(0xFFE50914) else MaterialTheme.colorScheme.onSurface,
                             fontWeight = if (item.status == tab.status.name) FontWeight.Bold else FontWeight.Normal
                         )
                     },
