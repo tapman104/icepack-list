@@ -12,6 +12,9 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
+import com.yourname.icepacklist.feature.home.domain.WatchProvider
+import com.yourname.icepacklist.feature.home.domain.Keyword
+import com.yourname.icepacklist.feature.home.domain.Review
 import com.yourname.icepacklist.feature.watchlist.data.WatchlistRepository
 import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +36,10 @@ sealed interface DetailUiState {
         val movie: MovieDetail,
         val credits: CreditsResponse,
         val videos: List<VideoResult>,
-        val similar: List<Movie>
+        val similar: List<Movie>,
+        val watchProviders: List<WatchProvider>,
+        val keywords: List<Keyword>,
+        val reviews: List<Review>
     ) : DetailUiState
 }
 
@@ -68,11 +74,17 @@ class DetailViewModel @Inject constructor(
             try {
                 val movieDef = async { apiService.getMovieDetails(movieId) }
                 val similarDef = async { apiService.getSimilarMovies(movieId) }
+                val providersDef = async { apiService.getMovieWatchProviders(movieId) }
+                val keywordsDef = async { apiService.getMovieKeywords(movieId) }
+                val reviewsDef = async { apiService.getMovieReviews(movieId) }
 
-                awaitAll(movieDef, similarDef)
+                awaitAll(movieDef, similarDef, providersDef, keywordsDef, reviewsDef)
 
                 val movie = movieDef.await()
                 val similarResponse = similarDef.await()
+                val providersResponse = providersDef.await()
+                val keywordsResponse = keywordsDef.await()
+                val reviewsResponse = reviewsDef.await()
                 
                 val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
                 val videosResponse = movie.videoResponse
@@ -90,11 +102,18 @@ class DetailViewModel @Inject constructor(
                     similar = similarMovies
                 )
 
+                val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
+                val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
+                val reviews = reviewsResponse.results
+
                 _uiState.value = DetailUiState.Success(
                     movie = updatedMovie,
                     credits = credits,
                     videos = videoResults,
-                    similar = similarMovies
+                    similar = similarMovies,
+                    watchProviders = inProviders,
+                    keywords = keywords,
+                    reviews = reviews
                 )
             } catch (e: Exception) {
                 _uiState.value = DetailUiState.Error(e.localizedMessage ?: "Unknown error occurred")

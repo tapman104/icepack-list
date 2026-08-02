@@ -11,6 +11,9 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
+import com.yourname.icepacklist.feature.home.domain.WatchProvider
+import com.yourname.icepacklist.feature.home.domain.Keyword
+import com.yourname.icepacklist.feature.home.domain.Review
 import com.yourname.icepacklist.feature.watchlist.data.WatchlistRepository
 import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +35,10 @@ sealed interface TvDetailUiState {
         val tvShow: TvShowDetail,
         val credits: CreditsResponse,
         val videos: List<VideoResult>,
-        val similar: List<TvShow>
+        val similar: List<TvShow>,
+        val watchProviders: List<WatchProvider>,
+        val keywords: List<Keyword>,
+        val reviews: List<Review>
     ) : TvDetailUiState
 }
 
@@ -66,11 +72,17 @@ class TvDetailViewModel @Inject constructor(
             try {
                 val tvDef = async { apiService.getTvShowDetails(tvId) }
                 val similarDef = async { apiService.getSimilarTvShows(tvId) }
+                val providersDef = async { apiService.getTvWatchProviders(tvId) }
+                val keywordsDef = async { apiService.getTvKeywords(tvId) }
+                val reviewsDef = async { apiService.getTvReviews(tvId) }
 
-                awaitAll(tvDef, similarDef)
+                awaitAll(tvDef, similarDef, providersDef, keywordsDef, reviewsDef)
 
                 val tvShow = tvDef.await()
                 val similarResponse = similarDef.await()
+                val providersResponse = providersDef.await()
+                val keywordsResponse = keywordsDef.await()
+                val reviewsResponse = reviewsDef.await()
                 
                 val credits = tvShow.creditsResponse ?: CreditsResponse(id = tvId)
                 val videosResponse = tvShow.videoResponse
@@ -91,11 +103,18 @@ class TvDetailViewModel @Inject constructor(
                     similar = similarShows
                 )
 
+                val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
+                val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
+                val reviews = reviewsResponse.results
+
                 _uiState.value = TvDetailUiState.Success(
                     tvShow = updatedTvShow,
                     credits = credits,
                     videos = videoResults,
-                    similar = similarShows
+                    similar = similarShows,
+                    watchProviders = inProviders,
+                    keywords = keywords,
+                    reviews = reviews
                 )
             } catch (e: Exception) {
                 _uiState.value = TvDetailUiState.Error(e.localizedMessage ?: "Unknown error occurred")

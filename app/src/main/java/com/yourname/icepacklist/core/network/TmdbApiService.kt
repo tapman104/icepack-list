@@ -4,6 +4,9 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.GenreListResponse
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
+import com.yourname.icepacklist.feature.home.domain.KeywordsResponse
+import com.yourname.icepacklist.feature.home.domain.WatchProvidersResponse
+import com.yourname.icepacklist.feature.home.domain.ReviewsResponse
 import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 import com.yourname.icepacklist.feature.home.domain.Person
 import com.yourname.icepacklist.feature.home.domain.TmdbResponse
@@ -68,6 +71,21 @@ interface TmdbApiService {
         @Path("movie_id") movieId: Int
     ): VideoResponse
 
+    @GET("movie/{movie_id}/watch/providers")
+    suspend fun getMovieWatchProviders(
+        @Path("movie_id") movieId: Int
+    ): WatchProvidersResponse
+
+    @GET("movie/{movie_id}/keywords")
+    suspend fun getMovieKeywords(
+        @Path("movie_id") movieId: Int
+    ): KeywordsResponse
+
+    @GET("movie/{movie_id}/reviews")
+    suspend fun getMovieReviews(
+        @Path("movie_id") movieId: Int
+    ): ReviewsResponse
+
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("query") query: String,
@@ -118,6 +136,21 @@ interface TmdbApiService {
     suspend fun getTvShowVideos(
         @Path("tv_id") tvId: Int
     ): VideoResponse
+
+    @GET("tv/{tv_id}/watch/providers")
+    suspend fun getTvWatchProviders(
+        @Path("tv_id") tvId: Int
+    ): WatchProvidersResponse
+
+    @GET("tv/{tv_id}/keywords")
+    suspend fun getTvKeywords(
+        @Path("tv_id") tvId: Int
+    ): KeywordsResponse
+
+    @GET("tv/{tv_id}/reviews")
+    suspend fun getTvReviews(
+        @Path("tv_id") tvId: Int
+    ): ReviewsResponse
 
     @GET("search/tv")
     suspend fun searchTvShows(

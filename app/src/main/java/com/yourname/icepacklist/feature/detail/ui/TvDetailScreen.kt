@@ -34,6 +34,11 @@ import com.yourname.icepacklist.feature.home.domain.CreditsResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResult
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import com.yourname.icepacklist.feature.home.domain.WatchProvider
+import com.yourname.icepacklist.feature.home.domain.Keyword
+import com.yourname.icepacklist.feature.home.domain.Review
 import com.yourname.icepacklist.core.database.WatchlistEntity
 import com.yourname.icepacklist.core.database.MediaType
 import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
@@ -97,6 +102,9 @@ fun TvDetailScreen(
                     credits = state.credits,
                     videos = state.videos,
                     similar = state.similar,
+                    watchProviders = state.watchProviders,
+                    keywords = state.keywords,
+                    reviews = state.reviews,
                     entryState = entryState,
                     onAddToWatchlist = { viewModel.addToWatchlist(it) },
                     onSaveEntry = { viewModel.saveEntry(it) },
@@ -111,11 +119,15 @@ fun TvDetailScreen(
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun TvDetailContent(
     tvShow: TvShowDetail,
     credits: CreditsResponse,
     videos: List<VideoResult>,
     similar: List<TvShow>,
+    watchProviders: List<WatchProvider>,
+    keywords: List<Keyword>,
+    reviews: List<Review>,
     entryState: WatchlistEntity?,
     onAddToWatchlist: (String) -> Unit,
     onSaveEntry: (WatchlistEntity) -> Unit,
@@ -291,6 +303,28 @@ private fun TvDetailContent(
                     }
                 }
 
+                // Crew Section
+                val crewJobs = listOf("Director", "Writer", "Screenplay", "Creator", "Executive Producer")
+                val crewList = credits.crew.filter { it.job in crewJobs }.take(6)
+                if (crewList.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Crew",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(crewList, key = { it.id.toString() + it.job }) { person ->
+                            CrewItemCard(
+                                person = person,
+                                onClick = { onPersonClick(person.id) }
+                            )
+                        }
+                    }
+                }
+
+
                 // Details Section
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -328,6 +362,38 @@ private fun TvDetailContent(
                     DetailRow(label = "Created By", value = createdBy)
                 }
 
+                // Keywords Section
+                if (keywords.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Keywords",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        keywords.take(8).forEach { keyword ->
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                            ) {
+                                Text(
+                                    text = keyword.name,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+
                 // Trailer Section
                 if (videos.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
@@ -363,6 +429,23 @@ private fun TvDetailContent(
                         }
                     }
                 }
+                // Reviews Section
+                if (reviews.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Reviews",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        reviews.take(3).forEach { review ->
+                            ReviewItem(review = review)
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -439,3 +522,116 @@ private fun CastItemCard(person: com.yourname.icepacklist.feature.home.domain.Ca
     }
 }
 
+
+
+@Composable
+private fun CrewItemCard(person: com.yourname.icepacklist.feature.home.domain.Crew, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(72.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            model = person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" },
+            contentDescription = person.name,
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(com.yourname.icepacklist.R.drawable.ic_image_placeholder),
+            error = painterResource(com.yourname.icepacklist.R.drawable.ic_image_placeholder),
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = person.name,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = person.job ?: "",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun ReviewItem(review: com.yourname.icepacklist.feature.home.domain.Review) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val avatarPath = review.authorDetails?.avatarPath
+            if (avatarPath != null) {
+                val imageUrl = if (avatarPath.startsWith("/http")) avatarPath.substring(1) else "https://image.tmdb.org/t/p/w185$avatarPath"
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Avatar",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = review.author.take(1).uppercase(),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(
+                    text = review.author,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                review.authorDetails?.rating?.let { rating ->
+                    Text(
+                        text = "★ $rating",
+                        color = Color(0xFFFFC107),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = review.content,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = if (expanded) Int.MAX_VALUE else 3,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (!expanded && review.content.length > 150) {
+            Text(
+                text = "Read More",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clickable { expanded = true }
+            )
+        }
+    }
+}
