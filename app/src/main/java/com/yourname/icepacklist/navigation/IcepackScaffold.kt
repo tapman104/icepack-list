@@ -96,6 +96,7 @@ fun IcepackScaffold(
                 NavigationBar(
                     containerColor = Color.Transparent,
                     contentColor = Color(0xFFE50914),
+                    tonalElevation = 0.dp,
                     modifier = Modifier
                         .background(
                             brush = Brush.verticalGradient(
@@ -135,7 +136,7 @@ fun IcepackScaffold(
                                 selectedTextColor = Color(0xFFE50914),
                                 unselectedIconColor = Color(0xFF888888),
                                 unselectedTextColor = Color(0xFF888888),
-                                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                                indicatorColor = Color.Transparent,
                             )
                         )
                     }
