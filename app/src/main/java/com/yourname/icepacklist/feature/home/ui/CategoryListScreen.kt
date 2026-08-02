@@ -89,7 +89,17 @@ fun CategoryListScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(items.itemCount) { index ->
+                        items(
+                            count = items.itemCount,
+                            key = { index -> 
+                                val item = items.peek(index)
+                                if (item is Movie) "movie_${item.id}" else if (item is TvShow) "tv_${item.id}" else index
+                            },
+                            contentType = { index ->
+                                val item = items.peek(index)
+                                if (item is Movie) "movie" else if (item is TvShow) "tv" else null
+                            }
+                        ) { index ->
                             val item = items[index]
                             if (item is Movie) {
                                 MovieCard(movie = item, onClick = { onMovieClick(item.id) })

@@ -119,6 +119,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_trending_week),
                                             items = uiState.trendingMovies,
                                             onViewAll = { onViewCategory("trending_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -129,6 +130,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_popular_movies),
                                             items = uiState.popularMovies,
                                             onViewAll = { onViewCategory("popular_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -139,6 +141,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_now_playing),
                                             items = uiState.nowPlayingMovies,
                                             onViewAll = { onViewCategory("now_playing") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -149,6 +152,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_upcoming),
                                             items = uiState.upcomingMovies,
                                             onViewAll = { onViewCategory("upcoming") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -159,6 +163,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_top_rated_movies),
                                             items = uiState.topRatedMovies,
                                             onViewAll = { onViewCategory("top_rated_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -169,6 +174,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_trending_shows),
                                             items = uiState.trendingTvShows,
                                             onViewAll = { onViewCategory("trending_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -179,6 +185,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_popular_shows),
                                             items = uiState.popularTvShows,
                                             onViewAll = { onViewCategory("popular_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -189,6 +196,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_top_rated_shows),
                                             items = uiState.topRatedTvShows,
                                             onViewAll = { onViewCategory("top_rated_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -199,6 +207,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_airing_today),
                                             items = uiState.airingTodayTvShows,
                                             onViewAll = { onViewCategory("airing_today") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -211,6 +220,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_trending_week),
                                             items = uiState.trendingMovies,
                                             onViewAll = { onViewCategory("trending_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -221,6 +231,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_popular_movies),
                                             items = uiState.popularMovies,
                                             onViewAll = { onViewCategory("popular_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -231,6 +242,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_now_playing),
                                             items = uiState.nowPlayingMovies,
                                             onViewAll = { onViewCategory("now_playing") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -241,6 +253,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_upcoming),
                                             items = uiState.upcomingMovies,
                                             onViewAll = { onViewCategory("upcoming") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -251,6 +264,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_top_rated_movies),
                                             items = uiState.topRatedMovies,
                                             onViewAll = { onViewCategory("top_rated_movies") },
+                                            key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
                                         )
                                     }
@@ -263,6 +277,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_trending_shows),
                                             items = uiState.trendingTvShows,
                                             onViewAll = { onViewCategory("trending_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -273,6 +288,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_popular_shows),
                                             items = uiState.popularTvShows,
                                             onViewAll = { onViewCategory("popular_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -283,6 +299,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_top_rated_shows),
                                             items = uiState.topRatedTvShows,
                                             onViewAll = { onViewCategory("top_rated_tv") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
@@ -293,6 +310,7 @@ fun HomeScreen(
                                             title = stringResource(R.string.section_airing_today),
                                             items = uiState.airingTodayTvShows,
                                             onViewAll = { onViewCategory("airing_today") },
+                                            key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }

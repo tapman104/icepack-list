@@ -17,7 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.yourname.icepacklist.feature.home.domain.Movie
 
 @Composable
@@ -32,7 +34,10 @@ fun MovieCard(movie: Movie, onClick: () -> Unit) {
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AsyncImage(
-                model = movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" },
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" })
+                    .crossfade(true)
+                    .build(),
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

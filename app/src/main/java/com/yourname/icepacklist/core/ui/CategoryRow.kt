@@ -21,6 +21,7 @@ fun <T> CategoryRow(
     title: String,
     items: List<T>,
     onViewAll: () -> Unit,
+    key: ((item: T) -> Any)? = null,
     itemContent: @Composable (T) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
@@ -67,7 +68,7 @@ fun <T> CategoryRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(items) { item ->
+            items(items, key = key) { item ->
                 itemContent(item)
             }
         }

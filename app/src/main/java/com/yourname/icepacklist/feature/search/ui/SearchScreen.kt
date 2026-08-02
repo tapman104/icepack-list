@@ -27,7 +27,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.yourname.icepacklist.core.ui.ShimmerGrid
 import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 
@@ -153,7 +155,8 @@ private fun SearchResultGrid(
     ) {
         items(
             count = results.itemCount,
-            key = { index -> results.peek(index)?.id ?: index }
+            key = { index -> results.peek(index)?.id ?: index },
+            contentType = { index -> results.peek(index)?.mediaType }
         ) { index ->
             val item = results[index]
             if (item != null) {
@@ -209,7 +212,10 @@ private fun SearchResultCard(
         ) {
             if (item.displayPoster.isNotBlank()) {
                 AsyncImage(
-                    model = TMDB_IMAGE_BASE + item.displayPoster,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(TMDB_IMAGE_BASE + item.displayPoster)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = item.displayTitle,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
