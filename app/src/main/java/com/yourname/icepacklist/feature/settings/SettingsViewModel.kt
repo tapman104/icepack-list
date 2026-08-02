@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 import kotlinx.coroutines.flow.first
+import com.yourname.icepacklist.feature.watchlist.data.ImportState
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -53,6 +54,9 @@ class SettingsViewModel @Inject constructor(
     private val _isImporting = MutableStateFlow(false)
     val isImporting = _isImporting.asStateFlow()
 
+    private val _importProgress = MutableStateFlow(0f)
+    val importProgress = _importProgress.asStateFlow()
+
     fun exportBackup(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
@@ -80,6 +84,7 @@ class SettingsViewModel @Inject constructor(
             }
             
             _isImporting.value = true
+            _importProgress.value = 0f
             _backupState.value = BackupState.Loading
             try {
                 val json = withContext(Dispatchers.IO) {
@@ -88,25 +93,32 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
                 if (json != null) {
-                    val result = watchlistRepository.importFromJson(json)
-                    val imported = result.first
-                    val skipped = result.second
-                    if (imported >= 0) {
-                        if (skipped > 0) {
-                            _backupState.value = BackupState.Success("Imported $imported items, $skipped skipped")
-                        } else {
-                            _backupState.value = BackupState.Success("Imported $imported items")
+                    watchlistRepository.importFromJson(json).collect { state ->
+                        when (state) {
+                            is ImportState.Progress -> {
+                                _importProgress.value = if (state.total > 0) state.current.toFloat() / state.total else 0f
+                            }
+                            is ImportState.Success -> {
+                                if (state.skipped > 0) {
+                                    _backupState.value = BackupState.Success("Imported ${state.imported} items, ${state.skipped} skipped")
+                                } else {
+                                    _backupState.value = BackupState.Success("Imported ${state.imported} items")
+                                }
+                                _isImporting.value = false
+                                apiKeyDataStore.saveLastImportTime(System.currentTimeMillis())
+                            }
+                            is ImportState.Error -> {
+                                _backupState.value = BackupState.Error(state.message ?: "Import failed")
+                                _isImporting.value = false
+                            }
                         }
-                    } else {
-                        _backupState.value = BackupState.Error("Import failed — file may be corrupted")
                     }
                 } else {
                     _backupState.value = BackupState.Error("Failed to read file.")
+                    _isImporting.value = false
                 }
             } catch (e: Exception) {
                 _backupState.value = BackupState.Error(e.message ?: "Failed to import backup")
-            } finally {
-                apiKeyDataStore.saveLastImportTime(System.currentTimeMillis())
                 _isImporting.value = false
             }
         }

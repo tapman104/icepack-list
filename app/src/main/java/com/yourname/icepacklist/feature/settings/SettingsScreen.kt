@@ -184,7 +184,8 @@ fun SettingsScreen(
         }
         
         if (isImporting) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            val progress by viewModel.importProgress.collectAsState()
+            LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
         } else if (backupState == BackupState.Loading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
