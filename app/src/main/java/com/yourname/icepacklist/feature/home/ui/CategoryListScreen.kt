@@ -47,19 +47,17 @@ fun CategoryListScreen(
 
     Scaffold(
         topBar = {
-            Box(modifier = Modifier.height(52.dp)) {
-                TopAppBar(
-                    title = { Text(title, color = Color.White) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-                        }
-                    },
-                    windowInsets = WindowInsets(0.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                )
-            }
+            TopAppBar(
+                title = { Text(title, color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                windowInsets = WindowInsets(0.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
         },
         modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D))
     ) { padding ->

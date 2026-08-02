@@ -58,25 +58,23 @@ fun HomeScreen(
             .background(Color(0xFF0D0D0D))
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            Box(modifier = Modifier.height(52.dp)) {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.home_title), color = Color.White) },
-                    actions = {
-                        IconButton(onClick = { viewModel.refresh() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
-                        }
-                        IconButton(onClick = onSettingsClick) {
-                            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
-                    windowInsets = WindowInsets(0.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
+            TopAppBar(
+                title = { Text(stringResource(R.string.home_title), color = Color.White) },
+                actions = {
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
+                    }
+                },
+                scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets(0.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
                 )
-            }
+            )
         }
     ) { padding ->
         Column(

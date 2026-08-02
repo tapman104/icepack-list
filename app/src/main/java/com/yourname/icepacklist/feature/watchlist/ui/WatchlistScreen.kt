@@ -68,17 +68,15 @@ fun WatchlistScreen(
             .background(Color(0xFF0D0D0D))
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            Box(modifier = Modifier.height(52.dp)) {
-                TopAppBar(
-                    title = { Text("My List", color = Color.White) },
-                    scrollBehavior = scrollBehavior,
-                    windowInsets = WindowInsets(0.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
+            TopAppBar(
+                title = { Text("My List", color = Color.White) },
+                scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets(0.dp),
+                modifier = Modifier.padding(horizontal = 4.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
                 )
-            }
+            )
         }
     ) { padding ->
         Column(
