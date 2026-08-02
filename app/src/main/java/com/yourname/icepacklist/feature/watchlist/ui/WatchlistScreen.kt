@@ -13,6 +13,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -20,9 +23,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import android.widget.Toast
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +76,15 @@ fun WatchlistScreen(
         topBar = {
             TopAppBar(
                 title = { Text("My List", color = Color.White) },
+                actions = {
+                    val context = LocalContext.current
+                    IconButton(onClick = { Toast.makeText(context, "Import feature coming soon", Toast.LENGTH_SHORT).show() }) {
+                        Icon(Icons.Default.FileDownload, contentDescription = "Import", tint = Color.White)
+                    }
+                    IconButton(onClick = { Toast.makeText(context, "Export feature coming soon", Toast.LENGTH_SHORT).show() }) {
+                        Icon(Icons.Default.FileUpload, contentDescription = "Export", tint = Color.White)
+                    }
+                },
                 scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets(0.dp),
                 modifier = Modifier.padding(horizontal = 4.dp),
@@ -115,7 +130,7 @@ fun WatchlistScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 80.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(itemsList, key = { "${it.mediaType}_${it.id}" }) { item ->
@@ -178,9 +193,13 @@ private fun WatchlistItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF1C1C1E))
-                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(Color(0xFF1C1C1E), Color(0xFF28282B))
+                    )
+                )
+                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                 .combinedClickable(
                     onClick = onClick,
                     onLongClick = { menuExpanded = true }
@@ -193,12 +212,12 @@ private fun WatchlistItemRow(
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .width(56.dp)
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .width(80.dp)
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
             Column(
                 modifier = Modifier.weight(1f)
@@ -207,33 +226,63 @@ private fun WatchlistItemRow(
                     text = item.title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = Color.White,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                val subText = listOfNotNull(
-                    item.year?.takeIf { it.isNotBlank() },
-                    item.mediaType.name.uppercase(Locale.US)
-                ).joinToString(" • ")
-                Text(
-                    text = subText,
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                    color = Color(0xFFE50914)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                val ratingStr = String.format(Locale.US, "%.1f", item.voteAverage)
-                Text(
-                    text = "★ $ratingStr",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color(0xFFFFC107)
-                )
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFFE50914).copy(alpha = 0.2f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = item.mediaType.name.uppercase(Locale.US),
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = Color(0xFFFF5252)
+                        )
+                    }
+                    
+                    if (!item.year.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = item.year,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFAAAAAA)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Rating",
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    val ratingStr = String.format(Locale.US, "%.1f", item.voteAverage)
+                    Text(
+                        text = ratingStr,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White
+                    )
+                }
             }
 
-            IconButton(onClick = onRemove) {
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier
+                    .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(50))
+            ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Remove from list",
-                    tint = Color(0xFF888888)
+                    tint = Color(0xFFFF5252)
                 )
             }
         }

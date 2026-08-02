@@ -101,7 +101,6 @@ fun IcepackScaffold(
                         containerColor = Color.Transparent,
                         contentColor = Color(0xFFE50914),
                         modifier = Modifier
-                            .height(56.dp)
                             .background(
                                 brush = Brush.verticalGradient(
                                     colors = listOf(
