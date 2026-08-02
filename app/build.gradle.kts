@@ -34,6 +34,10 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += listOf(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:stabilityConfigurationPath=${project.projectDir.absolutePath}/compose_stability.conf"
+        )
     }
 
     buildFeatures {

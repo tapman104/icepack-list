@@ -221,7 +221,7 @@ private fun PersonDetailContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(movieCredits) { credit ->
+                        items(movieCredits, key = { it.id }) { credit ->
                             val movie = Movie(
                                 id = credit.id,
                                 title = credit.title,
@@ -246,7 +246,7 @@ private fun PersonDetailContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(images.take(15)) { image ->
+                        items(images.take(15), key = { it.filePath }) { image ->
                             AsyncImage(
                                 model = "$TMDB_PROFILE_BASE${image.filePath}",
                                 contentDescription = "Image",

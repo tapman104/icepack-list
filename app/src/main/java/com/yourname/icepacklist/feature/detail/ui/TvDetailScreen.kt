@@ -282,41 +282,11 @@ private fun TvDetailContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(credits.cast.take(15)) { person ->
-                            Column(
-                                modifier = Modifier
-                                    .width(72.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { onPersonClick(person.id) }
-                                    .padding(4.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                AsyncImage(
-                                    model = person.profilePath?.let { "$TMDB_PROFILE_BASE$it" },
-                                    contentDescription = person.name,
-                                    contentScale = ContentScale.Crop,
-                                    placeholder = painterResource(R.drawable.ic_image_placeholder),
-                                    error = painterResource(R.drawable.ic_image_placeholder),
-                                    modifier = Modifier
-                                        .size(56.dp)
-                                        .clip(CircleShape)
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = person.name,
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = person.character ?: "",
-                                    color = Color(0xFF888888),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                        items(credits.cast.take(15), key = { it.id }) { person ->
+                            CastItemCard(
+                                person = person,
+                                onClick = { onPersonClick(person.id) }
+                            )
                         }
                     }
                 }
@@ -388,7 +358,7 @@ private fun TvDetailContent(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(similar) { simShow ->
+                        items(similar, key = { it.id }) { simShow ->
                             TvShowCard(tvShow = simShow, onClick = { onTvShowClick(simShow.id) })
                         }
                     }
@@ -427,6 +397,44 @@ private fun DetailRow(label: String, value: String) {
             text = value,
             color = Color.White,
             style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
+private fun CastItemCard(person: com.yourname.icepacklist.feature.home.domain.Cast, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(72.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            model = person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" },
+            contentDescription = person.name,
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(com.yourname.icepacklist.R.drawable.ic_image_placeholder),
+            error = painterResource(com.yourname.icepacklist.R.drawable.ic_image_placeholder),
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = person.name,
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = person.character ?: "",
+            color = Color(0xFF888888),
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

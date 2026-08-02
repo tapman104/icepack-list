@@ -85,21 +85,12 @@ fun WatchlistScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(tabs) { index, tab ->
-                    val isSelected = selectedTabIndex == index
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(if (isSelected) Color(0xFFE50914) else Color(0xFF1C1C1E))
-                            .clickable { selectedTabIndex = index }
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = tab.title,
-                            color = if (isSelected) Color.White else Color(0xFF888888),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                        )
-                    }
+                itemsIndexed(tabs, key = { _, tab -> tab.title }) { index, tab ->
+                    WatchlistTabItem(
+                        tab = tab,
+                        isSelected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index }
+                    )
                 }
             }
 
@@ -143,6 +134,27 @@ fun WatchlistScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun WatchlistTabItem(
+    tab: WatchlistTab,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (isSelected) Color(0xFFE50914) else Color(0xFF1C1C1E))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = tab.title,
+            color = if (isSelected) Color.White else Color(0xFF888888),
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
     }
 }
 
