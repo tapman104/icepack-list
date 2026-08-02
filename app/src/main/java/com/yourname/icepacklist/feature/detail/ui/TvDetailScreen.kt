@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,7 +55,9 @@ fun TvDetailScreen(
     viewModel: TvDetailViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onTvShowClick: (Int) -> Unit = {},
-    onPersonClick: (Int) -> Unit = {}
+    onPersonClick: (Int) -> Unit = {},
+    onSeasonClick: (Int, String) -> Unit = { _, _ -> },
+    onFullCastClick: (Int, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val entryState by viewModel.entryState.collectAsState()
@@ -111,7 +114,9 @@ fun TvDetailScreen(
                     onRemoveEntry = { viewModel.removeEntry(it) },
                     onBack = onBack,
                     onTvShowClick = onTvShowClick,
-                    onPersonClick = onPersonClick
+                    onPersonClick = onPersonClick,
+                    onSeasonClick = onSeasonClick,
+                    onFullCastClick = onFullCastClick
                 )
             }
         }
@@ -134,7 +139,9 @@ private fun TvDetailContent(
     onRemoveEntry: (WatchlistEntity) -> Unit,
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit,
-    onPersonClick: (Int) -> Unit
+    onPersonClick: (Int) -> Unit,
+    onSeasonClick: (Int, String) -> Unit,
+    onFullCastClick: (Int, String) -> Unit
 ) {
     val context = LocalContext.current
     var showMyListSheet by remember { mutableStateOf(false) }
@@ -287,11 +294,28 @@ private fun TvDetailContent(
                 // Cast Section — circular cards LazyRow, max 15
                 if (credits.cast.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.cast),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cast),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = "View All",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .clickable {
+                                    com.yourname.icepacklist.feature.detail.ui.CreditsHolder.credits = credits
+                                    onFullCastClick(tvShow.id, "tv")
+                                }
+                                .padding(4.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(credits.cast.take(15), key = { it.id }) { person ->
@@ -347,8 +371,30 @@ private fun TvDetailContent(
                 if (!tvShow.originalLanguage.isNullOrBlank()) {
                     DetailRow(label = stringResource(R.string.language), value = tvShow.originalLanguage.uppercase())
                 }
-                tvShow.numberOfSeasons?.let {
-                    DetailRow(label = "Seasons", value = "$it")
+                tvShow.numberOfSeasons?.let { seasons ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSeasonClick(tvShow.id, tvShow.name) }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Seasons",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.width(120.dp)
+                            )
+                            Text(
+                                text = "$seasons",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = "View Seasons", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
                 tvShow.numberOfEpisodes?.let {
                     DetailRow(label = "Episodes", value = "$it")

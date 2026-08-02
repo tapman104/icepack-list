@@ -107,7 +107,8 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 DetailScreen(
                     onBack = { navController.popBackStack() },
                     onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) },
-                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) }
+                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) },
+                    onFullCastClick = { id, type -> navController.navigate(Routes.FullCast.buildRoute(id, type)) }
                 )
             }
 
@@ -120,7 +121,9 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 TvDetailScreen(
                     onBack = { navController.popBackStack() },
                     onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) },
-                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) }
+                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) },
+                    onSeasonClick = { id, name -> navController.navigate(Routes.SeasonEpisodes.buildRoute(id, name)) },
+                    onFullCastClick = { id, type -> navController.navigate(Routes.FullCast.buildRoute(id, type)) }
                 )
             }
 
@@ -146,6 +149,35 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 PersonDetailScreen(
                     onBack = { navController.popBackStack() },
                     onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) }
+                )
+            }
+
+            composable(
+                route = Routes.SeasonEpisodes.route,
+                arguments = listOf(
+                    navArgument(Routes.SeasonEpisodes.ARG_TV_ID) { type = NavType.IntType },
+                    navArgument(Routes.SeasonEpisodes.ARG_TV_NAME) { type = NavType.StringType }
+                )
+            ) {
+                com.yourname.icepacklist.feature.detail.ui.SeasonEpisodesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Routes.FullCast.route,
+                arguments = listOf(
+                    navArgument(Routes.FullCast.ARG_MEDIA_ID) { type = NavType.IntType },
+                    navArgument(Routes.FullCast.ARG_MEDIA_TYPE) { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val mediaId = backStackEntry.arguments?.getInt(Routes.FullCast.ARG_MEDIA_ID) ?: 0
+                val mediaType = backStackEntry.arguments?.getString(Routes.FullCast.ARG_MEDIA_TYPE) ?: ""
+                com.yourname.icepacklist.feature.detail.ui.FullCastScreen(
+                    mediaId = mediaId,
+                    mediaType = mediaType,
+                    onBack = { navController.popBackStack() },
+                    onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) }
                 )
             }
         }

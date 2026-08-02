@@ -158,6 +158,12 @@ interface TmdbApiService {
         @Query("page") page: Int = 1
     ): TmdbResponse<TvShow>
 
+    @GET("tv/{tv_id}/season/{season_number}")
+    suspend fun getSeasonDetails(
+        @Path("tv_id") tvId: Int,
+        @Path("season_number") seasonNumber: Int
+    ): com.yourname.icepacklist.feature.home.domain.SeasonDetailResponse
+
     // ── People ───────────────────────────────────────────────────────────────
 
     @GET("person/{person_id}")

@@ -54,7 +54,8 @@ fun DetailScreen(
     viewModel: DetailViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
     onMovieClick: (Int) -> Unit = {},
-    onPersonClick: (Int) -> Unit = {}
+    onPersonClick: (Int) -> Unit = {},
+    onFullCastClick: (Int, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val entryState by viewModel.entryState.collectAsState()
@@ -111,7 +112,8 @@ fun DetailScreen(
                     onRemoveEntry = { viewModel.removeEntry(it) },
                     onBack = onBack,
                     onMovieClick = onMovieClick,
-                    onPersonClick = onPersonClick
+                    onPersonClick = onPersonClick,
+                    onFullCastClick = onFullCastClick
                 )
             }
         }
@@ -134,7 +136,8 @@ private fun DetailContent(
     onRemoveEntry: (WatchlistEntity) -> Unit,
     onBack: () -> Unit,
     onMovieClick: (Int) -> Unit,
-    onPersonClick: (Int) -> Unit
+    onPersonClick: (Int) -> Unit,
+    onFullCastClick: (Int, String) -> Unit
 ) {
     val context = LocalContext.current
     var showMyListSheet by remember { mutableStateOf(false) }
@@ -335,11 +338,28 @@ private fun DetailContent(
                 // Cast Section
                 if (credits.cast.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.cast),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cast),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = "View All",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .clickable {
+                                    com.yourname.icepacklist.feature.detail.ui.CreditsHolder.credits = credits
+                                    onFullCastClick(movie.id, "movie")
+                                }
+                                .padding(4.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(credits.cast.take(15), key = { it.id }) { person ->

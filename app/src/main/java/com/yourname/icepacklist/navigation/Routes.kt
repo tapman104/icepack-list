@@ -21,4 +21,14 @@ sealed class Routes(val route: String) {
         const val ARG_PERSON_ID = "personId"
         fun createRoute(personId: Int) = "person_detail/$personId"
     }
+    data object SeasonEpisodes : Routes("season_episodes/{tvId}/{tvName}") {
+        const val ARG_TV_ID = "tvId"
+        const val ARG_TV_NAME = "tvName"
+        fun buildRoute(tvId: Int, tvName: String) = "season_episodes/$tvId/$tvName"
+    }
+    data object FullCast : Routes("full_cast/{mediaId}/{mediaType}") {
+        const val ARG_MEDIA_ID = "mediaId"
+        const val ARG_MEDIA_TYPE = "mediaType"
+        fun buildRoute(mediaId: Int, mediaType: String) = "full_cast/$mediaId/$mediaType"
+    }
 }
