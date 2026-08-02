@@ -38,6 +38,7 @@ fun SettingsScreen(
 
     val context = LocalContext.current
     val backupState by viewModel.backupState.collectAsState()
+    val isImporting by viewModel.isImporting.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(backupState) {
@@ -167,7 +168,7 @@ fun SettingsScreen(
                     exportLauncher.launch("icepack_watchlist_backup_$dateStr.json") 
                 },
                 modifier = Modifier.weight(1f),
-                enabled = backupState != BackupState.Loading
+                enabled = backupState != BackupState.Loading && !isImporting
             ) {
                 Text("Export Backup")
             }
@@ -175,13 +176,15 @@ fun SettingsScreen(
             OutlinedButton(
                 onClick = { importLauncher.launch(arrayOf("application/json")) },
                 modifier = Modifier.weight(1f),
-                enabled = backupState != BackupState.Loading
+                enabled = backupState != BackupState.Loading && !isImporting
             ) {
                 Text("Import Backup")
             }
         }
         
-        if (backupState == BackupState.Loading) {
+        if (isImporting) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        } else if (backupState == BackupState.Loading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
     }

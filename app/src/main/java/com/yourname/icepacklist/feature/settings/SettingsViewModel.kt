@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+import kotlinx.coroutines.flow.first
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val apiKeyDataStore: ApiKeyDataStore,
@@ -47,6 +49,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
     val backupState = _backupState.asStateFlow()
+    
+    private val _isImporting = MutableStateFlow(false)
+    val isImporting = _isImporting.asStateFlow()
 
     fun exportBackup(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
@@ -67,6 +72,14 @@ class SettingsViewModel @Inject constructor(
 
     fun importBackup(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
+            val lastTime = apiKeyDataStore.lastImportTime.first() ?: 0L
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastTime < 60_000L) {
+                _backupState.value = BackupState.Error("Please wait before importing again.")
+                return@launch
+            }
+            
+            _isImporting.value = true
             _backupState.value = BackupState.Loading
             try {
                 val json = withContext(Dispatchers.IO) {
@@ -75,17 +88,26 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
                 if (json != null) {
-                    val count = watchlistRepository.importFromJson(moshi, json)
-                    if (count >= 0) {
-                        _backupState.value = BackupState.Success("Successfully imported $count items!")
+                    val result = watchlistRepository.importFromJson(json)
+                    val imported = result.first
+                    val skipped = result.second
+                    if (imported >= 0) {
+                        if (skipped > 0) {
+                            _backupState.value = BackupState.Success("Imported $imported items, $skipped skipped")
+                        } else {
+                            _backupState.value = BackupState.Success("Imported $imported items")
+                        }
                     } else {
-                        _backupState.value = BackupState.Error("Failed to parse backup file.")
+                        _backupState.value = BackupState.Error("Import failed — file may be corrupted")
                     }
                 } else {
                     _backupState.value = BackupState.Error("Failed to read file.")
                 }
             } catch (e: Exception) {
                 _backupState.value = BackupState.Error(e.message ?: "Failed to import backup")
+            } finally {
+                apiKeyDataStore.saveLastImportTime(System.currentTimeMillis())
+                _isImporting.value = false
             }
         }
     }

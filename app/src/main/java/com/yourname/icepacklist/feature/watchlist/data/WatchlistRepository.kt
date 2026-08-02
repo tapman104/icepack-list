@@ -28,22 +28,73 @@ class WatchlistRepository @Inject constructor(private val dao: WatchlistDao) {
         return adapter.toJson(list)
     }
 
-    suspend fun importFromJson(moshi: Moshi, json: String): Int {
+    suspend fun importFromJson(json: String): Pair<Int, Int> {
         return try {
-            val listType = Types.newParameterizedType(List::class.java, WatchlistEntity::class.java)
-            val adapter = moshi.adapter<List<WatchlistEntity>>(listType)
-            val list = adapter.fromJson(json)
+            val jsonArray = org.json.JSONArray(json)
             var importedCount = 0
-            list?.forEach { entity ->
-                // Merge strategy: update if exists, insert if new. 
-                // Our DAO insert uses REPLACE strategy, so it functions as an upsert.
+            var skippedCount = 0
+
+            for (i in 0 until jsonArray.length()) {
+                val itemObj = jsonArray.optJSONObject(i)
+                if (itemObj == null) {
+                    skippedCount++
+                    continue
+                }
+
+                val id = if (itemObj.has("id")) itemObj.optInt("id", -1) else -1
+                val mediaTypeStr = itemObj.optString("mediaType", "")
+                
+                if (id == -1 || mediaTypeStr.isEmpty()) {
+                    skippedCount++
+                    continue
+                }
+                
+                val mediaType = try {
+                    MediaType.valueOf(mediaTypeStr)
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+                
+                if (mediaType == null) {
+                    skippedCount++
+                    continue
+                }
+                
+                val title = itemObj.optString("title", "")
+                val voteAverage = itemObj.optDouble("voteAverage", 0.0)
+                val posterPath = if (itemObj.isNull("posterPath")) null else itemObj.optString("posterPath")
+                val year = if (itemObj.isNull("year")) null else itemObj.optString("year")
+                val status = itemObj.optString("status", "PLAN_TO_WATCH")
+                val rating = if (itemObj.isNull("rating")) null else itemObj.optDouble("rating").toFloat()
+                val startDate = if (itemObj.isNull("startDate")) null else itemObj.optString("startDate")
+                val finishDate = if (itemObj.isNull("finishDate")) null else itemObj.optString("finishDate")
+                val notes = if (itemObj.isNull("notes")) null else itemObj.optString("notes")
+                val episodesWatched = if (itemObj.isNull("episodesWatched")) null else itemObj.optInt("episodesWatched")
+                val addedAt = itemObj.optLong("addedAt", System.currentTimeMillis())
+                
+                val entity = WatchlistEntity(
+                    id = id,
+                    mediaType = mediaType,
+                    title = title,
+                    posterPath = posterPath,
+                    voteAverage = voteAverage,
+                    year = year,
+                    status = status,
+                    rating = rating,
+                    startDate = startDate,
+                    finishDate = finishDate,
+                    notes = notes,
+                    episodesWatched = episodesWatched,
+                    addedAt = addedAt
+                )
+                
                 dao.insert(entity)
                 importedCount++
             }
-            importedCount
+            Pair(importedCount, skippedCount)
         } catch (e: Exception) {
             e.printStackTrace()
-            -1
+            Pair(-1, 0)
         }
     }
 }
