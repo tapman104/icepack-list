@@ -38,6 +38,7 @@ private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     viewModel: SearchViewModel = hiltViewModel(),
     onMovieClick: (Int) -> Unit = {},
     onTvShowClick: (Int) -> Unit = {},
@@ -50,6 +51,7 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0D0D0D))
+            .padding(paddingValues)
     ) {
         SearchBar(
             query = searchQuery,

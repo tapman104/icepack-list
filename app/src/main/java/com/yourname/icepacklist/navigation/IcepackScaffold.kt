@@ -89,7 +89,7 @@ fun IcepackScaffold(
     Scaffold(
         modifier = modifier,
         containerColor = Color(0xFF0D0D0D),
-        contentWindowInsets = WindowInsets(0.dp),
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         bottomBar = {
             if (showBottomBar) {
                 AnimatedVisibility(

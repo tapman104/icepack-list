@@ -46,6 +46,7 @@ fun CategoryListScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 title = { Text(title, color = Color.White) },
@@ -54,7 +55,6 @@ fun CategoryListScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                windowInsets = WindowInsets(0.dp),
                 modifier = Modifier.padding(horizontal = 4.dp),
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )

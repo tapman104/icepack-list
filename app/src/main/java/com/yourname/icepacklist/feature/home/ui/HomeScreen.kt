@@ -53,6 +53,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0D0D0D))
@@ -69,7 +70,6 @@ fun HomeScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                windowInsets = WindowInsets(0.dp),
                 modifier = Modifier.padding(horizontal = 4.dp),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
