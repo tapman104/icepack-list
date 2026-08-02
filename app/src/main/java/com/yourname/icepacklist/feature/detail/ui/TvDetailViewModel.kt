@@ -79,7 +79,7 @@ class TvDetailViewModel @Inject constructor(
                     ?.filter { it.type == "Trailer" && it.site == "YouTube" }
                     ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
                     ?: emptyList()
-                val similarShows = similarResponse.results.take(12)
+                val similarShows = similarResponse.results.distinctBy { it.id }.take(12)
 
                 val networkNames = tvShow.networksList.map { it.name }
                 val createdByStr = tvShow.createdByList.map { it.name }.joinToString(", ")

@@ -93,25 +93,20 @@ fun IcepackScaffold(
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets,
         bottomBar = {
             if (showBottomBar) {
-                AnimatedVisibility(
-                    visible = bottomBarVisible,
-                    enter = slideInVertically(initialOffsetY = { it }),
-                    exit = slideOutVertically(targetOffsetY = { it })
-                ) {
-                    NavigationBar(
-                        containerColor = Color.Transparent,
-                        contentColor = Color(0xFFE50914),
-                        modifier = Modifier
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-                                    )
+                NavigationBar(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xFFE50914),
+                    modifier = Modifier
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0xCC000000)
                                 )
                             )
-                            .windowInsetsPadding(WindowInsets.navigationBars)
-                    ) {
+                        )
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                ) {
                     bottomNavItems.forEach { item ->
                         val isSelected =
                             currentDestination?.hierarchy?.any { it.route == item.route } == true
@@ -143,7 +138,6 @@ fun IcepackScaffold(
                                 indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
                             )
                         )
-                    }
                     }
                 }
             }

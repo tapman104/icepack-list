@@ -82,7 +82,7 @@ class DetailViewModel @Inject constructor(
                     ?.filter { it.type == "Trailer" && it.site == "YouTube" }
                     ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
                     ?: emptyList()
-                val similarMovies = similarResponse.results.take(12)
+                val similarMovies = similarResponse.results.distinctBy { it.id }.take(12)
 
                 val updatedMovie = movie.copy(
                     director = director,
