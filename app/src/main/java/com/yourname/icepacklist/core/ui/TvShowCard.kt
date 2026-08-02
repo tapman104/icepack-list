@@ -8,6 +8,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,11 +34,15 @@ fun TvShowCard(tvShow: TvShow, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
+            val context = LocalContext.current
+            val imageRequest = remember(tvShow.posterPath) {
+                ImageRequest.Builder(context)
                     .data(tvShow.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" })
                     .crossfade(true)
-                    .build(),
+                    .build()
+            }
+            AsyncImage(
+                model = imageRequest,
                 contentDescription = tvShow.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
