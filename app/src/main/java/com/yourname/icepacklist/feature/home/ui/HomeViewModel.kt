@@ -55,10 +55,10 @@ class HomeViewModel @Inject constructor(
     private fun loadDramaRow(filter: DramaFilter) {
         viewModelScope.launch {
             if (filter == DramaFilter.All) {
-                val trending = repository.getTrendingTvShows().getOrDefault(emptyList())
+                val trending = repository.getTrendingTvShows().getOrDefault(emptyList()).distinctBy { it.id }
                 _uiState.update { it.copy(trendingTvShows = trending) }
             } else {
-                val result = repository.getDiscoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).getOrDefault(emptyList())
+                val result = repository.getDiscoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).getOrDefault(emptyList()).distinctBy { it.id }
                 _uiState.update { it.copy(trendingTvShows = result) }
             }
         }
@@ -107,15 +107,15 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        trendingMovies = trendingMoviesDef.await().getOrDefault(emptyList()),
-                        popularMovies = popularMoviesDef.await().getOrDefault(emptyList()),
-                        nowPlayingMovies = nowPlayingMoviesDef.await().getOrDefault(emptyList()),
-                        upcomingMovies = upcomingMoviesDef.await().getOrDefault(emptyList()),
-                        topRatedMovies = topRatedMoviesDef.await().getOrDefault(emptyList()),
-                        trendingTvShows = trendingTvShowsDef.await().getOrDefault(emptyList()),
-                        popularTvShows = popularTvShowsDef.await().getOrDefault(emptyList()),
-                        topRatedTvShows = topRatedTvShowsDef.await().getOrDefault(emptyList()),
-                        airingTodayTvShows = airingTodayTvShowsDef.await().getOrDefault(emptyList()),
+                        trendingMovies = trendingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        popularMovies = popularMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        nowPlayingMovies = nowPlayingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        upcomingMovies = upcomingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        topRatedMovies = topRatedMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        trendingTvShows = trendingTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        popularTvShows = popularTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        topRatedTvShows = topRatedTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        airingTodayTvShows = airingTodayTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
                     )
                 }
             }

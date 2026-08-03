@@ -383,7 +383,10 @@ fun DramaFilterChips(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(DramaFilter.entries) { filter ->
+        items(
+            items = DramaFilter.entries.filterNotNull(),
+            key = { it.label }
+        ) { filter ->
             FilterChip(
                 selected = selected == filter,
                 onClick = { onSelect(filter) },

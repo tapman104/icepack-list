@@ -13,6 +13,8 @@ sealed class DramaFilter(
     object Anime : DramaFilter("Anime", withGenres = "16")
 
     companion object {
-        val entries = listOf(All, KDrama, JDrama, CDrama, Anime)
+        val entries: List<DramaFilter> by lazy {
+            listOf(All, KDrama, JDrama, CDrama, Anime)
+        }
     }
 }
