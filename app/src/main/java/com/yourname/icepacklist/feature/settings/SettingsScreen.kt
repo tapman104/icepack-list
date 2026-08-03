@@ -154,6 +154,28 @@ fun SettingsScreen(
             Divider()
             Spacer(modifier = Modifier.height(8.dp))
 
+            val isDarkTheme by viewModel.isDarkTheme.collectAsState()
+
+            Text(
+                text = "Appearance",
+                style = MaterialTheme.typography.titleLarge
+            )
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.setDarkTheme(!isDarkTheme) }
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Dark Theme", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Switch(checked = isDarkTheme, onCheckedChange = null)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = "Content Region",
                 style = MaterialTheme.typography.titleLarge
@@ -170,17 +192,17 @@ fun SettingsScreen(
             val western = listOf(ContentFilter.US, ContentFilter.UK)
             val allRegions = listOf(ContentFilter.ALL)
 
-            Text(text = "Asian Drama", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+            Text(text = "Asian Drama", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 16.dp))
             asianDramas.forEach { filter ->
                 FilterRow(filter, filter == contentFilter) { viewModel.setContentFilter(filter) }
             }
 
-            Text(text = "Western", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+            Text(text = "Western", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 16.dp))
             western.forEach { filter ->
                 FilterRow(filter, filter == contentFilter) { viewModel.setContentFilter(filter) }
             }
 
-            Text(text = "All Regions", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+            Text(text = "All Regions", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 16.dp))
             allRegions.forEach { filter ->
                 FilterRow(filter, filter == contentFilter) { viewModel.setContentFilter(filter) }
             }

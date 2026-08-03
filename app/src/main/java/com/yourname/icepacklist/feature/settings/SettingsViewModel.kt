@@ -63,6 +63,19 @@ class SettingsViewModel @Inject constructor(
             apiKeyDataStore.setContentFilter(filter.name)
         }
     }
+    
+    val isDarkTheme: StateFlow<Boolean> = apiKeyDataStore.isDarkTheme
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true
+        )
+
+    fun setDarkTheme(enabled: Boolean) {
+        viewModelScope.launch {
+            apiKeyDataStore.setDarkTheme(enabled)
+        }
+    }
 
     private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
     val backupState = _backupState.asStateFlow()

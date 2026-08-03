@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -23,6 +24,7 @@ class ApiKeyDataStore @Inject constructor(
         private val API_KEY = stringPreferencesKey("tmdb_api_key")
         private val LAST_IMPORT_TIME = longPreferencesKey("last_import_time")
         private val CONTENT_FILTER_KEY = stringPreferencesKey("content_filter")
+        private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
     }
 
     val apiKey: Flow<String?> = context.dataStore.data
@@ -33,6 +35,9 @@ class ApiKeyDataStore @Inject constructor(
 
     val contentFilter: Flow<String> = context.dataStore.data
         .map { prefs -> prefs[CONTENT_FILTER_KEY] ?: "All" }
+        
+    val isDarkTheme: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[DARK_THEME_KEY] ?: true }
 
     suspend fun saveApiKey(key: String) {
         context.dataStore.edit { prefs ->
@@ -55,6 +60,12 @@ class ApiKeyDataStore @Inject constructor(
     suspend fun setContentFilter(value: String) {
         context.dataStore.edit { prefs ->
             prefs[CONTENT_FILTER_KEY] = value
+        }
+    }
+    
+    suspend fun setDarkTheme(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[DARK_THEME_KEY] = enabled
         }
     }
 }
