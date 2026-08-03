@@ -1,7 +1,11 @@
 package com.yourname.icepacklist.feature.home.data
 
 import com.yourname.icepacklist.core.datastore.ContentFilter
-
+import com.yourname.icepacklist.core.datastore.cacheKey
+import com.yourname.icepacklist.core.datastore.isAll
+import com.yourname.icepacklist.core.datastore.originCountryParam
+import com.yourname.icepacklist.core.datastore.withGenresParam
+import com.yourname.icepacklist.core.datastore.withoutGenresParam
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.yourname.icepacklist.core.cache.CacheConfig
@@ -13,32 +17,6 @@ import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.core.database.WatchlistDao
 import com.yourname.icepacklist.core.database.MediaType
 import javax.inject.Inject
-
-// Derive aggregated TMDB discover params from a set of ContentFilters.
-// When the set is ALL or empty, all params are null (use standard endpoints).
-private fun Set<ContentFilter>.isAll(): Boolean =
-    isEmpty() || contains(ContentFilter.ALL)
-
-private fun Set<ContentFilter>.originCountryParam(): String? {
-    if (isAll()) return null
-    val values = mapNotNull { it.originCountry }
-    return if (values.isEmpty()) null else values.joinToString("|")
-}
-
-private fun Set<ContentFilter>.withGenresParam(): String? {
-    if (isAll()) return null
-    val values = mapNotNull { it.withGenres }
-    return if (values.isEmpty()) null else values.joinToString(",")
-}
-
-private fun Set<ContentFilter>.withoutGenresParam(): String? {
-    if (isAll()) return null
-    val values = mapNotNull { it.withoutGenres }
-    return if (values.isEmpty()) null else values.joinToString(",")
-}
-
-private fun Set<ContentFilter>.cacheKey(): String =
-    if (isAll()) "ALL" else toList().sortedBy { it.name }.joinToString("_") { it.name }
 
 class HomeRepository @Inject constructor(
     private val apiService: TmdbApiService,

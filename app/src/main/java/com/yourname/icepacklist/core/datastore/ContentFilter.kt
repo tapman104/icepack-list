@@ -37,3 +37,47 @@ enum class ContentFilter(
         }
     }
 }
+
+// ── Shared aggregation helpers for Set<ContentFilter> ─────────────────────────
+// Used by HomeRepository, CategoryPagingSource, SearchPagingSource, etc.
+// Single source of truth — do not re-declare these in individual files.
+
+/** True when the set represents "no filter" (contains ALL or is empty). */
+fun Set<ContentFilter>.isAll(): Boolean = isEmpty() || contains(ContentFilter.ALL)
+
+/**
+ * TMDB `with_origin_country` value: pipe-joined non-null origin countries.
+ * Returns null when [isAll] so standard endpoints are used unchanged.
+ */
+fun Set<ContentFilter>.originCountryParam(): String? {
+    if (isAll()) return null
+    val values = mapNotNull { it.originCountry }
+    return if (values.isEmpty()) null else values.joinToString("|")
+}
+
+/**
+ * TMDB `with_genres` value: comma-joined non-null genre IDs.
+ * Returns null when [isAll].
+ */
+fun Set<ContentFilter>.withGenresParam(): String? {
+    if (isAll()) return null
+    val values = mapNotNull { it.withGenres }
+    return if (values.isEmpty()) null else values.joinToString(",")
+}
+
+/**
+ * TMDB `without_genres` value: comma-joined non-null genre IDs.
+ * Returns null when [isAll].
+ */
+fun Set<ContentFilter>.withoutGenresParam(): String? {
+    if (isAll()) return null
+    val values = mapNotNull { it.withoutGenres }
+    return if (values.isEmpty()) null else values.joinToString(",")
+}
+
+/**
+ * Stable, sorted cache key string derived from the active filter set.
+ * Example: setOf(K_DRAMA, C_DRAMA) → "C_DRAMA_K_DRAMA"
+ */
+fun Set<ContentFilter>.cacheKey(): String =
+    if (isAll()) "ALL" else toList().sortedBy { it.name }.joinToString("_") { it.name }

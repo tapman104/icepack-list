@@ -3,9 +3,11 @@ package com.yourname.icepacklist.feature.home.data
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.yourname.icepacklist.core.datastore.ContentFilter
+import com.yourname.icepacklist.core.datastore.isAll
+import com.yourname.icepacklist.core.datastore.originCountryParam
+import com.yourname.icepacklist.core.datastore.withGenresParam
+import com.yourname.icepacklist.core.datastore.withoutGenresParam
 import com.yourname.icepacklist.core.network.TmdbApiService
-import com.yourname.icepacklist.feature.home.domain.Movie
-import com.yourname.icepacklist.feature.home.domain.TvShow
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -15,45 +17,29 @@ class CategoryPagingSource(
     private val filter: Set<ContentFilter> = setOf(ContentFilter.ALL)
 ) : PagingSource<Int, Any>() {
 
-    private val isAll: Boolean
-        get() = filter.isEmpty() || filter.contains(ContentFilter.ALL)
-
-    private val originCountry: String?
-        get() {
-            if (isAll) return null
-            val values = filter.mapNotNull { it.originCountry }
-            return if (values.isEmpty()) null else values.joinToString("|")
-        }
-
-    private val withGenres: String?
-        get() {
-            if (isAll) return null
-            val values = filter.mapNotNull { it.withGenres }
-            return if (values.isEmpty()) null else values.joinToString(",")
-        }
-
-    private val withoutGenres: String?
-        get() {
-            if (isAll) return null
-            val values = filter.mapNotNull { it.withoutGenres }
-            return if (values.isEmpty()) null else values.joinToString(",")
-        }
-
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Any> {
         val position = params.key ?: 1
+        // Compute aggregated params once per load call via shared extensions in ContentFilter.kt
+        val isAll = filter.isAll()
+        val originCountry = filter.originCountryParam()
+        val withGenres = filter.withGenresParam()
+        val withoutGenres = filter.withoutGenresParam()
+
         return try {
             val response = when {
-                // When filter is ALL — use existing standard endpoints unchanged
+                // When filter is ALL — use standard endpoints unchanged
                 isAll -> when (category) {
-                    "trending_movies" -> apiService.getTrendingMovies(page = position)
-                    "popular_movies"  -> apiService.getPopularMovies(page = position)
-                    "now_playing"     -> apiService.getNowPlayingMovies(page = position)
-                    "upcoming"        -> apiService.getUpcomingMovies(page = position)
-                    "top_rated_movies"-> apiService.getTopRatedMovies(page = position)
-                    "trending_tv"     -> apiService.getTrendingTvShows(page = position)
-                    "popular_tv"      -> apiService.getPopularTvShows(page = position)
-                    "top_rated_tv"    -> apiService.getTopRatedTvShows(page = position)
-                    "airing_today"    -> apiService.getAiringTodayTvShows(page = position)
+                    "trending_movies"    -> apiService.getTrendingMovies(page = position)
+                    "popular_movies"     -> apiService.getPopularMovies(page = position)
+                    "now_playing"        -> apiService.getNowPlayingMovies(page = position)
+                    "upcoming"           -> apiService.getUpcomingMovies(page = position)
+                    "top_rated_movies"   -> apiService.getTopRatedMovies(page = position)
+                    "trending_tv"        -> apiService.getTrendingTvShows(page = position)
+                    "popular_tv"         -> apiService.getPopularTvShows(page = position)
+                    "top_rated_tv"       -> apiService.getTopRatedTvShows(page = position)
+                    "airing_today"       -> apiService.getAiringTodayTvShows(page = position)
+                    // "recommendations" has no dedicated endpoint — fall through to discover
+                    "recommendations"    -> apiService.getPopularMovies(page = position)
                     else -> throw IllegalArgumentException("Unknown category: $category")
                 }
                 // When filter is active — use discoverMovie / discoverTv with aggregated params
@@ -66,6 +52,13 @@ class CategoryPagingSource(
                         page = position
                     )
                     "popular_movies" -> apiService.discoverMovie(
+                        originCountry = originCountry,
+                        withGenres = withGenres,
+                        withoutGenres = withoutGenres,
+                        sortBy = "popularity.desc",
+                        page = position
+                    )
+                    "recommendations" -> apiService.discoverMovie(
                         originCountry = originCountry,
                         withGenres = withGenres,
                         withoutGenres = withoutGenres,

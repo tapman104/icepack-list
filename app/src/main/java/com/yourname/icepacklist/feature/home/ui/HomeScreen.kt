@@ -42,7 +42,7 @@ fun HomeScreen(
     onSettingsClick: () -> Unit = {},
     onScrollUp: (Boolean) -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tabs = listOf(stringResource(R.string.tab_all), stringResource(R.string.tab_movies), stringResource(R.string.tab_tv_shows))
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
