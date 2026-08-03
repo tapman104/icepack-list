@@ -44,20 +44,18 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
-    private var lastHomeFilter: ContentFilter = ContentFilter.ALL
-    private var lastRecsFilter: ContentFilter = ContentFilter.ALL
+    private var lastHomeFilter: Set<ContentFilter> = setOf(ContentFilter.ALL)
+    private var lastRecsFilter: Set<ContentFilter> = setOf(ContentFilter.ALL)
 
     init {
         viewModelScope.launch {
-            apiKeyDataStore.homeContentFilter.collect { key ->
-                val filter = ContentFilter.fromKey(key)
+            apiKeyDataStore.homeContentFilter.collect { filter ->
                 lastHomeFilter = filter
                 refreshHomeRows(filter)
             }
         }
         viewModelScope.launch {
-            apiKeyDataStore.recommendationsContentFilter.collect { key ->
-                val filter = ContentFilter.fromKey(key)
+            apiKeyDataStore.recommendationsContentFilter.collect { filter ->
                 lastRecsFilter = filter
                 refreshRecommendations(filter)
             }
@@ -80,7 +78,7 @@ class HomeViewModel @Inject constructor(
         retry()
     }
 
-    private fun refreshHomeRows(filter: ContentFilter) {
+    private fun refreshHomeRows(filter: Set<ContentFilter>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isError = false, errorMessage = "", error = null) }
             
@@ -131,13 +129,13 @@ class HomeViewModel @Inject constructor(
         }
     }
     
-    private fun refreshRecommendations(filter: ContentFilter) {
+    private fun refreshRecommendations(filter: Set<ContentFilter>) {
         viewModelScope.launch {
             val tab = _uiState.value.selectedTab
             val fetchMovies = tab == 0 || tab == 1
             val fetchTv = tab == 0 || tab == 2
 
-            if (filter == ContentFilter.ALL) {
+            if (filter.isEmpty() || filter.contains(ContentFilter.ALL)) {
                 _uiState.update { it.copy(recommendations = emptyList()) }
                 return@launch
             }
@@ -157,4 +155,3 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
-

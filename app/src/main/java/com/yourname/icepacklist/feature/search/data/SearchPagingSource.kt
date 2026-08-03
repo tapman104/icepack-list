@@ -12,7 +12,7 @@ import com.yourname.icepacklist.core.datastore.ContentFilter
 class SearchPagingSource(
     private val apiService: TmdbApiService,
     private val query: String,
-    private val filter: ContentFilter? = null
+    private val filter: Set<ContentFilter> = setOf(ContentFilter.ALL)
 ) : PagingSource<Int, MultiSearchResult>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MultiSearchResult> {
@@ -23,10 +23,14 @@ class SearchPagingSource(
         return try {
             val response = apiService.searchMulti(query, position)
             var results = response.results
-            
-            if (filter != null && filter != ContentFilter.ALL && filter.originCountry != null) {
-                results = results.filter { item ->
-                    item.mediaType == "person" || (item.originCountry?.contains(filter.originCountry) == true)
+
+            val isAll = filter.isEmpty() || filter.contains(ContentFilter.ALL)
+            if (!isAll) {
+                val allowedCountries = filter.mapNotNull { it.originCountry }.toSet()
+                if (allowedCountries.isNotEmpty()) {
+                    results = results.filter { item ->
+                        item.mediaType == "person" || (item.originCountry?.any { it in allowedCountries } == true)
+                    }
                 }
             }
             

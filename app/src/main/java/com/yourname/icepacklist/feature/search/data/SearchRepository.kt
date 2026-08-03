@@ -16,7 +16,7 @@ class SearchRepository @Inject constructor(
     private val apiService: TmdbApiService,
     private val searchHistoryDao: SearchHistoryDao
 ) {
-    fun searchMulti(query: String, filter: ContentFilter? = null): Flow<PagingData<MultiSearchResult>> {
+    fun searchMulti(query: String, filter: Set<ContentFilter> = setOf(ContentFilter.ALL)): Flow<PagingData<MultiSearchResult>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,

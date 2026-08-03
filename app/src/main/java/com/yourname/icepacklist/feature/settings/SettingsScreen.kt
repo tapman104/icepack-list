@@ -227,8 +227,8 @@ fun SettingsScreen(
             ContentRegionPicker(
                 title = "Home Region",
                 description = "Filter the Trending, Popular, Now Playing, and Top Rated rows by country. Selecting ALL disables filtering.",
-                selectedFilter = homeContentFilter,
-                onFilterSelected = { viewModel.setHomeContentFilter(it) }
+                selectedFilters = homeContentFilter,
+                onSelect = { viewModel.setHomeContentFilter(it) }
             )
 
             // Section 3: Search Results Content
@@ -236,8 +236,8 @@ fun SettingsScreen(
             ContentRegionPicker(
                 title = "Search Region",
                 description = "Filter your manual search queries by country. Selecting ALL disables filtering.",
-                selectedFilter = searchContentFilter,
-                onFilterSelected = { viewModel.setSearchContentFilter(it) }
+                selectedFilters = searchContentFilter,
+                onSelect = { viewModel.setSearchContentFilter(it) }
             )
 
             // Section 4: Recommendations Content
@@ -245,8 +245,8 @@ fun SettingsScreen(
             ContentRegionPicker(
                 title = "Recommendations Region",
                 description = "Filter the recommendations row by country. Selecting ALL turns the recommendations row off entirely.",
-                selectedFilter = recommendationsContentFilter,
-                onFilterSelected = { viewModel.setRecommendationsContentFilter(it) }
+                selectedFilters = recommendationsContentFilter,
+                onSelect = { viewModel.setRecommendationsContentFilter(it) }
             )
 
             Spacer(modifier = Modifier.height(80.dp)) // padding for bottom nav if needed
@@ -258,8 +258,8 @@ fun SettingsScreen(
 fun ContentRegionPicker(
     title: String,
     description: String,
-    selectedFilter: ContentFilter,
-    onFilterSelected: (ContentFilter) -> Unit
+    selectedFilters: Set<ContentFilter>,
+    onSelect: (Set<ContentFilter>) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -271,42 +271,72 @@ fun ContentRegionPicker(
             Text(text = description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(16.dp))
 
+            // "Select All Regions" checkbox at the top
+            FilterCheckRow(
+                label = ContentFilter.ALL.displayName,
+                checked = selectedFilters.contains(ContentFilter.ALL),
+                onToggle = {
+                    // Tapping ALL clears all specific selections and selects only ALL
+                    onSelect(setOf(ContentFilter.ALL))
+                }
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             val asianDramas = listOf(ContentFilter.K_DRAMA, ContentFilter.J_DRAMA, ContentFilter.C_DRAMA, ContentFilter.ANIME, ContentFilter.THAI_DRAMA, ContentFilter.INDIAN)
             val western = listOf(ContentFilter.US, ContentFilter.UK)
-            val allRegions = listOf(ContentFilter.ALL)
 
             Text(text = "Asian Drama", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
             asianDramas.forEach { filter ->
-                FilterRow(filter, filter == selectedFilter) { onFilterSelected(filter) }
+                FilterCheckRow(
+                    label = filter.displayName,
+                    checked = filter in selectedFilters,
+                    onToggle = { onSelect(toggleFilter(selectedFilters, filter)) }
+                )
             }
 
             Text(text = "Western", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 16.dp))
             western.forEach { filter ->
-                FilterRow(filter, filter == selectedFilter) { onFilterSelected(filter) }
-            }
-
-            Text(text = "All Regions", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 16.dp))
-            allRegions.forEach { filter ->
-                FilterRow(filter, filter == selectedFilter) { onFilterSelected(filter) }
+                FilterCheckRow(
+                    label = filter.displayName,
+                    checked = filter in selectedFilters,
+                    onToggle = { onSelect(toggleFilter(selectedFilters, filter)) }
+                )
             }
         }
     }
 }
 
+/**
+ * Toggle a specific (non-ALL) filter in the set.
+ * - If ALL is tapped: handled separately (select only ALL).
+ * - If a specific filter is tapped: remove ALL from the set and toggle that entry.
+ * - If the resulting set is empty: fall back to setOf(ALL).
+ */
+private fun toggleFilter(current: Set<ContentFilter>, filter: ContentFilter): Set<ContentFilter> {
+    val withoutAll = current - ContentFilter.ALL
+    val updated = if (filter in withoutAll) {
+        withoutAll - filter
+    } else {
+        withoutAll + filter
+    }
+    return if (updated.isEmpty()) setOf(ContentFilter.ALL) else updated
+}
+
 @Composable
-private fun FilterRow(filter: ContentFilter, selected: Boolean, onSelect: () -> Unit) {
+private fun FilterCheckRow(label: String, checked: Boolean, onToggle: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onSelect() }
+            .clickable { onToggle() }
             .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(
-            selected = selected,
-            onClick = onSelect
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onToggle() }
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = filter.displayName, style = MaterialTheme.typography.bodyLarge)
+        Text(text = label, style = MaterialTheme.typography.bodyLarge)
     }
 }

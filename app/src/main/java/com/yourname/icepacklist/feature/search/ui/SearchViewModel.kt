@@ -18,9 +18,9 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
+import com.yourname.icepacklist.core.datastore.ContentFilter
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -33,9 +33,9 @@ class SearchViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    // DataStore now emits Set<ContentFilter> directly — no mapping needed
     private val searchConfig = apiKeyDataStore.searchContentFilter
-        .map { key -> com.yourname.icepacklist.core.datastore.ContentFilter.fromKey(key) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.yourname.icepacklist.core.datastore.ContentFilter.ALL)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), setOf(ContentFilter.ALL))
 
     val searchHistory: StateFlow<List<com.yourname.icepacklist.core.database.entity.SearchHistoryEntity>> = repository.getSearchHistory()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

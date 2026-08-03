@@ -7,7 +7,6 @@ import com.yourname.icepacklist.core.datastore.ContentFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -50,45 +49,42 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    val homeContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.homeContentFilter
-        .map { ContentFilter.fromKey(it) }
+    val homeContentFilter: StateFlow<Set<ContentFilter>> = apiKeyDataStore.homeContentFilter
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ContentFilter.ALL
+            initialValue = setOf(ContentFilter.ALL)
         )
 
-    fun setHomeContentFilter(filter: ContentFilter) {
+    fun setHomeContentFilter(filters: Set<ContentFilter>) {
         viewModelScope.launch {
-            apiKeyDataStore.setHomeContentFilter(filter.name)
+            apiKeyDataStore.setHomeContentFilter(filters)
         }
     }
     
-    val searchContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.searchContentFilter
-        .map { ContentFilter.fromKey(it) }
+    val searchContentFilter: StateFlow<Set<ContentFilter>> = apiKeyDataStore.searchContentFilter
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ContentFilter.ALL
+            initialValue = setOf(ContentFilter.ALL)
         )
 
-    fun setSearchContentFilter(filter: ContentFilter) {
+    fun setSearchContentFilter(filters: Set<ContentFilter>) {
         viewModelScope.launch {
-            apiKeyDataStore.setSearchContentFilter(filter.name)
+            apiKeyDataStore.setSearchContentFilter(filters)
         }
     }
     
-    val recommendationsContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.recommendationsContentFilter
-        .map { ContentFilter.fromKey(it) }
+    val recommendationsContentFilter: StateFlow<Set<ContentFilter>> = apiKeyDataStore.recommendationsContentFilter
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ContentFilter.ALL
+            initialValue = setOf(ContentFilter.ALL)
         )
 
-    fun setRecommendationsContentFilter(filter: ContentFilter) {
+    fun setRecommendationsContentFilter(filters: Set<ContentFilter>) {
         viewModelScope.launch {
-            apiKeyDataStore.setRecommendationsContentFilter(filter.name)
+            apiKeyDataStore.setRecommendationsContentFilter(filters)
         }
     }
 

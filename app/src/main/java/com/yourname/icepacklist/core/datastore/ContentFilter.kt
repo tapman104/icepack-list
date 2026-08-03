@@ -20,5 +20,20 @@ enum class ContentFilter(
         fun fromKey(key: String): ContentFilter {
             return entries.find { it.name == key } ?: ALL
         }
+
+        fun toKey(filters: Set<ContentFilter>): String {
+            if (filters.isEmpty() || filters.contains(ALL)) return "ALL"
+            return filters.joinToString(",") { it.name }
+        }
+
+        fun fromKeys(key: String): Set<ContentFilter> {
+            if (key.isBlank()) return setOf(ALL)
+            val result = key.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+                .map { fromKey(it) }
+                .toSet()
+            return if (result.isEmpty()) setOf(ALL) else result
+        }
     }
 }

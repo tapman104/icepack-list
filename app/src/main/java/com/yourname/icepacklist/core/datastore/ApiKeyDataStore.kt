@@ -36,17 +36,18 @@ class ApiKeyDataStore @Inject constructor(
     val lastImportTime: Flow<Long?> = context.dataStore.data
         .map { prefs -> prefs[LAST_IMPORT_TIME] }
 
+    // Unchanged — kept for backward compatibility
     val contentFilter: Flow<String> = context.dataStore.data
         .map { prefs -> prefs[CONTENT_FILTER_KEY] ?: "All" }
 
-    val homeContentFilter: Flow<String> = context.dataStore.data
-        .map { prefs -> prefs[HOME_CONTENT_FILTER_KEY] ?: "All" }
+    val homeContentFilter: Flow<Set<ContentFilter>> = context.dataStore.data
+        .map { prefs -> ContentFilter.fromKeys(prefs[HOME_CONTENT_FILTER_KEY] ?: "ALL") }
 
-    val searchContentFilter: Flow<String> = context.dataStore.data
-        .map { prefs -> prefs[SEARCH_CONTENT_FILTER_KEY] ?: "All" }
+    val searchContentFilter: Flow<Set<ContentFilter>> = context.dataStore.data
+        .map { prefs -> ContentFilter.fromKeys(prefs[SEARCH_CONTENT_FILTER_KEY] ?: "ALL") }
 
-    val recommendationsContentFilter: Flow<String> = context.dataStore.data
-        .map { prefs -> prefs[RECOMMENDATIONS_CONTENT_FILTER_KEY] ?: "All" }
+    val recommendationsContentFilter: Flow<Set<ContentFilter>> = context.dataStore.data
+        .map { prefs -> ContentFilter.fromKeys(prefs[RECOMMENDATIONS_CONTENT_FILTER_KEY] ?: "ALL") }
         
     val isDarkTheme: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[DARK_THEME_KEY] ?: true }
@@ -69,27 +70,28 @@ class ApiKeyDataStore @Inject constructor(
         }
     }
 
+    // Unchanged — old shared key kept for backward compatibility
     suspend fun setContentFilter(value: String) {
         context.dataStore.edit { prefs ->
             prefs[CONTENT_FILTER_KEY] = value
         }
     }
 
-    suspend fun setHomeContentFilter(value: String) {
+    suspend fun setHomeContentFilter(filters: Set<ContentFilter>) {
         context.dataStore.edit { prefs ->
-            prefs[HOME_CONTENT_FILTER_KEY] = value
+            prefs[HOME_CONTENT_FILTER_KEY] = ContentFilter.toKey(filters)
         }
     }
 
-    suspend fun setSearchContentFilter(value: String) {
+    suspend fun setSearchContentFilter(filters: Set<ContentFilter>) {
         context.dataStore.edit { prefs ->
-            prefs[SEARCH_CONTENT_FILTER_KEY] = value
+            prefs[SEARCH_CONTENT_FILTER_KEY] = ContentFilter.toKey(filters)
         }
     }
 
-    suspend fun setRecommendationsContentFilter(value: String) {
+    suspend fun setRecommendationsContentFilter(filters: Set<ContentFilter>) {
         context.dataStore.edit { prefs ->
-            prefs[RECOMMENDATIONS_CONTENT_FILTER_KEY] = value
+            prefs[RECOMMENDATIONS_CONTENT_FILTER_KEY] = ContentFilter.toKey(filters)
         }
     }
     
