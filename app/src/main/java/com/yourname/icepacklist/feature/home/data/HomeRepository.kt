@@ -1,5 +1,7 @@
 package com.yourname.icepacklist.feature.home.data
 
+import com.yourname.icepacklist.core.datastore.ContentFilter
+
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.yourname.icepacklist.core.cache.CacheConfig
@@ -15,8 +17,8 @@ class HomeRepository @Inject constructor(
     private val cacheDao: HomeListCacheDao,
     private val moshi: Moshi
 ) {
-    suspend fun getTrendingMovies(): Result<List<Movie>> {
-        val key = "trending_movie"
+    suspend fun getTrendingMovies(filter: ContentFilter): Result<List<Movie>> {
+        val key = "trending_movie_${filter.name}"
         val adapter = moshi.adapter<List<Movie>>(
             Types.newParameterizedType(List::class.java, Movie::class.java)
         )
@@ -25,7 +27,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getTrendingMovies(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getTrendingMovies(page = 1).results.take(12)
+            } else {
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -33,8 +39,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getPopularMovies(): Result<List<Movie>> {
-        val key = "popular_movie"
+    suspend fun getPopularMovies(filter: ContentFilter): Result<List<Movie>> {
+        val key = "popular_movie_${filter.name}"
         val adapter = moshi.adapter<List<Movie>>(
             Types.newParameterizedType(List::class.java, Movie::class.java)
         )
@@ -43,7 +49,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getPopularMovies(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getPopularMovies(page = 1).results.take(12)
+            } else {
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -51,8 +61,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getNowPlayingMovies(): Result<List<Movie>> {
-        val key = "now_playing_movie"
+    suspend fun getNowPlayingMovies(filter: ContentFilter): Result<List<Movie>> {
+        val key = "now_playing_movie_${filter.name}"
         val adapter = moshi.adapter<List<Movie>>(
             Types.newParameterizedType(List::class.java, Movie::class.java)
         )
@@ -61,7 +71,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getNowPlayingMovies(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getNowPlayingMovies(page = 1).results.take(12)
+            } else {
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -69,8 +83,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getUpcomingMovies(): Result<List<Movie>> {
-        val key = "upcoming_movie"
+    suspend fun getUpcomingMovies(filter: ContentFilter): Result<List<Movie>> {
+        val key = "upcoming_movie_${filter.name}"
         val adapter = moshi.adapter<List<Movie>>(
             Types.newParameterizedType(List::class.java, Movie::class.java)
         )
@@ -79,7 +93,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getUpcomingMovies(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getUpcomingMovies(page = 1).results.take(12)
+            } else {
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -87,8 +105,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getTopRatedMovies(): Result<List<Movie>> {
-        val key = "top_rated_movie"
+    suspend fun getTopRatedMovies(filter: ContentFilter): Result<List<Movie>> {
+        val key = "top_rated_movie_${filter.name}"
         val adapter = moshi.adapter<List<Movie>>(
             Types.newParameterizedType(List::class.java, Movie::class.java)
         )
@@ -97,7 +115,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getTopRatedMovies(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getTopRatedMovies(page = 1).results.take(12)
+            } else {
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -105,8 +127,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getTrendingTvShows(): Result<List<TvShow>> {
-        val key = "trending_tv"
+    suspend fun getTrendingTvShows(filter: ContentFilter): Result<List<TvShow>> {
+        val key = "trending_tv_${filter.name}"
         val adapter = moshi.adapter<List<TvShow>>(
             Types.newParameterizedType(List::class.java, TvShow::class.java)
         )
@@ -115,7 +137,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getTrendingTvShows(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getTrendingTvShows(page = 1).results.take(12)
+            } else {
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -123,8 +149,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getPopularTvShows(): Result<List<TvShow>> {
-        val key = "popular_tv"
+    suspend fun getPopularTvShows(filter: ContentFilter): Result<List<TvShow>> {
+        val key = "popular_tv_${filter.name}"
         val adapter = moshi.adapter<List<TvShow>>(
             Types.newParameterizedType(List::class.java, TvShow::class.java)
         )
@@ -133,7 +159,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getPopularTvShows(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getPopularTvShows(page = 1).results.take(12)
+            } else {
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -141,8 +171,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getTopRatedTvShows(): Result<List<TvShow>> {
-        val key = "top_rated_tv"
+    suspend fun getTopRatedTvShows(filter: ContentFilter): Result<List<TvShow>> {
+        val key = "top_rated_tv_${filter.name}"
         val adapter = moshi.adapter<List<TvShow>>(
             Types.newParameterizedType(List::class.java, TvShow::class.java)
         )
@@ -151,7 +181,11 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getTopRatedTvShows(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getTopRatedTvShows(page = 1).results.take(12)
+            } else {
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
@@ -159,8 +193,8 @@ class HomeRepository @Inject constructor(
         }
     }
 
-    suspend fun getAiringTodayTvShows(): Result<List<TvShow>> {
-        val key = "airing_today_tv"
+    suspend fun getAiringTodayTvShows(filter: ContentFilter): Result<List<TvShow>> {
+        val key = "airing_today_tv_${filter.name}"
         val adapter = moshi.adapter<List<TvShow>>(
             Types.newParameterizedType(List::class.java, TvShow::class.java)
         )
@@ -169,16 +203,15 @@ class HomeRepository @Inject constructor(
             return Result.success(adapter.fromJson(cached.json) ?: emptyList())
         }
         return runCatching {
-            val result = apiService.getAiringTodayTvShows(page = 1).results.take(12)
+            val result = if (filter == ContentFilter.ALL) {
+                apiService.getAiringTodayTvShows(page = 1).results.take(12)
+            } else {
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+            }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
         }.recoverCatching { error ->
             cached?.let { adapter.fromJson(it.json) ?: emptyList() } ?: throw error
-        }
-    }
-    suspend fun getDiscoverTv(originCountry: String?, withGenres: String?, withoutGenres: String?): Result<List<TvShow>> {
-        return runCatching {
-            apiService.discoverTv(originCountry, withGenres, withoutGenres).results.take(12)
         }
     }
 }
