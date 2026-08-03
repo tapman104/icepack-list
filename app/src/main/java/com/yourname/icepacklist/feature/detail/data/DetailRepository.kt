@@ -8,6 +8,9 @@ import com.yourname.icepacklist.core.database.dao.TvDetailCacheDao
 import com.yourname.icepacklist.core.database.entity.MovieDetailCacheEntity
 import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
+import com.yourname.icepacklist.feature.home.domain.PersonDetail
+import com.yourname.icepacklist.feature.home.domain.CombinedCreditsResponse
+import com.yourname.icepacklist.feature.home.domain.PersonImagesResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -38,5 +41,17 @@ class DetailRepository @Inject constructor(
 
     private suspend fun fetchMovieDetails(movieId: Int): MovieDetail = withContext(Dispatchers.IO) {
         apiService.getMovieDetails(movieId)
+    }
+
+    suspend fun getPersonDetail(personId: Int): PersonDetail = withContext(Dispatchers.IO) {
+        apiService.getPersonDetails(personId)
+    }
+
+    suspend fun getPersonCombinedCredits(personId: Int): CombinedCreditsResponse = withContext(Dispatchers.IO) {
+        apiService.getPersonCombinedCredits(personId)
+    }
+
+    suspend fun getPersonImages(personId: Int): PersonImagesResponse = withContext(Dispatchers.IO) {
+        apiService.getPersonImages(personId)
     }
 }

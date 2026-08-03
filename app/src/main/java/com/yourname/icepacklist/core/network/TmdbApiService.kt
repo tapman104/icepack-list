@@ -8,12 +8,12 @@ import com.yourname.icepacklist.feature.home.domain.KeywordsResponse
 import com.yourname.icepacklist.feature.home.domain.WatchProvidersResponse
 import com.yourname.icepacklist.feature.home.domain.ReviewsResponse
 import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
-import com.yourname.icepacklist.feature.home.domain.Person
+import com.yourname.icepacklist.feature.home.domain.PersonDetail
 import com.yourname.icepacklist.feature.home.domain.TmdbResponse
 import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.feature.home.domain.VideoResponse
-import com.yourname.icepacklist.feature.home.domain.PersonMovieCreditsResponse
+import com.yourname.icepacklist.feature.home.domain.CombinedCreditsResponse
 import com.yourname.icepacklist.feature.home.domain.PersonImagesResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -169,12 +169,12 @@ interface TmdbApiService {
     @GET("person/{person_id}")
     suspend fun getPersonDetails(
         @Path("person_id") personId: Int
-    ): Person
+    ): PersonDetail
 
-    @GET("person/{person_id}/movie_credits")
-    suspend fun getPersonMovieCredits(
+    @GET("person/{person_id}/combined_credits")
+    suspend fun getPersonCombinedCredits(
         @Path("person_id") personId: Int
-    ): PersonMovieCreditsResponse
+    ): CombinedCreditsResponse
 
     @GET("person/{person_id}/images")
     suspend fun getPersonImages(

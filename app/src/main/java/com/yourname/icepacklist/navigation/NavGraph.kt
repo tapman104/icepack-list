@@ -148,7 +148,8 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             ) {
                 PersonDetailScreen(
                     onBack = { navController.popBackStack() },
-                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) }
+                    onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) },
+                    onTvClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) }
                 )
             }
 
