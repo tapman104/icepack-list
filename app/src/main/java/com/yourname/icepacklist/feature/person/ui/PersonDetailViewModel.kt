@@ -65,16 +65,14 @@ class PersonDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, isError = false) }
             try {
                 coroutineScope {
-                    val results = awaitAll(
-                        async { repository.getPersonDetail(personId) },
-                        async { repository.getPersonCombinedCredits(personId) },
-                        async { repository.getPersonImages(personId) }
-                    )
-                    
-                    val personDetail = results[0] as PersonDetail
-                    val combinedCredits = (results[1] as CombinedCreditsResponse).cast
-                        .sortedByDescending { it.releaseDate ?: it.firstAirDate }
-                    val images = (results[2] as PersonImagesResponse).profiles
+                    val result = repository.getPersonDetailFull(personId)
+                    val fullResponse = result.getOrThrow()
+
+                    val personDetail = fullResponse.toPersonDetail()
+                    val combinedCredits = fullResponse.combinedCreditsResponse?.cast
+                        ?.sortedByDescending { it.releaseDate ?: it.firstAirDate }
+                        ?: emptyList()
+                    val images = fullResponse.imagesResponse?.profiles ?: emptyList()
 
                     val knownFor = combinedCredits.take(10)
 

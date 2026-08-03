@@ -192,6 +192,12 @@ interface TmdbApiService {
         @Path("person_id") personId: Int
     ): PersonDetail
 
+    @GET("person/{person_id}")
+    suspend fun getPersonDetailFull(
+        @Path("person_id") personId: Int,
+        @Query("append_to_response") appendToResponse: String = "combined_credits,images"
+    ): com.yourname.icepacklist.feature.home.domain.PersonDetailFullResponse
+
     @GET("person/{person_id}/combined_credits")
     suspend fun getPersonCombinedCredits(
         @Path("person_id") personId: Int
