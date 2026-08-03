@@ -27,7 +27,7 @@ class CategoryPagingSource(
                 "airing_today" -> apiService.getAiringTodayTvShows(page = position)
                 else -> throw IllegalArgumentException("Unknown category: $category")
             }
-            val nextKey = null
+            val nextKey = if (response.page < response.totalPages) response.page + 1 else null
             LoadResult.Page(
                 data = response.results as List<Any>,
                 prevKey = if (position == 1) null else position - 1,
