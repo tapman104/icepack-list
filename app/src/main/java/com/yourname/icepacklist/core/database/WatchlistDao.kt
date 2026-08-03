@@ -22,6 +22,9 @@ interface WatchlistDao {
     @Query("SELECT * FROM watchlist ORDER BY addedAt DESC")
     fun getAll(): Flow<List<WatchlistEntity>>
 
+    @Query("SELECT * FROM watchlist ORDER BY addedAt DESC LIMIT 1")
+    suspend fun getLatestWatchlistItem(): WatchlistEntity?
+
     @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY addedAt DESC")
     fun getByStatus(status: String): Flow<List<WatchlistEntity>>
 
