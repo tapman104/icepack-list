@@ -72,6 +72,12 @@ interface TmdbApiService {
         @Query("page") page: Int = 1
     ): TmdbResponse<Movie>
 
+    @GET("movie/{movie_id}/recommendations")
+    suspend fun getMovieRecommendations(
+        @Path("movie_id") movieId: Int,
+        @Query("page") page: Int = 1
+    ): TmdbResponse<Movie>
+
     @GET("movie/{movie_id}/videos")
     suspend fun getMovieVideos(
         @Path("movie_id") movieId: Int
@@ -140,6 +146,12 @@ interface TmdbApiService {
 
     @GET("tv/{tv_id}/similar")
     suspend fun getSimilarTvShows(
+        @Path("tv_id") tvId: Int,
+        @Query("page") page: Int = 1
+    ): TmdbResponse<TvShow>
+
+    @GET("tv/{tv_id}/recommendations")
+    suspend fun getTvRecommendations(
         @Path("tv_id") tvId: Int,
         @Query("page") page: Int = 1
     ): TmdbResponse<TvShow>
