@@ -176,4 +176,9 @@ class HomeRepository @Inject constructor(
             cached?.let { adapter.fromJson(it.json) ?: emptyList() } ?: throw error
         }
     }
+    suspend fun getDiscoverTv(originCountry: String?, withGenres: String?, withoutGenres: String?): Result<List<TvShow>> {
+        return runCatching {
+            apiService.discoverTv(originCountry, withGenres, withoutGenres).results.take(12)
+        }
+    }
 }

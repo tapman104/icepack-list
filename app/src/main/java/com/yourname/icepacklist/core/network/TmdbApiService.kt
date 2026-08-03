@@ -164,6 +164,15 @@ interface TmdbApiService {
         @Path("season_number") seasonNumber: Int
     ): com.yourname.icepacklist.feature.home.domain.SeasonDetailResponse
 
+    @GET("discover/tv")
+    suspend fun discoverTv(
+        @Query("with_origin_country") originCountry: String? = null,
+        @Query("with_genres") withGenres: String? = null,
+        @Query("without_genres") withoutGenres: String? = null,
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("page") page: Int = 1
+    ): TmdbResponse<TvShow>
+
     // ── People ───────────────────────────────────────────────────────────────
 
     @GET("person/{person_id}")
