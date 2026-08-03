@@ -449,9 +449,10 @@ private fun PersonInfoSection(
     modifier: Modifier = Modifier
 ) {
     // Split name into first and family
-    val nameParts = person.name.trim().split(" ")
-    val firstName = nameParts.firstOrNull() ?: ""
-    val familyName = nameParts.drop(1).joinToString(" ")
+    val (firstName, familyName) = remember(person.name) {
+        val parts = person.name.trim().split(" ")
+        Pair(parts.firstOrNull() ?: "", parts.drop(1).joinToString(" "))
+    }
 
     Column(
         modifier = modifier

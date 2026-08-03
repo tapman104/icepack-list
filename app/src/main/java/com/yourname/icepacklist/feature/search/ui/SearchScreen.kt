@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -231,11 +232,12 @@ private fun SearchResultCard(
                 "person" -> Color(0xFF757575)
                 else -> Color(0xFF333333)
             }
+            val chipColorFaded = remember(item.mediaType) { chipColor.copy(alpha = 0.9f) }
             
             Box(
                 modifier = Modifier
                     .padding(8.dp)
-                    .background(chipColor.copy(alpha = 0.9f), RoundedCornerShape(12.dp))
+                    .background(chipColorFaded, RoundedCornerShape(12.dp))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .align(Alignment.TopStart)
             ) {

@@ -38,6 +38,7 @@ fun SeasonEpisodesScreen(
     val totalSeasons by viewModel.totalSeasons.collectAsState()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 title = { Text(viewModel.tvName, color = MaterialTheme.colorScheme.onSurface) },

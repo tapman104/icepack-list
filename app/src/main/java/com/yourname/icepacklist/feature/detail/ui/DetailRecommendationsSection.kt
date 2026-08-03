@@ -32,7 +32,7 @@ fun DetailRecommendationsSection(
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(modifier = Modifier.height(180.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(similar) { simMovie ->
+                items(similar, key = { it.id }) { simMovie ->
                     MovieCard(movie = simMovie, onClick = { onMovieClick(simMovie.id) })
                 }
             }

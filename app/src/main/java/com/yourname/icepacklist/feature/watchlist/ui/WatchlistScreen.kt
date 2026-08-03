@@ -187,15 +187,19 @@ private fun WatchlistItemRow(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
+    val surface = MaterialTheme.colorScheme.surface
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val rowBrush = remember(surface, surfaceVariant) {
+        Brush.horizontalGradient(listOf(surface, surfaceVariant))
+    }
+
     Box {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant)
-                    )
+                    brush = rowBrush
                 )
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                 .combinedClickable(

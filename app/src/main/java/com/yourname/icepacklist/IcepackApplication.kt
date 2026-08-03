@@ -10,6 +10,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import coil.size.Precision
 import com.yourname.icepacklist.core.cache.CacheEvictionWorker
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
@@ -36,7 +37,9 @@ class IcepackApplication : Application(), Configuration.Provider, ImageLoaderFac
                     .build()
             }
             .respectCacheHeaders(false)
-            .crossfade(true)
+            .precision(Precision.INEXACT)
+            .bitmapFactoryMaxParallelism(2)
+            .crossfade(false)
             .build()
     }
 

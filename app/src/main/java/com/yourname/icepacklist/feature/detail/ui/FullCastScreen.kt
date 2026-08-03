@@ -56,6 +56,7 @@ fun FullCastScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
                 title = { Text("Cast & Crew", color = MaterialTheme.colorScheme.onSurface) },
