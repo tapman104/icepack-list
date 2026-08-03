@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 
 @JsonClass(generateAdapter = true)
 data class WatchProvidersResponse(
-    @Json(name = "id") val id: Int,
+    @Json(name = "id") val id: Int? = null,
     @Json(name = "results") val results: Map<String, WatchProviderRegion>?
 )
 
