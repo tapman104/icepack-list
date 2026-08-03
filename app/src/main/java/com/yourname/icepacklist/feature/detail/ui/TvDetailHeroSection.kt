@@ -40,6 +40,10 @@ fun TvDetailHeroSection(
     onShowMyListSheet: () -> Unit
 ) {
     val context = LocalContext.current
+    val overlayColor = remember { Color.Black.copy(alpha = 0.5f) }
+    val ratingColor = remember { Color(0xFFFFC107) }
+    val mutedGray = remember { Color(0xFF888888) }
+    val primaryRed = remember { Color(0xFFE50914) }
 
     // M13 — String.format in remember, only recalculates when voteAverage changes
     val ratingStr = remember(tvShow.voteAverage) {
@@ -84,7 +88,7 @@ fun TvDetailHeroSection(
                 modifier = Modifier
                     .padding(top = 32.dp, start = 16.dp)
                     .align(Alignment.TopStart)
-                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    .background(overlayColor, CircleShape)
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
             }
@@ -130,15 +134,15 @@ fun TvDetailHeroSection(
                 // M13 — using pre-computed ratingStr from remember above
                 Text(
                     text = "★ $ratingStr",
-                    color = Color(0xFFFFC107),
+                    color = ratingColor,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
                 )
                 tvShow.firstAirDate?.takeIf { it.length >= 4 }?.let {
-                    Text(text = it.take(4), color = Color(0xFF888888), fontSize = 14.sp)
+                    Text(text = it.take(4), color = mutedGray, fontSize = 14.sp)
                 }
                 tvShow.numberOfSeasons?.let {
-                    Text(text = "$it Seasons", color = Color(0xFF888888), fontSize = 14.sp)
+                    Text(text = "$it Seasons", color = mutedGray, fontSize = 14.sp)
                 }
             }
 
@@ -169,7 +173,7 @@ fun TvDetailHeroSection(
                             onAddToWatchlist(WatchlistStatus.PLAN_TO_WATCH.name)
                             onShowMyListSheet()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryRed),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {

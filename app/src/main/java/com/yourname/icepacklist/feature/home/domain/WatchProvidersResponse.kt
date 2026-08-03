@@ -2,6 +2,7 @@ package com.yourname.icepacklist.feature.home.domain
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import androidx.compose.runtime.Immutable
 
 @JsonClass(generateAdapter = true)
 data class WatchProvidersResponse(
@@ -15,6 +16,7 @@ data class WatchProviderRegion(
     @Json(name = "flatrate") val flatrate: List<WatchProvider>?
 )
 
+@Immutable
 @JsonClass(generateAdapter = true)
 data class WatchProvider(
     @Json(name = "provider_id") val providerId: Int,

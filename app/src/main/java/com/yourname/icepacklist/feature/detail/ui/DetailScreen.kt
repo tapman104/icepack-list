@@ -32,6 +32,7 @@ fun DetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val entryState by viewModel.entryState.collectAsState()
+    val primaryRed = remember { Color(0xFFE50914) }
 
     // L1 — outer Box(fillMaxSize) removed to eliminate double measurement with LazyColumn(fillMaxSize).
     // Loading/Error each have their own Box with centering; Success renders directly.
@@ -61,7 +62,7 @@ fun DetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { viewModel.loadMovieDetail() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryRed)
                     ) {
                         Text(stringResource(R.string.retry), color = Color.White)
                     }

@@ -2,6 +2,7 @@ package com.yourname.icepacklist.feature.home.domain
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import androidx.compose.runtime.Immutable
 
 @JsonClass(generateAdapter = true)
 data class Network(
@@ -15,6 +16,7 @@ data class CreatedBy(
     @Json(name = "name") val name: String
 )
 
+@Immutable
 @JsonClass(generateAdapter = true)
 data class TvShowDetail(
     @Json(name = "id") val id: Int,

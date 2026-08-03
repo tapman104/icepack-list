@@ -153,6 +153,7 @@ fun CrewItemCard(person: Crew, onClick: () -> Unit) {
 @Composable
 fun ReviewItem(review: Review) {
     var expanded by remember { mutableStateOf(false) }
+    val ratingColor = remember { Color(0xFFFFC107) }
 
     // M5 — Color.copy() captured in remember; new Color object is not allocated on every recomposition
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
@@ -173,8 +174,13 @@ fun ReviewItem(review: Review) {
                     if (avatarPath.startsWith("/http")) avatarPath.substring(1)
                     else "https://image.tmdb.org/t/p/w185$avatarPath"
                 }
+                val context = LocalContext.current
                 AsyncImage(
-                    model = imageUrl,
+                    model = ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .size(100, 100)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = "Avatar",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -206,7 +212,7 @@ fun ReviewItem(review: Review) {
                 review.authorDetails?.rating?.let { rating ->
                     Text(
                         text = "★ $rating",
-                        color = Color(0xFFFFC107),
+                        color = ratingColor,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

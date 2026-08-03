@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.compose.runtime.Immutable
 
+@Immutable
 sealed interface TvDetailUiState {
     data object Loading : TvDetailUiState
     data class Error(val message: String) : TvDetailUiState

@@ -2,6 +2,7 @@ package com.yourname.icepacklist.feature.home.domain
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import androidx.compose.runtime.Immutable
 
 @JsonClass(generateAdapter = true)
 data class ProductionCompany(
@@ -9,6 +10,7 @@ data class ProductionCompany(
     @Json(name = "name") val name: String
 )
 
+@Immutable
 @JsonClass(generateAdapter = true)
 data class MovieDetail(
     @Json(name = "id") val id: Int,

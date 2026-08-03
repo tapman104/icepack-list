@@ -2,7 +2,9 @@ package com.yourname.icepacklist.feature.home.domain
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
+import androidx.compose.runtime.Immutable
 
+@Immutable
 @JsonClass(generateAdapter = true)
 data class Review(
     @Json(name = "id") val id: String,

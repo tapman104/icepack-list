@@ -40,6 +40,10 @@ fun DetailHeroSection(
     onShowMyListSheet: () -> Unit
 ) {
     val context = LocalContext.current
+    val overlayColor = remember { Color.Black.copy(alpha = 0.5f) }
+    val ratingColor = remember { Color(0xFFFFC107) }
+    val mutedGray = remember { Color(0xFF888888) }
+    val primaryRed = remember { Color(0xFFE50914) }
 
     // M12 — String.format in remember, only recalculates when voteAverage changes
     val ratingStr = remember(movie.voteAverage) {
@@ -84,7 +88,7 @@ fun DetailHeroSection(
                 modifier = Modifier
                     .padding(top = 32.dp, start = 16.dp)
                     .align(Alignment.TopStart)
-                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    .background(overlayColor, CircleShape)
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
             }
@@ -132,21 +136,21 @@ fun DetailHeroSection(
                 // M12 — using pre-computed ratingStr from remember above
                 Text(
                     text = "★ $ratingStr",
-                    color = Color(0xFFFFC107),
+                    color = ratingColor,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
                 )
                 movie.releaseDate?.takeIf { it.isNotEmpty() }?.let {
                     Text(
                         text = it.take(4),
-                        color = Color(0xFF888888),
+                        color = mutedGray,
                         fontSize = 14.sp
                     )
                 }
                 movie.runtime?.takeIf { it > 0 }?.let {
                     Text(
                         text = "${it / 60}h ${it % 60}m",
-                        color = Color(0xFF888888),
+                        color = mutedGray,
                         fontSize = 14.sp
                     )
                 }
@@ -179,7 +183,7 @@ fun DetailHeroSection(
                             onAddToWatchlist(WatchlistStatus.PLAN_TO_WATCH.name)
                             onShowMyListSheet()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryRed),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
