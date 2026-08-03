@@ -3,9 +3,11 @@ package com.yourname.icepacklist.feature.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
+import com.yourname.icepacklist.core.datastore.ContentFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,6 +47,20 @@ class SettingsViewModel @Inject constructor(
     fun clearKey() {
         viewModelScope.launch {
             apiKeyDataStore.clearApiKey()
+        }
+    }
+
+    val contentFilter: StateFlow<ContentFilter> = apiKeyDataStore.contentFilter
+        .map { ContentFilter.fromKey(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ContentFilter.ALL
+        )
+
+    fun setContentFilter(filter: ContentFilter) {
+        viewModelScope.launch {
+            apiKeyDataStore.setContentFilter(filter.name)
         }
     }
 
