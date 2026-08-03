@@ -25,6 +25,8 @@ class ApiKeyDataStore @Inject constructor(
         private val LAST_IMPORT_TIME = longPreferencesKey("last_import_time")
         private val CONTENT_FILTER_KEY = stringPreferencesKey("content_filter")
         private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
+        private val RECOMMENDATIONS_ENABLED_KEY = booleanPreferencesKey("recommendations_enabled")
+        private val SEARCH_FILTER_ENABLED_KEY = booleanPreferencesKey("search_filter_enabled")
     }
 
     val apiKey: Flow<String?> = context.dataStore.data
@@ -38,6 +40,12 @@ class ApiKeyDataStore @Inject constructor(
         
     val isDarkTheme: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[DARK_THEME_KEY] ?: true }
+
+    val recommendationsEnabled: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[RECOMMENDATIONS_ENABLED_KEY] ?: true }
+
+    val searchFilterEnabled: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[SEARCH_FILTER_ENABLED_KEY] ?: false }
 
     suspend fun saveApiKey(key: String) {
         context.dataStore.edit { prefs ->
@@ -66,6 +74,18 @@ class ApiKeyDataStore @Inject constructor(
     suspend fun setDarkTheme(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[DARK_THEME_KEY] = enabled
+        }
+    }
+
+    suspend fun setRecommendationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[RECOMMENDATIONS_ENABLED_KEY] = enabled
+        }
+    }
+
+    suspend fun setSearchFilterEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[SEARCH_FILTER_ENABLED_KEY] = enabled
         }
     }
 }
