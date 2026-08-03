@@ -30,7 +30,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getTrendingMovies(page = 1).results.take(12)
             } else {
-                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "popularity.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -52,7 +52,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getPopularMovies(page = 1).results.take(12)
             } else {
-                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "popularity.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -74,7 +74,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getNowPlayingMovies(page = 1).results.take(12)
             } else {
-                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "primary_release_date.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -96,7 +96,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getUpcomingMovies(page = 1).results.take(12)
             } else {
-                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "primary_release_date.asc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -118,7 +118,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getTopRatedMovies(page = 1).results.take(12)
             } else {
-                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "vote_average.desc", voteCountGte = 200).results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -140,7 +140,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getTrendingTvShows(page = 1).results.take(12)
             } else {
-                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "popularity.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -162,7 +162,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getPopularTvShows(page = 1).results.take(12)
             } else {
-                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "popularity.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -184,7 +184,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getTopRatedTvShows(page = 1).results.take(12)
             } else {
-                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "vote_average.desc", voteCountGte = 200).results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result
@@ -206,7 +206,7 @@ class HomeRepository @Inject constructor(
             val result = if (filter == ContentFilter.ALL) {
                 apiService.getAiringTodayTvShows(page = 1).results.take(12)
             } else {
-                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).results.take(12)
+                apiService.discoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "first_air_date.desc").results.take(12)
             }
             cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
             result

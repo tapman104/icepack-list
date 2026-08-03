@@ -182,6 +182,7 @@ interface TmdbApiService {
         @Query("with_genres") withGenres: String? = null,
         @Query("without_genres") withoutGenres: String? = null,
         @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("vote_count.gte") voteCountGte: Int? = null,
         @Query("page") page: Int = 1
     ): TmdbResponse<TvShow>
 
@@ -191,6 +192,7 @@ interface TmdbApiService {
         @Query("with_genres") withGenres: String? = null,
         @Query("without_genres") withoutGenres: String? = null,
         @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("vote_count.gte") voteCountGte: Int? = null,
         @Query("page") page: Int = 1
     ): TmdbResponse<Movie>
 
