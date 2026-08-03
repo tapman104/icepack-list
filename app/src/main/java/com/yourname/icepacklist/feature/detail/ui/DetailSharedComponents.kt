@@ -61,7 +61,7 @@ fun CastItemCard(person: Cast, onClick: () -> Unit) {
 
     Column(
         modifier = Modifier
-            .width(72.dp)
+            .width(88.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(4.dp),
@@ -87,7 +87,7 @@ fun CastItemCard(person: Cast, onClick: () -> Unit) {
             text = person.name,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
         Text(
@@ -111,7 +111,7 @@ fun CrewItemCard(person: Crew, onClick: () -> Unit) {
 
     Column(
         modifier = Modifier
-            .width(72.dp)
+            .width(88.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(4.dp),
@@ -137,7 +137,7 @@ fun CrewItemCard(person: Crew, onClick: () -> Unit) {
             text = person.name,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
         Text(
