@@ -16,22 +16,36 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: SearchRepository
+    private val repository: SearchRepository,
+    private val apiKeyDataStore: com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val searchConfig = combine(
+        apiKeyDataStore.contentFilter,
+        apiKeyDataStore.searchFilterEnabled
+    ) { key, filterEnabled ->
+        if (filterEnabled) com.yourname.icepacklist.core.datastore.ContentFilter.fromKey(key) else null
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     val searchResults: Flow<PagingData<MultiSearchResult>> = _searchQuery
         .debounce(300)
         .filter { it.isNotBlank() }
-        .flatMapLatest { query ->
-            repository.searchMulti(query)
+        .combine(searchConfig) { query, filter ->
+            query to filter
+        }
+        .flatMapLatest { (query, filter) ->
+            repository.searchMulti(query, filter)
         }
         .cachedIn(viewModelScope)
 

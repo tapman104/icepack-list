@@ -17,6 +17,7 @@ data class MultiSearchResult(
     @Json(name = "vote_average") val voteAverage: Double?,
     @Json(name = "release_date") val releaseDate: String?,
     @Json(name = "first_air_date") val firstAirDate: String?,
+    @Json(name = "origin_country") val originCountry: List<String>?,
     @Json(name = "genre_ids") val genreIds: List<Int>?
 ) {
     val displayTitle: String get() = title ?: name ?: ""
