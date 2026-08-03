@@ -10,6 +10,7 @@ import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.feature.home.domain.MovieDetailFullResponse
 import com.yourname.icepacklist.feature.home.domain.PersonDetail
+import com.yourname.icepacklist.feature.home.domain.TvDetailFullResponse
 import com.yourname.icepacklist.feature.home.domain.CombinedCreditsResponse
 import com.yourname.icepacklist.feature.home.domain.PersonImagesResponse
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +57,28 @@ class DetailRepository @Inject constructor(
                 apiService.getMovieDetailFull(movieId).also { detail ->
                     movieDetailCacheDao.upsert(
                         MovieDetailCacheEntity(movieId, adapter.toJson(detail), System.currentTimeMillis())
+                    )
+                }
+            }
+        }.recoverCatching { error ->
+            cached?.let { adapter.fromJson(it.json) } ?: throw error
+        }
+    }
+
+    suspend fun getTvDetailFull(tvId: Int): Result<TvDetailFullResponse> {
+        val adapter = moshi.adapter(TvDetailFullResponse::class.java)
+        val cached = tvDetailCacheDao.get(tvId)
+        if (cached != null && !CacheConfig.isStale(cached.fetchedAt)) {
+            val fromCache = runCatching { adapter.fromJson(cached.json) }.getOrNull()
+            if (fromCache != null) return Result.success(fromCache)
+        }
+        return runCatching {
+            withContext(Dispatchers.IO) {
+                apiService.getTvDetailFull(tvId).also { detail ->
+                    tvDetailCacheDao.upsert(
+                        com.yourname.icepacklist.core.database.entity.TvDetailCacheEntity(
+                            tvId, adapter.toJson(detail), System.currentTimeMillis()
+                        )
                     )
                 }
             }

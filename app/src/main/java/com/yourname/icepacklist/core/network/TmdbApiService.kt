@@ -127,6 +127,12 @@ interface TmdbApiService {
         @Query("append_to_response") appendToResponse: String = "credits,videos"
     ): TvShowDetail
 
+    @GET("tv/{tv_id}")
+    suspend fun getTvDetailFull(
+        @Path("tv_id") tvId: Int,
+        @Query("append_to_response") appendToResponse: String = "credits,videos,similar,watch/providers,keywords,reviews"
+    ): com.yourname.icepacklist.feature.home.domain.TvDetailFullResponse
+
     @GET("tv/{tv_id}/credits")
     suspend fun getTvShowCredits(
         @Path("tv_id") tvId: Int
