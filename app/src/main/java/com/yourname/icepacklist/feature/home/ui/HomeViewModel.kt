@@ -2,6 +2,8 @@ package com.yourname.icepacklist.feature.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
+import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.feature.home.data.HomeRepository
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.TvShow
@@ -14,7 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.yourname.icepacklist.feature.home.domain.DramaFilter
 
 data class HomeUiState(
     val trendingMovies: List<Movie> = emptyList(),
@@ -34,61 +35,43 @@ data class HomeUiState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: HomeRepository
+    private val repository: HomeRepository,
+    private val apiKeyDataStore: ApiKeyDataStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
-    private val _dramaFilter = MutableStateFlow<DramaFilter>(DramaFilter.All)
-    val dramaFilter: StateFlow<DramaFilter> = _dramaFilter.asStateFlow()
+    
+    private var lastFilter: ContentFilter = ContentFilter.ALL
 
     init {
-        refresh()
-    }
-
-    fun setDramaFilter(filter: DramaFilter) {
-        _dramaFilter.value = filter
-        loadDramaRow(filter)
-    }
-
-    private fun loadDramaRow(filter: DramaFilter) {
         viewModelScope.launch {
-            if (filter == DramaFilter.All) {
-                val trending = repository.getTrendingTvShows().getOrDefault(emptyList()).distinctBy { it.id }
-                _uiState.update { it.copy(trendingTvShows = trending) }
-            } else {
-                val result = repository.getDiscoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres).getOrDefault(emptyList()).distinctBy { it.id }
-                _uiState.update { it.copy(trendingTvShows = result) }
+            apiKeyDataStore.contentFilter.collect { key ->
+                val filter = ContentFilter.fromKey(key)
+                lastFilter = filter
+                refresh(filter)
             }
         }
     }
 
     fun retry() {
-        refresh()
+        refresh(lastFilter)
     }
 
-    fun refresh() {
+    fun refresh(filter: ContentFilter = lastFilter) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isError = false, errorMessage = "", error = null) }
             
-            val trendingMoviesDef = async { repository.getTrendingMovies() }
-            val popularMoviesDef = async { repository.getPopularMovies() }
-            val nowPlayingMoviesDef = async { repository.getNowPlayingMovies() }
-            val upcomingMoviesDef = async { repository.getUpcomingMovies() }
-            val topRatedMoviesDef = async { repository.getTopRatedMovies() }
+            val trendingMoviesDef = async { repository.getTrendingMovies(filter) }
+            val popularMoviesDef = async { repository.getPopularMovies(filter) }
+            val nowPlayingMoviesDef = async { repository.getNowPlayingMovies(filter) }
+            val upcomingMoviesDef = async { repository.getUpcomingMovies(filter) }
+            val topRatedMoviesDef = async { repository.getTopRatedMovies(filter) }
             
-            val trendingTvShowsDef = async { 
-                val filter = _dramaFilter.value
-                if (filter == DramaFilter.All) {
-                    repository.getTrendingTvShows()
-                } else {
-                    repository.getDiscoverTv(filter.originCountry, filter.withGenres, filter.withoutGenres)
-                }
-            }
-            val popularTvShowsDef = async { repository.getPopularTvShows() }
-            val topRatedTvShowsDef = async { repository.getTopRatedTvShows() }
-            val airingTodayTvShowsDef = async { repository.getAiringTodayTvShows() }
+            val trendingTvShowsDef = async { repository.getTrendingTvShows(filter) }
+            val popularTvShowsDef = async { repository.getPopularTvShows(filter) }
+            val topRatedTvShowsDef = async { repository.getTopRatedTvShows(filter) }
+            val airingTodayTvShowsDef = async { repository.getAiringTodayTvShows(filter) }
             
             val results = awaitAll(
                 trendingMoviesDef, popularMoviesDef, nowPlayingMoviesDef, upcomingMoviesDef, topRatedMoviesDef,
@@ -122,3 +105,4 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
