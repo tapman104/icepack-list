@@ -166,6 +166,25 @@ fun HomeScreen(
                                         )
                                     }
                                 }
+                                item(key = "all_recommendations", contentType = "CategoryRow") {
+                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                        CategoryRow(
+                                            title = "Recommended",
+                                            items = uiState.recommendations,
+                                            onViewAll = { onViewCategory("recommendations") },
+                                            key = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) item.id else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) item.id else item.hashCode()
+                                            },
+                                            itemContent = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
                                 item(key = "all_popular_movies", contentType = "CategoryRow") {
                                     if (uiState.popularMovies.isNotEmpty()) {
                                         CategoryRow(
@@ -267,6 +286,25 @@ fun HomeScreen(
                                         )
                                     }
                                 }
+                                item(key = "movies_recommendations", contentType = "CategoryRow") {
+                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                        CategoryRow(
+                                            title = "Recommended",
+                                            items = uiState.recommendations,
+                                            onViewAll = { onViewCategory("recommendations") },
+                                            key = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) item.id else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) item.id else item.hashCode()
+                                            },
+                                            itemContent = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
                                 item(key = "movies_popular", contentType = "CategoryRow") {
                                     if (uiState.popularMovies.isNotEmpty()) {
                                         CategoryRow(
@@ -321,6 +359,25 @@ fun HomeScreen(
                                             onViewAll = { onViewCategory("trending_tv") },
                                             key = { it.id },
                                             itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                        )
+                                    }
+                                }
+                                item(key = "tv_recommendations", contentType = "CategoryRow") {
+                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                        CategoryRow(
+                                            title = "Recommended",
+                                            items = uiState.recommendations,
+                                            onViewAll = { onViewCategory("recommendations") },
+                                            key = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) item.id else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) item.id else item.hashCode()
+                                            },
+                                            itemContent = { item -> 
+                                                if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                }
+                                            }
                                         )
                                     }
                                 }
