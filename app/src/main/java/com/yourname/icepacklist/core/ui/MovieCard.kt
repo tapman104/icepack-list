@@ -38,6 +38,7 @@ fun MovieCard(movie: Movie, onClick: () -> Unit) {
             val imageRequest = remember(movie.posterPath) {
                 ImageRequest.Builder(context)
                     .data(movie.posterPath?.let { "https://image.tmdb.org/t/p/w342$it" })
+                    .size(300, 450) // decode at display size, not original
                     .crossfade(true)
                     .build()
             }

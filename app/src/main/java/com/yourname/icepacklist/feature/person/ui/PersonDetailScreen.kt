@@ -220,7 +220,7 @@ private fun PersonDetailContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(180.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(movieCredits, key = { it.id }) { credit ->
                             val movie = Movie(
                                 id = credit.id,
@@ -245,7 +245,7 @@ private fun PersonDetailContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(200.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(images.take(15), key = { it.filePath }) { image ->
                             AsyncImage(
                                 model = "$TMDB_PROFILE_BASE${image.filePath}",

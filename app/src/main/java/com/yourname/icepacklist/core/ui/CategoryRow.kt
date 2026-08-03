@@ -65,6 +65,7 @@ fun <T> CategoryRow(
         }
         Spacer(modifier = Modifier.height(12.dp))
         LazyRow(
+            modifier = Modifier.height(180.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {

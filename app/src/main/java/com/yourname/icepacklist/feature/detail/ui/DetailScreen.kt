@@ -308,8 +308,11 @@ private fun DetailContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(watchProviders) { provider ->
+                    LazyRow(modifier = Modifier.height(72.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(
+                            items = watchProviders,
+                            key = { it.providerId }
+                        ) { provider ->
                             Column(
                                 modifier = Modifier.width(64.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -361,7 +364,7 @@ private fun DetailContent(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(credits.cast.take(15), key = { it.id }) { person ->
                             CastItemCard(
                                 person = person,
@@ -396,7 +399,7 @@ private fun DetailContent(
                         style = MaterialTheme.typography.labelMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(crewList, key = { it.id.toString() + it.job }) { person ->
                             CrewItemCard(
                                 person = person,
@@ -503,7 +506,7 @@ private fun DetailContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(180.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(similar, key = { it.id }) { simMovie ->
                             MovieCard(movie = simMovie, onClick = { onMovieClick(simMovie.id) })
                         }

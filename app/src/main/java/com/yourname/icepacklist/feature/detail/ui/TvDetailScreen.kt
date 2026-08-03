@@ -317,7 +317,7 @@ private fun TvDetailContent(
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(credits.cast.take(15), key = { it.id }) { person ->
                             CastItemCard(
                                 person = person,
@@ -338,7 +338,7 @@ private fun TvDetailContent(
                         style = MaterialTheme.typography.labelMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(crewList, key = { it.id.toString() + it.job }) { person ->
                             CrewItemCard(
                                 person = person,
@@ -469,7 +469,7 @@ private fun TvDetailContent(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LazyRow(modifier = Modifier.height(180.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(similar, key = { it.id }) { simShow ->
                             TvShowCard(tvShow = simShow, onClick = { onTvShowClick(simShow.id) })
                         }
