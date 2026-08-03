@@ -23,7 +23,7 @@ data class AuthorDetails(
 
 @JsonClass(generateAdapter = true)
 data class ReviewsResponse(
-    @Json(name = "id") val id: Int,
+    @Json(name = "id") val id: Int? = null,
     @Json(name = "page") val page: Int,
     @Json(name = "results") val results: List<Review>,
     @Json(name = "total_pages") val totalPages: Int,

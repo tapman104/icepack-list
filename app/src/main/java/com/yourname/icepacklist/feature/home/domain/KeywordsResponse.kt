@@ -13,7 +13,7 @@ data class Keyword(
 
 @JsonClass(generateAdapter = true)
 data class KeywordsResponse(
-    @Json(name = "id") val id: Int,
+    @Json(name = "id") val id: Int? = null,
     @Json(name = "keywords") val keywords: List<Keyword>? = null,
     @Json(name = "results") val results: List<Keyword>? = null
 )
