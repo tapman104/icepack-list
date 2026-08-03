@@ -159,7 +159,10 @@ private fun SearchResultGrid(
     ) {
         items(
             count = results.itemCount,
-            key = { index -> results.peek(index)?.id ?: index },
+            key = { index -> 
+                val item = results.peek(index)
+                if (item != null) "${item.mediaType}_${item.id}_$index" else index 
+            },
             contentType = { index -> results.peek(index)?.mediaType }
         ) { index ->
             val item = results[index]

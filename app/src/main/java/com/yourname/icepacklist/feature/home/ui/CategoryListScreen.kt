@@ -113,7 +113,7 @@ fun CategoryListScreen(
                             count = items.itemCount,
                             key = { index -> 
                                 val item = items.peek(index)
-                                if (item is Movie) "movie_${item.id}" else if (item is TvShow) "tv_${item.id}" else index
+                                if (item is Movie) "movie_${item.id}_$index" else if (item is TvShow) "tv_${item.id}_$index" else index
                             },
                             contentType = { index ->
                                 val item = items.peek(index)
