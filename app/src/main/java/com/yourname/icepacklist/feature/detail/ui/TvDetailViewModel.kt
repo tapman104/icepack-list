@@ -19,6 +19,7 @@ import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -81,52 +82,54 @@ class TvDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = TvDetailUiState.Loading
             try {
-                val tvDef = async { apiService.getTvShowDetails(tvId) }
-                val similarDef = async { apiService.getSimilarTvShows(tvId) }
-                val providersDef = async { apiService.getTvWatchProviders(tvId) }
-                val keywordsDef = async { apiService.getTvKeywords(tvId) }
-                val reviewsDef = async { apiService.getTvReviews(tvId) }
+                coroutineScope {
+                    val tvDef = async { apiService.getTvShowDetails(tvId) }
+                    val similarDef = async { apiService.getSimilarTvShows(tvId) }
+                    val providersDef = async { apiService.getTvWatchProviders(tvId) }
+                    val keywordsDef = async { apiService.getTvKeywords(tvId) }
+                    val reviewsDef = async { apiService.getTvReviews(tvId) }
 
-                awaitAll(tvDef, similarDef, providersDef, keywordsDef, reviewsDef)
+                    awaitAll(tvDef, similarDef, providersDef, keywordsDef, reviewsDef)
 
-                val tvShow = tvDef.await()
-                val similarResponse = similarDef.await()
-                val providersResponse = providersDef.await()
-                val keywordsResponse = keywordsDef.await()
-                val reviewsResponse = reviewsDef.await()
+                    val tvShow = tvDef.await()
+                    val similarResponse = similarDef.await()
+                    val providersResponse = providersDef.await()
+                    val keywordsResponse = keywordsDef.await()
+                    val reviewsResponse = reviewsDef.await()
 
-                val credits = tvShow.creditsResponse ?: CreditsResponse(id = tvId)
-                val videosResponse = tvShow.videoResponse
+                    val credits = tvShow.creditsResponse ?: CreditsResponse(id = tvId)
+                    val videosResponse = tvShow.videoResponse
 
-                val videoResults = videosResponse?.results
-                    ?.filter { it.type == "Trailer" && it.site == "YouTube" }
-                    ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
-                    ?: emptyList()
-                val similarShows = similarResponse.results.distinctBy { it.id }.take(12)
+                    val videoResults = videosResponse?.results
+                        ?.filter { it.type == "Trailer" && it.site == "YouTube" }
+                        ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                        ?: emptyList()
+                    val similarShows = similarResponse.results.distinctBy { it.id }.take(12)
 
-                val networkNames = tvShow.networksList.map { it.name }
-                val createdByStr = tvShow.createdByList.map { it.name }.joinToString(", ")
+                    val networkNames = tvShow.networksList.map { it.name }
+                    val createdByStr = tvShow.createdByList.map { it.name }.joinToString(", ")
 
-                val updatedTvShow = tvShow.copy(
-                    networks = networkNames,
-                    createdBy = createdByStr,
-                    videos = videoResults,
-                    similar = similarShows
-                )
+                    val updatedTvShow = tvShow.copy(
+                        networks = networkNames,
+                        createdBy = createdByStr,
+                        videos = videoResults,
+                        similar = similarShows
+                    )
 
-                val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
-                val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
-                val reviews = reviewsResponse.results
+                    val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
+                    val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
+                    val reviews = reviewsResponse.results
 
-                _uiState.value = TvDetailUiState.Success(
-                    tvShow = updatedTvShow,
-                    credits = credits,
-                    videos = videoResults,
-                    similar = similarShows,
-                    watchProviders = inProviders,
-                    keywords = keywords,
-                    reviews = reviews
-                )
+                    _uiState.value = TvDetailUiState.Success(
+                        tvShow = updatedTvShow,
+                        credits = credits,
+                        videos = videoResults,
+                        similar = similarShows,
+                        watchProviders = inProviders,
+                        keywords = keywords,
+                        reviews = reviews
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.value = TvDetailUiState.Error(e.localizedMessage ?: "Unknown error occurred")
             }
