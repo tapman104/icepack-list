@@ -1,6 +1,8 @@
 package com.yourname.icepacklist.core.di
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.squareup.moshi.Moshi
 import com.yourname.icepacklist.core.network.AuthInterceptor
 import com.yourname.icepacklist.core.network.RateLimitInterceptor
@@ -38,16 +40,39 @@ object NetworkModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+        
+        val cacheSize = 10L * 1024 * 1024 // 10 MB
+        val cache = Cache(File(context.cacheDir, "http_cache"), cacheSize)
+
         return OkHttpClient.Builder()
+            .cache(cache)
+            .addInterceptor { chain ->
+                var request = chain.request()
+                request = if (isNetworkAvailable(context)) {
+                    request.newBuilder()
+                        .header("Cache-Control", "public, max-age=300") // 5 min fresh
+                        .build()
+                } else {
+                    request.newBuilder()
+                        .header("Cache-Control", "public, only-if-cached, max-stale=86400") // 1 day stale
+                        .build()
+                }
+                chain.proceed(request)
+            }
             .addInterceptor(authInterceptor)
             // Rate limiting: max 40 requests per 10 seconds (TMDB limit is 50, stay under)
             .addInterceptor(RateLimitInterceptor(maxRequests = 40, windowMs = 10_000L))
             // Retry on 429 with Retry-After header respect
             .addInterceptor(RetryInterceptor(maxRetries = 3))
             .addInterceptor(loggingInterceptor)
-            // Cache: 10 MB HTTP cache for image metadata (not images themselves)
-            .cache(Cache(File(context.cacheDir, "http_cache"), 10L * 1024 * 1024))
             .build()
+    }
+
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
     @Provides

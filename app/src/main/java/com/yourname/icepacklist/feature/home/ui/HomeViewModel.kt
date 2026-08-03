@@ -1,4 +1,4 @@
-﻿package com.yourname.icepacklist.feature.home.ui
+package com.yourname.icepacklist.feature.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,6 +26,8 @@ data class HomeUiState(
     val topRatedTvShows: List<TvShow> = emptyList(),
     val airingTodayTvShows: List<TvShow> = emptyList(),
     val isLoading: Boolean = false,
+    val isError: Boolean = false,
+    val errorMessage: String = "",
     val error: String? = null
 )
 
@@ -41,9 +43,13 @@ class HomeViewModel @Inject constructor(
         refresh()
     }
 
+    fun retry() {
+        refresh()
+    }
+
     fun refresh() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, isError = false, errorMessage = "", error = null) }
             
             val trendingMoviesDef = async { repository.getTrendingMovies() }
             val popularMoviesDef = async { repository.getPopularMovies() }
@@ -63,7 +69,12 @@ class HomeViewModel @Inject constructor(
             
             val anyFailure = results.firstOrNull { it.isFailure }
             if (anyFailure != null) {
-                _uiState.update { it.copy(isLoading = false, error = anyFailure.exceptionOrNull()?.message ?: "Unknown error") }
+                _uiState.update { it.copy(
+                    isLoading = false, 
+                    isError = true, 
+                    errorMessage = "No internet connection", 
+                    error = anyFailure.exceptionOrNull()?.message ?: "Unknown error"
+                ) }
             } else {
                 _uiState.update {
                     it.copy(
