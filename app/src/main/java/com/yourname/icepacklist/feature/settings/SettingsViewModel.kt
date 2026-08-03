@@ -77,6 +77,32 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    val recommendationsEnabled: StateFlow<Boolean> = apiKeyDataStore.recommendationsEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = true
+        )
+
+    fun setRecommendationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            apiKeyDataStore.setRecommendationsEnabled(enabled)
+        }
+    }
+
+    val searchFilterEnabled: StateFlow<Boolean> = apiKeyDataStore.searchFilterEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
+
+    fun setSearchFilterEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            apiKeyDataStore.setSearchFilterEnabled(enabled)
+        }
+    }
+
     private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
     val backupState = _backupState.asStateFlow()
     

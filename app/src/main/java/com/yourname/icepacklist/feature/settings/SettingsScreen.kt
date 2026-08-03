@@ -176,6 +176,43 @@ fun SettingsScreen(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
+            val recommendationsEnabled by viewModel.recommendationsEnabled.collectAsState()
+            val searchFilterEnabled by viewModel.searchFilterEnabled.collectAsState()
+
+            Text(
+                text = "Discovery",
+                style = MaterialTheme.typography.titleLarge
+            )
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.setRecommendationsEnabled(!recommendationsEnabled) }
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Show Recommendations", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                Switch(checked = recommendationsEnabled, onCheckedChange = null)
+            }
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.setSearchFilterEnabled(!searchFilterEnabled) }
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Filter Search by Region", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "Applies your Content Region to search results", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = searchFilterEnabled, onCheckedChange = null)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = "Content Region",
                 style = MaterialTheme.typography.titleLarge
