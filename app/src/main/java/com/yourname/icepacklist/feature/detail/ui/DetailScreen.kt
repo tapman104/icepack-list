@@ -37,14 +37,7 @@ fun DetailScreen(
     // Loading/Error each have their own Box with centering; Success renders directly.
     when (val state = uiState) {
         is DetailUiState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = Color(0xFFE50914))
-            }
+            DetailScreenShimmer()
         }
         is DetailUiState.Error -> {
             Box(

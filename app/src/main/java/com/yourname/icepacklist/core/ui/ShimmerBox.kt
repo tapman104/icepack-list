@@ -15,10 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+
 @Composable
 fun ShimmerBox(
     modifier: Modifier = Modifier,
-    height: Dp = 200.dp
+    height: Dp? = 200.dp,
+    cornerRadius: Dp = 8.dp
 ) {
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnim by transition.animateFloat(
@@ -45,10 +49,11 @@ fun ShimmerBox(
         end = Offset(translateAnim, 0f)
     )
 
+    val baseModifier = if (height != null && height > 0.dp) modifier.height(height) else modifier
+
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
+        modifier = baseModifier
+            .clip(RoundedCornerShape(cornerRadius))
             .background(brush)
     )
 }

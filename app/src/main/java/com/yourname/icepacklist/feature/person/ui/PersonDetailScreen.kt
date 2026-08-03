@@ -65,10 +65,7 @@ fun PersonDetailScreen(
     ) {
         when {
             uiState.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFFE50914)
-                )
+                PersonDetailShimmer()
             }
             uiState.isError -> {
                 OfflineErrorContent(

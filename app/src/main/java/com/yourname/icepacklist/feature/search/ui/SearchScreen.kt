@@ -62,7 +62,7 @@ fun SearchScreen(
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                results.loadState.refresh is LoadState.Loading && searchQuery.isNotBlank() -> ShimmerGrid()
+                results.loadState.refresh is LoadState.Loading && searchQuery.isNotBlank() -> SearchResultShimmer()
                 results.loadState.refresh is LoadState.Error -> {
                     val error = (results.loadState.refresh as LoadState.Error).error
                     FullScreenError(
@@ -318,6 +318,32 @@ private fun FullScreenError(message: String, onRetry: () -> Unit) {
             }
             Button(onClick = onRetry) {
                 Text("Retry")
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchResultShimmer() {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(10) {
+            Column {
+                com.yourname.icepacklist.core.ui.ShimmerBox(
+                    modifier = Modifier.fillMaxWidth().aspectRatio(2f / 3f),
+                    cornerRadius = 8.dp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.width(50.dp).height(18.dp), cornerRadius = 9.dp)
+                Spacer(modifier = Modifier.height(4.dp))
+                com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.fillMaxWidth(0.8f).height(12.dp), cornerRadius = 4.dp)
+                Spacer(modifier = Modifier.height(4.dp))
+                com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.fillMaxWidth(0.4f).height(10.dp), cornerRadius = 4.dp)
             }
         }
     }

@@ -80,9 +80,7 @@ fun SeasonEpisodesScreen(
 
             when (val state = uiState) {
                 is SeasonEpisodesUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFE50914))
-                    }
+                    SeasonEpisodesShimmer()
                 }
                 is SeasonEpisodesUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -180,5 +178,34 @@ private fun EpisodePlot(plot: String, showPlot: Boolean) {
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodySmall
         )
+    }
+}
+
+@Composable
+private fun SeasonEpisodesShimmer() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        repeat(6) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                com.yourname.icepacklist.core.ui.ShimmerBox(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .aspectRatio(16f / 9f),
+                    cornerRadius = 6.dp
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.width(40.dp).height(10.dp), cornerRadius = 4.dp)
+                    com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.width(160.dp).height(13.dp), cornerRadius = 4.dp)
+                    com.yourname.icepacklist.core.ui.ShimmerBox(modifier = Modifier.width(90.dp).height(10.dp), cornerRadius = 4.dp)
+                }
+            }
+        }
     }
 }

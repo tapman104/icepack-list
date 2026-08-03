@@ -64,7 +64,7 @@ fun CategoryListScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0D0D0D)).padding(padding)) {
             when {
-                items.loadState.refresh is LoadState.Loading -> ShimmerGrid()
+                items.loadState.refresh is LoadState.Loading -> CategoryListShimmer()
                 items.loadState.refresh is LoadState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -129,6 +129,43 @@ fun CategoryListScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryListShimmer() {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 80.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(10) {
+            Column {
+                com.yourname.icepacklist.core.ui.ShimmerBox(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(2f / 3f),
+                    height = 0.dp,
+                    cornerRadius = 8.dp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                com.yourname.icepacklist.core.ui.ShimmerBox(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(12.dp),
+                    cornerRadius = 4.dp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                com.yourname.icepacklist.core.ui.ShimmerBox(
+                    modifier = Modifier
+                        .fillMaxWidth(0.4f)
+                        .height(10.dp),
+                    cornerRadius = 4.dp
+                )
             }
         }
     }
