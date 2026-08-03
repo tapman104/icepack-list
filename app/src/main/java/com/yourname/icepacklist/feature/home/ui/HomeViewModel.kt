@@ -23,10 +23,12 @@ data class HomeUiState(
     val nowPlayingMovies: List<Movie> = emptyList(),
     val upcomingMovies: List<Movie> = emptyList(),
     val topRatedMovies: List<Movie> = emptyList(),
+    val recommendations: List<Any> = emptyList(),
     val trendingTvShows: List<TvShow> = emptyList(),
     val popularTvShows: List<TvShow> = emptyList(),
     val topRatedTvShows: List<TvShow> = emptyList(),
     val airingTodayTvShows: List<TvShow> = emptyList(),
+    val recommendationsEnabled: Boolean = true,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
@@ -44,6 +46,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
     private var lastFilter: ContentFilter = ContentFilter.ALL
+    private var lastRecsEnabled: Boolean = true
 
     init {
         viewModelScope.launch {
@@ -51,6 +54,12 @@ class HomeViewModel @Inject constructor(
                 val filter = ContentFilter.fromKey(key)
                 lastFilter = filter
                 refresh(filter)
+            }
+        }
+        viewModelScope.launch {
+            apiKeyDataStore.recommendationsEnabled.collect { enabled ->
+                lastRecsEnabled = enabled
+                refresh(lastFilter)
             }
         }
     }
@@ -83,10 +92,11 @@ class HomeViewModel @Inject constructor(
             val popularTvShowsDef = if (fetchTv) async { repository.getPopularTvShows(filter) } else null
             val topRatedTvShowsDef = if (fetchTv) async { repository.getTopRatedTvShows(filter) } else null
             val airingTodayTvShowsDef = if (fetchTv) async { repository.getAiringTodayTvShows(filter) } else null
+            val recommendationsDef = if (lastRecsEnabled && (fetchMovies || fetchTv)) async { repository.getRecommendations(filter) } else null
             
             val results = listOfNotNull(
                 trendingMoviesDef, popularMoviesDef, nowPlayingMoviesDef, upcomingMoviesDef, topRatedMoviesDef,
-                trendingTvShowsDef, popularTvShowsDef, topRatedTvShowsDef, airingTodayTvShowsDef
+                trendingTvShowsDef, popularTvShowsDef, topRatedTvShowsDef, airingTodayTvShowsDef, recommendationsDef
             ).awaitAll()
             
             val anyFailure = results.firstOrNull { it.isFailure }
@@ -106,6 +116,8 @@ class HomeViewModel @Inject constructor(
                         nowPlayingMovies = nowPlayingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.nowPlayingMovies,
                         upcomingMovies = upcomingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.upcomingMovies,
                         topRatedMovies = topRatedMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.topRatedMovies,
+                        recommendations = if (lastRecsEnabled) recommendationsDef?.await()?.getOrDefault(emptyList()) ?: it.recommendations else emptyList(),
+                        recommendationsEnabled = lastRecsEnabled,
                         trendingTvShows = trendingTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.trendingTvShows,
                         popularTvShows = popularTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.popularTvShows,
                         topRatedTvShows = topRatedTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.topRatedTvShows,
