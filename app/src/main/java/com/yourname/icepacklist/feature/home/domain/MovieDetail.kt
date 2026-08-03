@@ -27,6 +27,7 @@ data class MovieDetail(
     @Json(name = "budget") val budget: Long? = null,
     @Json(name = "revenue") val revenue: Long? = null,
     @Json(name = "production_companies") val productionCompanies: List<ProductionCompany> = emptyList(),
+    @Json(name = "spoken_languages") val spokenLanguages: List<SpokenLanguage> = emptyList(),
     @Json(name = "credits") val creditsResponse: CreditsResponse? = null,
     @Json(name = "videos") val videoResponse: VideoResponse? = null,
     @Json(ignore = true) val director: String = "",
