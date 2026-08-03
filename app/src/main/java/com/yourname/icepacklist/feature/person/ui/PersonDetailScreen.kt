@@ -12,7 +12,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Translate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -106,10 +114,19 @@ private fun PersonContent(
     uiState: PersonUiState,
     onBack: () -> Unit,
     onMovieClick: (Int) -> Unit,
-    onTvClick: (Int) -> Unit
+    onTvClick: (Int) -> Unit,
+    viewModel: PersonDetailViewModel = hiltViewModel()
 ) {
     val person = uiState.person!!
     val scrollState = rememberLazyListState()
+    val sectionExpanded = remember {
+        androidx.compose.runtime.mutableStateMapOf(
+            "drama" to true,
+            "movie" to true,
+            "tv" to true,
+            "images" to true
+        )
+    }
 
     LazyColumn(
         state = scrollState,
@@ -123,7 +140,12 @@ private fun PersonContent(
 
         // ── Personal Info ─────────────────────────────────────
         item(key = "info") {
-            PersonInfoSection(person = person)
+            PersonInfoSection(
+                person = person,
+                nativeName = uiState.nativeName,
+                nationality = uiState.nationality,
+                age = uiState.age
+            )
         }
 
         // ── Biography ─────────────────────────────────────────
@@ -149,68 +171,93 @@ private fun PersonContent(
 
         // ── Drama (vertical) ─────────────────────────────────
         if (uiState.dramas.isNotEmpty()) {
+            val expanded = sectionExpanded["drama"] == true
             item(key = "drama_header") {
                 SectionHeader(
                     title = "Drama",
-                    count = uiState.dramas.size
+                    count = uiState.dramas.size,
+                    expanded = expanded,
+                    onToggle = { sectionExpanded["drama"] = !expanded }
                 )
             }
-            items(
-                items = uiState.dramas,
-                key = { "drama_${it.id}" }
-            ) { credit ->
-                FilmographyCard(
-                    credit = credit,
-                    onClick = { onTvClick(credit.id) }
-                )
+            if (expanded) {
+                items(
+                    items = uiState.dramas,
+                    key = { "drama_${it.id}" }
+                ) { credit ->
+                    FilmographyCard(
+                        credit = credit,
+                        onClick = { onTvClick(credit.id) },
+                        onAddToWatchlist = { viewModel.addToWatchlist(credit) }
+                    )
+                }
             }
         }
 
         // ── Movie (vertical) ──────────────────────────────────
         if (uiState.movies.isNotEmpty()) {
+            val expanded = sectionExpanded["movie"] == true
             item(key = "movie_header") {
                 SectionHeader(
                     title = "Movie",
-                    count = uiState.movies.size
+                    count = uiState.movies.size,
+                    expanded = expanded,
+                    onToggle = { sectionExpanded["movie"] = !expanded }
                 )
             }
-            items(
-                items = uiState.movies,
-                key = { "movie_${it.id}" }
-            ) { credit ->
-                FilmographyCard(
-                    credit = credit,
-                    onClick = { onMovieClick(credit.id) }
-                )
+            if (expanded) {
+                items(
+                    items = uiState.movies,
+                    key = { "movie_${it.id}" }
+                ) { credit ->
+                    FilmographyCard(
+                        credit = credit,
+                        onClick = { onMovieClick(credit.id) },
+                        onAddToWatchlist = { viewModel.addToWatchlist(credit) }
+                    )
+                }
             }
         }
 
         // ── TV Show (vertical) ────────────────────────────────
         if (uiState.tvShows.isNotEmpty()) {
+            val expanded = sectionExpanded["tv"] == true
             item(key = "tv_header") {
                 SectionHeader(
                     title = "TV Show",
-                    count = uiState.tvShows.size
+                    count = uiState.tvShows.size,
+                    expanded = expanded,
+                    onToggle = { sectionExpanded["tv"] = !expanded }
                 )
             }
-            items(
-                items = uiState.tvShows,
-                key = { "tv_${it.id}" }
-            ) { credit ->
-                FilmographyCard(
-                    credit = credit,
-                    onClick = { onTvClick(credit.id) }
-                )
+            if (expanded) {
+                items(
+                    items = uiState.tvShows,
+                    key = { "tv_${it.id}" }
+                ) { credit ->
+                    FilmographyCard(
+                        credit = credit,
+                        onClick = { onTvClick(credit.id) },
+                        onAddToWatchlist = { viewModel.addToWatchlist(credit) }
+                    )
+                }
             }
         }
 
         // ── Images (horizontal) ───────────────────────────────
         if (uiState.images.isNotEmpty()) {
+            val expanded = sectionExpanded["images"] == true
             item(key = "images_header") {
-                SectionHeader(title = "Images")
+                SectionHeader(
+                    title = "Images",
+                    expanded = expanded,
+                    onToggle = { sectionExpanded["images"] = !expanded }
+                )
             }
-            item(key = "images_row") {
-                PersonImagesRow(images = uiState.images)
+            if (expanded) {
+                item(key = "images_row") {
+                    PersonImagesRow(images = uiState.images)
+                }
             }
         }
     }
@@ -221,6 +268,7 @@ private fun PersonContent(
 private fun FilmographyCard(
     credit: CombinedCreditsCast,
     onClick: () -> Unit,
+    onAddToWatchlist: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -238,6 +286,7 @@ private fun FilmographyCard(
                         "https://image.tmdb.org/t/p/w185${credit.posterPath}"
                     else null
                 )
+                .size(160, 240)
                 .crossfade(true)
                 .build(),
             contentDescription = credit.displayTitle,
@@ -291,7 +340,7 @@ private fun FilmographyCard(
         }
 
         // + button
-        IconButton(onClick = { /* add to watchlist */ }) {
+        IconButton(onClick = onAddToWatchlist) {
             Icon(
                 imageVector = Icons.Outlined.Add,
                 contentDescription = "Add to watchlist",
@@ -306,25 +355,31 @@ private fun FilmographyCard(
 private fun SectionHeader(
     title: String,
     count: Int? = null,
+    expanded: Boolean = true,
+    onToggle: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .clickable(onClick = onToggle)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = title,
+            text = if (count != null) "$title" else title,
             style = MaterialTheme.typography.titleLarge,
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
-        if (count != null) {
+        if (count != null || title == "Images") {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = null,
+                imageVector = if (expanded)
+                    Icons.Default.KeyboardArrowUp
+                else
+                    Icons.Default.KeyboardArrowDown,
+                contentDescription = if (expanded) "Collapse" else "Expand",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -386,33 +441,98 @@ private fun PersonHero(person: PersonDetail, onBack: () -> Unit) {
 }
 
 @Composable
-private fun PersonInfoSection(person: PersonDetail) {
-    if (!person.birthday.isNullOrBlank() || !person.placeOfBirth.isNullOrBlank()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (!person.birthday.isNullOrBlank()) {
-                Text(
-                    text = person.birthday,
-                    color = Color(0xFF888888),
-                    fontSize = 14.sp
-                )
-            }
-            if (!person.birthday.isNullOrBlank() && !person.placeOfBirth.isNullOrBlank()) {
-                Text(text = " • ", color = Color(0xFF888888))
-            }
-            if (!person.placeOfBirth.isNullOrBlank()) {
-                Text(
-                    text = person.placeOfBirth,
-                    color = Color(0xFF888888),
-                    fontSize = 14.sp
-                )
-            }
+private fun PersonInfoSection(
+    person: PersonDetail,
+    nativeName: String,
+    nationality: String,
+    age: Int?,
+    modifier: Modifier = Modifier
+) {
+    // Split name into first and family
+    val nameParts = person.name.trim().split(" ")
+    val firstName = nameParts.firstOrNull() ?: ""
+    val familyName = nameParts.drop(1).joinToString(" ")
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp)
+    ) {
+        PersonInfoRow(
+            icon = Icons.Outlined.AccountCircle,
+            label = "First Name",
+            value = firstName
+        )
+        PersonInfoRow(
+            icon = Icons.Outlined.People,
+            label = "Family Name",
+            value = familyName
+        )
+        if (nativeName.isNotEmpty()) {
+            PersonInfoRow(
+                icon = Icons.Outlined.Translate,
+                label = "Native Name",
+                value = nativeName
+            )
         }
-        Spacer(modifier = Modifier.height(24.dp))
+        if (nationality.isNotEmpty()) {
+            PersonInfoRow(
+                icon = Icons.Outlined.Public,
+                label = "Nationality",
+                value = nationality
+            )
+        }
+        if (!person.birthday.isNullOrBlank()) {
+            PersonInfoRow(
+                icon = Icons.Outlined.CalendarToday,
+                label = "Birthday",
+                value = person.birthday
+            )
+        }
+        if (age != null) {
+            PersonInfoRow(
+                icon = Icons.Outlined.Info,
+                label = "Age",
+                value = age.toString()
+            )
+        }
+    }
+}
+
+@Composable
+private fun PersonInfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(110.dp)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

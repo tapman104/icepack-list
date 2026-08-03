@@ -50,5 +50,6 @@ data class PersonDetail(
     @Json(name = "place_of_birth") val placeOfBirth: String?,
     @Json(name = "known_for_department") val knownForDepartment: String?,
     @Json(name = "deathday") val deathday: String?,
-    @Json(name = "gender") val gender: Int?
+    @Json(name = "gender") val gender: Int?,
+    @Json(name = "also_known_as") val alsoKnownAs: List<String> = emptyList()
 )

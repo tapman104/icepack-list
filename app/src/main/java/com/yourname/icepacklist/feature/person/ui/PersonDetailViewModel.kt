@@ -20,7 +20,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import java.time.LocalDate
+import java.time.Period
 import javax.inject.Inject
+import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.core.database.WatchlistEntity
+import com.yourname.icepacklist.feature.watchlist.data.WatchlistRepository
 
 data class PersonUiState(
     val isLoading: Boolean = true,
@@ -30,12 +35,16 @@ data class PersonUiState(
     val dramas: List<CombinedCreditsCast> = emptyList(),
     val movies: List<CombinedCreditsCast> = emptyList(),
     val tvShows: List<CombinedCreditsCast> = emptyList(),
-    val images: List<PersonImage> = emptyList()
+    val images: List<PersonImage> = emptyList(),
+    val nativeName: String = "",
+    val nationality: String = "",
+    val age: Int? = null
 )
 
 @HiltViewModel
 class PersonDetailViewModel @Inject constructor(
     private val repository: DetailRepository,
+    private val watchlistRepository: WatchlistRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -75,6 +84,27 @@ class PersonDetailViewModel @Inject constructor(
                 val dramas = allTv.filter { 18 in it.genreIds }
                 val tvShows = allTv.filter { 18 !in it.genreIds }
 
+                val nativeName = personDetail.alsoKnownAs
+                    .firstOrNull { it.any { c -> c.code in 0xAC00..0xD7A3 } }  // first Korean-script entry
+                    ?: personDetail.alsoKnownAs.getOrNull(1)
+                    ?: ""
+
+                val nationality = when {
+                    personDetail.placeOfBirth?.contains("Korea", ignoreCase = true) == true -> "South Korean"
+                    personDetail.placeOfBirth?.contains("Japan", ignoreCase = true) == true -> "Japanese"
+                    personDetail.placeOfBirth?.contains("China", ignoreCase = true) == true -> "Chinese"
+                    personDetail.placeOfBirth?.contains("Hong Kong", ignoreCase = true) == true -> "Hong Kongese"
+                    personDetail.placeOfBirth?.contains("Taiwan", ignoreCase = true) == true -> "Taiwanese"
+                    else -> personDetail.placeOfBirth?.substringAfterLast(",")?.trim() ?: ""
+                }
+
+                val age = personDetail.birthday?.let {
+                    try {
+                        val birth = LocalDate.parse(it)
+                        Period.between(birth, LocalDate.now()).years
+                    } catch (e: Exception) { null }
+                }
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -83,7 +113,10 @@ class PersonDetailViewModel @Inject constructor(
                         dramas = dramas,
                         movies = allMovies,
                         tvShows = tvShows,
-                        images = images
+                        images = images,
+                        nativeName = nativeName,
+                        nationality = nationality,
+                        age = age
                     )
                 }
             } catch (e: IOException) {
@@ -91,6 +124,21 @@ class PersonDetailViewModel @Inject constructor(
             } catch (e: HttpException) {
                 _uiState.update { it.copy(isLoading = false, isError = true) }
             }
+        }
+    }
+
+    fun addToWatchlist(credit: CombinedCreditsCast) {
+        viewModelScope.launch {
+            val entity = WatchlistEntity(
+                id = credit.id,
+                mediaType = if (credit.mediaType == "tv") MediaType.TV else MediaType.MOVIE,
+                title = credit.displayTitle,
+                posterPath = credit.posterPath ?: "",
+                voteAverage = 0.0,
+                year = credit.displayYear,
+                status = "PLAN_TO_WATCH"
+            )
+            watchlistRepository.add(entity)
         }
     }
 }
