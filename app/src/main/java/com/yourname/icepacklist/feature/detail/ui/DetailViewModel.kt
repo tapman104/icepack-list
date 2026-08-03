@@ -20,6 +20,7 @@ import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -83,49 +84,51 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = DetailUiState.Loading
             try {
-                val movieDef = async { apiService.getMovieDetails(movieId) }
-                val similarDef = async { apiService.getSimilarMovies(movieId) }
-                val providersDef = async { apiService.getMovieWatchProviders(movieId) }
-                val keywordsDef = async { apiService.getMovieKeywords(movieId) }
-                val reviewsDef = async { apiService.getMovieReviews(movieId) }
+                coroutineScope {
+                    val movieDef = async { apiService.getMovieDetails(movieId) }
+                    val similarDef = async { apiService.getSimilarMovies(movieId) }
+                    val providersDef = async { apiService.getMovieWatchProviders(movieId) }
+                    val keywordsDef = async { apiService.getMovieKeywords(movieId) }
+                    val reviewsDef = async { apiService.getMovieReviews(movieId) }
 
-                awaitAll(movieDef, similarDef, providersDef, keywordsDef, reviewsDef)
+                    awaitAll(movieDef, similarDef, providersDef, keywordsDef, reviewsDef)
 
-                val movie = movieDef.await()
-                val similarResponse = similarDef.await()
-                val providersResponse = providersDef.await()
-                val keywordsResponse = keywordsDef.await()
-                val reviewsResponse = reviewsDef.await()
+                    val movie = movieDef.await()
+                    val similarResponse = similarDef.await()
+                    val providersResponse = providersDef.await()
+                    val keywordsResponse = keywordsDef.await()
+                    val reviewsResponse = reviewsDef.await()
 
-                val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
-                val videosResponse = movie.videoResponse
+                    val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
+                    val videosResponse = movie.videoResponse
 
-                val director = credits.crew.firstOrNull { it.job == "Director" }?.name ?: ""
-                val videoResults = videosResponse?.results
-                    ?.filter { it.type == "Trailer" && it.site == "YouTube" }
-                    ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
-                    ?: emptyList()
-                val similarMovies = similarResponse.results.distinctBy { it.id }.take(12)
+                    val director = credits.crew.firstOrNull { it.job == "Director" }?.name ?: ""
+                    val videoResults = videosResponse?.results
+                        ?.filter { it.type == "Trailer" && it.site == "YouTube" }
+                        ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
+                        ?: emptyList()
+                    val similarMovies = similarResponse.results.distinctBy { it.id }.take(12)
 
-                val updatedMovie = movie.copy(
-                    director = director,
-                    videos = videoResults,
-                    similar = similarMovies
-                )
+                    val updatedMovie = movie.copy(
+                        director = director,
+                        videos = videoResults,
+                        similar = similarMovies
+                    )
 
-                val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
-                val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
-                val reviews = reviewsResponse.results
+                    val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
+                    val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
+                    val reviews = reviewsResponse.results
 
-                _uiState.value = DetailUiState.Success(
-                    movie = updatedMovie,
-                    credits = credits,
-                    videos = videoResults,
-                    similar = similarMovies,
-                    watchProviders = inProviders,
-                    keywords = keywords,
-                    reviews = reviews
-                )
+                    _uiState.value = DetailUiState.Success(
+                        movie = updatedMovie,
+                        credits = credits,
+                        videos = videoResults,
+                        similar = similarMovies,
+                        watchProviders = inProviders,
+                        keywords = keywords,
+                        reviews = reviews
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.value = DetailUiState.Error(e.localizedMessage ?: "Unknown error occurred")
             }
