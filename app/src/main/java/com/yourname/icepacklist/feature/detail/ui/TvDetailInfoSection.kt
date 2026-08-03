@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.FlowRow
 fun TvDetailInfoSection(
     tvShow: TvShowDetail,
     keywords: List<Keyword>,
-    onSeasonClick: (Int, String) -> Unit
+    onSeasonClick: (Int, String, Int) -> Unit
 ) {
     // M10 — networkNames map moved into remember; only recalculates when tvShow changes
     val networkNames = remember(tvShow) {
@@ -73,7 +73,7 @@ fun TvDetailInfoSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onSeasonClick(tvShow.id, tvShow.name) }
+                    .clickable { onSeasonClick(tvShow.id, tvShow.name, seasons) }
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween

@@ -28,7 +28,7 @@ fun TvDetailScreen(
     onBack: () -> Unit = {},
     onTvShowClick: (Int) -> Unit = {},
     onPersonClick: (Int) -> Unit = {},
-    onSeasonClick: (Int, String) -> Unit = { _, _ -> },
+    onSeasonClick: (Int, String, Int) -> Unit = { _, _, _ -> },
     onFullCastClick: (Int, String) -> Unit = { _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -109,7 +109,7 @@ private fun TvDetailContent(
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit,
     onPersonClick: (Int) -> Unit,
-    onSeasonClick: (Int, String) -> Unit,
+    onSeasonClick: (Int, String, Int) -> Unit,
     onFullCastClick: (Int, String) -> Unit
 ) {
     var showMyListSheet by remember { mutableStateOf(false) }

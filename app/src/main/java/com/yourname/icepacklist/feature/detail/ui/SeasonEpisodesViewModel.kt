@@ -33,16 +33,10 @@ class SeasonEpisodesViewModel @Inject constructor(
     private val _selectedSeason = MutableStateFlow(1)
     val selectedSeason: StateFlow<Int> = _selectedSeason.asStateFlow()
 
-    private val _totalSeasons = MutableStateFlow(1)
+    private val _totalSeasons = MutableStateFlow(checkNotNull(savedStateHandle.get<Int>("totalSeasons")))
     val totalSeasons: StateFlow<Int> = _totalSeasons.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            try {
-                val tvShow = apiService.getTvShowDetails(tvId)
-                _totalSeasons.value = tvShow.numberOfSeasons ?: 1
-            } catch (e: Exception) {}
-        }
         loadSeason(1)
     }
     

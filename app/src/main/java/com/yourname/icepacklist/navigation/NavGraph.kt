@@ -122,7 +122,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     onBack = { navController.popBackStack() },
                     onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) },
                     onPersonClick = { navController.navigate(Routes.PersonDetail.createRoute(it)) },
-                    onSeasonClick = { id, name -> navController.navigate(Routes.SeasonEpisodes.buildRoute(id, name)) },
+                    onSeasonClick = { id, name, totalSeasons -> navController.navigate(Routes.SeasonEpisodes.buildRoute(id, name, totalSeasons)) },
                     onFullCastClick = { id, type -> navController.navigate(Routes.FullCast.buildRoute(id, type)) }
                 )
             }
@@ -157,7 +157,8 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                 route = Routes.SeasonEpisodes.route,
                 arguments = listOf(
                     navArgument(Routes.SeasonEpisodes.ARG_TV_ID) { type = NavType.IntType },
-                    navArgument(Routes.SeasonEpisodes.ARG_TV_NAME) { type = NavType.StringType }
+                    navArgument(Routes.SeasonEpisodes.ARG_TV_NAME) { type = NavType.StringType },
+                    navArgument(Routes.SeasonEpisodes.ARG_TOTAL_SEASONS) { type = NavType.IntType }
                 )
             ) {
                 com.yourname.icepacklist.feature.detail.ui.SeasonEpisodesScreen(
