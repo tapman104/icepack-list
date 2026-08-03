@@ -13,6 +13,7 @@ import com.yourname.icepacklist.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,61 +64,63 @@ class PersonDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isError = false) }
             try {
-                val results = awaitAll(
-                    async { repository.getPersonDetail(personId) },
-                    async { repository.getPersonCombinedCredits(personId) },
-                    async { repository.getPersonImages(personId) }
-                )
-                
-                val personDetail = results[0] as PersonDetail
-                val combinedCredits = (results[1] as CombinedCreditsResponse).cast
-                    .sortedByDescending { it.releaseDate ?: it.firstAirDate }
-                val images = (results[2] as PersonImagesResponse).profiles
-
-                val knownFor = combinedCredits.take(10)
-
-                // Split by media_type, then by genre for dramas
-                val allMovies = combinedCredits.filter { it.mediaType == "movie" }
-                val allTv = combinedCredits.filter { it.mediaType == "tv" }
-
-                // Korean dramas: genre_id 18 (Drama) in TV credits
-                val dramas = allTv.filter { 18 in it.genreIds }
-                val tvShows = allTv.filter { 18 !in it.genreIds }
-
-                val nativeName = personDetail.alsoKnownAs
-                    .firstOrNull { it.any { c -> c.code in 0xAC00..0xD7A3 } }  // first Korean-script entry
-                    ?: personDetail.alsoKnownAs.getOrNull(1)
-                    ?: ""
-
-                val nationality = when {
-                    personDetail.placeOfBirth?.contains("Korea", ignoreCase = true) == true -> "South Korean"
-                    personDetail.placeOfBirth?.contains("Japan", ignoreCase = true) == true -> "Japanese"
-                    personDetail.placeOfBirth?.contains("China", ignoreCase = true) == true -> "Chinese"
-                    personDetail.placeOfBirth?.contains("Hong Kong", ignoreCase = true) == true -> "Hong Kongese"
-                    personDetail.placeOfBirth?.contains("Taiwan", ignoreCase = true) == true -> "Taiwanese"
-                    else -> personDetail.placeOfBirth?.substringAfterLast(",")?.trim() ?: ""
-                }
-
-                val age = personDetail.birthday?.let {
-                    try {
-                        val birth = LocalDate.parse(it)
-                        Period.between(birth, LocalDate.now()).years
-                    } catch (e: Exception) { null }
-                }
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        person = personDetail,
-                        knownFor = knownFor,
-                        dramas = dramas,
-                        movies = allMovies,
-                        tvShows = tvShows,
-                        images = images,
-                        nativeName = nativeName,
-                        nationality = nationality,
-                        age = age
+                coroutineScope {
+                    val results = awaitAll(
+                        async { repository.getPersonDetail(personId) },
+                        async { repository.getPersonCombinedCredits(personId) },
+                        async { repository.getPersonImages(personId) }
                     )
+                    
+                    val personDetail = results[0] as PersonDetail
+                    val combinedCredits = (results[1] as CombinedCreditsResponse).cast
+                        .sortedByDescending { it.releaseDate ?: it.firstAirDate }
+                    val images = (results[2] as PersonImagesResponse).profiles
+
+                    val knownFor = combinedCredits.take(10)
+
+                    // Split by media_type, then by genre for dramas
+                    val allMovies = combinedCredits.filter { it.mediaType == "movie" }
+                    val allTv = combinedCredits.filter { it.mediaType == "tv" }
+
+                    // Korean dramas: genre_id 18 (Drama) in TV credits
+                    val dramas = allTv.filter { 18 in it.genreIds }
+                    val tvShows = allTv.filter { 18 !in it.genreIds }
+
+                    val nativeName = personDetail.alsoKnownAs
+                        .firstOrNull { it.any { c -> c.code in 0xAC00..0xD7A3 } }  // first Korean-script entry
+                        ?: personDetail.alsoKnownAs.getOrNull(1)
+                        ?: ""
+
+                    val nationality = when {
+                        personDetail.placeOfBirth?.contains("Korea", ignoreCase = true) == true -> "South Korean"
+                        personDetail.placeOfBirth?.contains("Japan", ignoreCase = true) == true -> "Japanese"
+                        personDetail.placeOfBirth?.contains("China", ignoreCase = true) == true -> "Chinese"
+                        personDetail.placeOfBirth?.contains("Hong Kong", ignoreCase = true) == true -> "Hong Kongese"
+                        personDetail.placeOfBirth?.contains("Taiwan", ignoreCase = true) == true -> "Taiwanese"
+                        else -> personDetail.placeOfBirth?.substringAfterLast(",")?.trim() ?: ""
+                    }
+
+                    val age = personDetail.birthday?.let {
+                        try {
+                            val birth = LocalDate.parse(it)
+                            Period.between(birth, LocalDate.now()).years
+                        } catch (e: Exception) { null }
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            person = personDetail,
+                            knownFor = knownFor,
+                            dramas = dramas,
+                            movies = allMovies,
+                            tvShows = tvShows,
+                            images = images,
+                            nativeName = nativeName,
+                            nationality = nationality,
+                            age = age
+                        )
+                    }
                 }
             } catch (e: IOException) {
                 _uiState.update { it.copy(isLoading = false, isError = true) }
