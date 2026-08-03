@@ -8,18 +8,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.yourname.icepacklist.R
 import com.yourname.icepacklist.feature.home.domain.TvShowDetail
 import com.yourname.icepacklist.core.database.WatchlistEntity
@@ -36,14 +39,33 @@ fun TvDetailHeroSection(
     onAddToWatchlist: (String) -> Unit,
     onShowMyListSheet: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    // M13 — String.format in remember, only recalculates when voteAverage changes
+    val ratingStr = remember(tvShow.voteAverage) {
+        String.format(Locale.US, "%.1f", tvShow.voteAverage)
+    }
+
+    // H2 — Gradient brush captured in remember; theme color captured first as a local val
+    val backgroundColor = MaterialTheme.colorScheme.background
+    val heroGradient = remember(backgroundColor) {
+        Brush.verticalGradient(listOf(Color.Transparent, backgroundColor))
+    }
+
     Column {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f)
         ) {
+            // H4 — backdrop AsyncImage with explicit size so Coil does not decode at full resolution
+            val backdropUrl = tvShow.backdropPath?.let { "$TMDB_BACKDROP_BASE$it" }
             AsyncImage(
-                model = tvShow.backdropPath?.let { "$TMDB_BACKDROP_BASE$it" },
+                model = ImageRequest.Builder(context)
+                    .data(backdropUrl)
+                    .size(780, 440)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = "Backdrop for ${tvShow.name}",
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_image_placeholder),
@@ -55,11 +77,7 @@ fun TvDetailHeroSection(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
                     .height(100.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background)
-                        )
-                    )
+                    .background(heroGradient) // H2 — remembered brush
             )
             IconButton(
                 onClick = onBack,
@@ -109,7 +127,7 @@ fun TvDetailHeroSection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                val ratingStr = String.format(Locale.US, "%.1f", tvShow.voteAverage)
+                // M13 — using pre-computed ratingStr from remember above
                 Text(
                     text = "★ $ratingStr",
                     color = Color(0xFFFFC107),

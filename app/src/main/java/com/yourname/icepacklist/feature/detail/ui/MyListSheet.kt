@@ -29,6 +29,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// M7 — statuses list moved to top-level val; it is constant and never needs to be re-allocated
+// inside the composable body on every recomposition
+private val WATCHLIST_STATUSES: List<Pair<WatchlistStatus, ImageVector>> = listOf(
+    WatchlistStatus.WATCHING to Icons.Default.Visibility,
+    WatchlistStatus.COMPLETED to Icons.Default.CheckCircle,
+    WatchlistStatus.PLAN_TO_WATCH to Icons.Default.Schedule,
+    WatchlistStatus.PAUSED to Icons.Default.PauseCircle,
+    WatchlistStatus.DROPPED to Icons.Default.Cancel,
+    WatchlistStatus.REWATCHING to Icons.Default.Refresh
+)
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MyListSheet(
@@ -48,6 +59,11 @@ fun MyListSheet(
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showFinishDatePicker by remember { mutableStateOf(false) }
+
+    // M8 — Save button gradient captured in remember; not re-allocated on every state change
+    val saveButtonGradient = remember {
+        Brush.horizontalGradient(listOf(Color(0xFFE91E63), Color(0xFFA55EAA)))
+    }
 
     val scrollState = rememberScrollState()
 
@@ -87,15 +103,8 @@ fun MyListSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val statuses = listOf(
-                    WatchlistStatus.WATCHING to Icons.Default.Visibility,
-                    WatchlistStatus.COMPLETED to Icons.Default.CheckCircle,
-                    WatchlistStatus.PLAN_TO_WATCH to Icons.Default.Schedule,
-                    WatchlistStatus.PAUSED to Icons.Default.PauseCircle,
-                    WatchlistStatus.DROPPED to Icons.Default.Cancel,
-                    WatchlistStatus.REWATCHING to Icons.Default.Refresh
-                )
-                statuses.forEach { (ws, icon) ->
+                // M7 — using top-level constant list; no allocation here
+                WATCHLIST_STATUSES.forEach { (ws, icon) ->
                     val isSelected = status == ws.name
                     Row(
                         modifier = Modifier
@@ -260,7 +269,7 @@ fun MyListSheet(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                Brush.horizontalGradient(listOf(Color(0xFFE91E63), Color(0xFFA55EAA))),
+                                saveButtonGradient, // M8 — remembered gradient
                                 RoundedCornerShape(24.dp)
                             ),
                         contentAlignment = Alignment.Center

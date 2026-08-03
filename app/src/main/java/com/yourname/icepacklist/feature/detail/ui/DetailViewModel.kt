@@ -56,12 +56,21 @@ class DetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
-    val isInWatchlist: StateFlow<Boolean> = watchlistRepository.getAll()
-        .map { list -> list.any { it.id == movieId && it.mediaType == MediaType.MOVIE } }
+    // H10 — single getAll() subscription; isInWatchlist and watchlistStatus are derived from it,
+    // so only one database flow is active instead of two separate full-list scans per DB write
+    private val watchlistEntry: StateFlow<WatchlistEntity?> = watchlistRepository.getAll()
+        .map { list -> list.firstOrNull { it.id == movieId && it.mediaType == MediaType.MOVIE } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val isInWatchlist: StateFlow<Boolean> = watchlistEntry
+        .map { it != null }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val watchlistStatus: StateFlow<String?> = watchlistRepository.getAll()
-        .map { list -> list.firstOrNull { it.id == movieId && it.mediaType == MediaType.MOVIE }?.status }
+    val watchlistStatus: StateFlow<String?> = watchlistEntry
+        .map { it?.status }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val entryState: StateFlow<WatchlistEntity?> = watchlistRepository.getEntry(movieId, MediaType.MOVIE)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
@@ -85,7 +94,7 @@ class DetailViewModel @Inject constructor(
                 val providersResponse = providersDef.await()
                 val keywordsResponse = keywordsDef.await()
                 val reviewsResponse = reviewsDef.await()
-                
+
                 val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
                 val videosResponse = movie.videoResponse
 
@@ -151,9 +160,6 @@ class DetailViewModel @Inject constructor(
             watchlistRepository.updateStatus(movieId, MediaType.MOVIE, status)
         }
     }
-
-    val entryState: StateFlow<WatchlistEntity?> = watchlistRepository.getEntry(movieId, MediaType.MOVIE)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun saveEntry(updated: WatchlistEntity) {
         viewModelScope.launch {

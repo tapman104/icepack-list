@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -16,6 +17,7 @@ import com.yourname.icepacklist.feature.home.domain.Keyword
 import com.yourname.icepacklist.feature.home.domain.MovieDetail
 import com.yourname.icepacklist.core.util.formatDate
 import java.util.Locale
+import java.text.NumberFormat
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 
@@ -25,6 +27,24 @@ fun DetailInfoSection(
     movie: MovieDetail,
     keywords: List<Keyword>
 ) {
+    // H5 — budget formatted once, only recalculates when movie.budget changes
+    val formattedBudget = remember(movie.budget) {
+        movie.budget?.takeIf { it > 0 }?.let {
+            NumberFormat.getCurrencyInstance(Locale.US).apply {
+                maximumFractionDigits = 0
+            }.format(it)
+        }
+    }
+
+    // H6 — revenue formatted once, only recalculates when movie.revenue changes
+    val formattedRevenue = remember(movie.revenue) {
+        movie.revenue?.takeIf { it > 0 }?.let {
+            NumberFormat.getCurrencyInstance(Locale.US).apply {
+                maximumFractionDigits = 0
+            }.format(it)
+        }
+    }
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -53,17 +73,13 @@ fun DetailInfoSection(
         movie.runtime?.takeIf { it > 0 }?.let {
             DetailRow(label = stringResource(R.string.runtime), value = "${it / 60}h ${it % 60}m")
         }
-        movie.budget?.takeIf { it > 0 }?.let {
-            val formatted = java.text.NumberFormat.getCurrencyInstance(Locale.US).apply { 
-                maximumFractionDigits = 0 
-            }.format(it)
-            DetailRow(label = stringResource(R.string.detail_budget), value = formatted)
+        // H5 — use pre-computed formattedBudget
+        formattedBudget?.let {
+            DetailRow(label = stringResource(R.string.detail_budget), value = it)
         }
-        movie.revenue?.takeIf { it > 0 }?.let {
-            val formatted = java.text.NumberFormat.getCurrencyInstance(Locale.US).apply { 
-                maximumFractionDigits = 0 
-            }.format(it)
-            DetailRow(label = stringResource(R.string.detail_revenue), value = formatted)
+        // H6 — use pre-computed formattedRevenue
+        formattedRevenue?.let {
+            DetailRow(label = stringResource(R.string.detail_revenue), value = it)
         }
 
         if (keywords.isNotEmpty()) {

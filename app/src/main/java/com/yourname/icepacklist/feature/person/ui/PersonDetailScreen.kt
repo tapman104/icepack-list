@@ -233,7 +233,7 @@ private fun PersonContent(
             if (expanded) {
                 items(
                     items = uiState.tvShows,
-                    key = { "tv_${it.id}" }
+                    key = { "${it.id}_${it.episodeCount}_${it.character}" }
                 ) { credit ->
                     FilmographyCard(
                         credit = credit,

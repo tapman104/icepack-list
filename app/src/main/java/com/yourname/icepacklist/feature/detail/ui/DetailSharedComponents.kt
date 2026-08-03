@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.yourname.icepacklist.R
 import com.yourname.icepacklist.feature.home.domain.Cast
 import com.yourname.icepacklist.feature.home.domain.Crew
@@ -50,6 +52,13 @@ fun DetailRow(label: String, value: String) {
 
 @Composable
 fun CastItemCard(person: Cast, onClick: () -> Unit) {
+    val context = LocalContext.current
+
+    // L8 — profile URL computed in remember; no string allocation on every recomposition
+    val imageUrl = remember(person.profilePath) {
+        person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" }
+    }
+
     Column(
         modifier = Modifier
             .width(72.dp)
@@ -58,8 +67,13 @@ fun CastItemCard(person: Cast, onClick: () -> Unit) {
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // L9 — size(144, 144) added so Coil down-samples to display dimensions (72dp at 2x)
         AsyncImage(
-            model = person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" },
+            model = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .size(144, 144)
+                .crossfade(true)
+                .build(),
             contentDescription = person.name,
             contentScale = ContentScale.Crop,
             placeholder = painterResource(R.drawable.ic_image_placeholder),
@@ -88,6 +102,13 @@ fun CastItemCard(person: Cast, onClick: () -> Unit) {
 
 @Composable
 fun CrewItemCard(person: Crew, onClick: () -> Unit) {
+    val context = LocalContext.current
+
+    // L8 — profile URL computed in remember; no string allocation on every recomposition
+    val imageUrl = remember(person.profilePath) {
+        person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" }
+    }
+
     Column(
         modifier = Modifier
             .width(72.dp)
@@ -96,8 +117,13 @@ fun CrewItemCard(person: Crew, onClick: () -> Unit) {
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // L9 — size(144, 144) added so Coil down-samples to display dimensions (72dp at 2x)
         AsyncImage(
-            model = person.profilePath?.let { "https://image.tmdb.org/t/p/w185$it" },
+            model = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .size(144, 144)
+                .crossfade(true)
+                .build(),
             contentDescription = person.name,
             contentScale = ContentScale.Crop,
             placeholder = painterResource(R.drawable.ic_image_placeholder),
@@ -127,17 +153,26 @@ fun CrewItemCard(person: Crew, onClick: () -> Unit) {
 @Composable
 fun ReviewItem(review: Review) {
     var expanded by remember { mutableStateOf(false) }
+
+    // M5 — Color.copy() captured in remember; new Color object is not allocated on every recomposition
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val reviewBg = remember(surfaceVariant) { surfaceVariant.copy(alpha = 0.5f) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .background(reviewBg) // M5 — remembered color
             .padding(12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val avatarPath = review.authorDetails?.avatarPath
             if (avatarPath != null) {
-                val imageUrl = if (avatarPath.startsWith("/http")) avatarPath.substring(1) else "https://image.tmdb.org/t/p/w185$avatarPath"
+                // M6 — avatar URL string logic moved into remember; no string ops on every recomposition
+                val imageUrl = remember(avatarPath) {
+                    if (avatarPath.startsWith("/http")) avatarPath.substring(1)
+                    else "https://image.tmdb.org/t/p/w185$avatarPath"
+                }
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = "Avatar",
@@ -178,8 +213,13 @@ fun ReviewItem(review: Review) {
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
+
+        // L2 — display content derived in remember; avoids re-evaluating length check on every recomposition
+        val displayContent = remember(expanded, review.content) {
+            if (!expanded && review.content.length > 150) review.content else review.content
+        }
         Text(
-            text = review.content,
+            text = displayContent,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
             maxLines = if (expanded) Int.MAX_VALUE else 3,

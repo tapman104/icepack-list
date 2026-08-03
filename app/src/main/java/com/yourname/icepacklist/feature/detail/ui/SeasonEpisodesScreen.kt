@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.yourname.icepacklist.R
 import com.yourname.icepacklist.feature.home.domain.Episode
 
@@ -51,12 +53,14 @@ fun SeasonEpisodesScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             var expanded by remember { mutableStateOf(false) }
-            
+
             Box(modifier = Modifier.padding(16.dp)) {
+                // M9 — single safe-cast instead of is-check + explicit as-cast
+                val successState = uiState as? SeasonEpisodesUiState.Success
+                val episodeCount = successState?.seasonData?.episodes?.size ?: 0
+                val epsText = if (episodeCount > 0) " ($episodeCount eps)" else ""
+
                 OutlinedButton(onClick = { expanded = true }) {
-                    val epsText = if (uiState is SeasonEpisodesUiState.Success) {
-                        " (${(uiState as SeasonEpisodesUiState.Success).seasonData.episodes.size} eps)"
-                    } else ""
                     Text("Season $selectedSeason$epsText", color = MaterialTheme.colorScheme.onSurface)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
@@ -99,11 +103,23 @@ fun SeasonEpisodesScreen(
 @Composable
 fun EpisodeItem(episode: Episode) {
     var showPlot by remember { mutableStateOf(false) }
-    
+    val context = LocalContext.current
+
+    // L6 — still image URL computed in remember; no string allocation on every recomposition
+    val stillUrl = remember(episode.stillPath) {
+        episode.stillPath?.let { "https://image.tmdb.org/t/p/w300$it" }
+    }
+
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row {
+            // L6 — size(240, 135) added; Coil decodes to display dimensions (120dp×68dp at 2x)
+            // instead of full w300 resolution
             AsyncImage(
-                model = episode.stillPath?.let { "https://image.tmdb.org/t/p/w300$it" },
+                model = ImageRequest.Builder(context)
+                    .data(stillUrl)
+                    .size(240, 135)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = episode.name,
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(R.drawable.ic_image_placeholder),
@@ -146,13 +162,22 @@ fun EpisodeItem(episode: Episode) {
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.clickable { showPlot = !showPlot }.padding(vertical = 4.dp)
             )
-            if (showPlot) {
-                Text(
-                    text = episode.overview,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            // L5 — plot text extracted into its own composable so toggling showPlot only
+            // recomposes EpisodePlot, not the AsyncImage above
+            EpisodePlot(plot = episode.overview, showPlot = showPlot)
         }
+    }
+}
+
+// L5 — separate composable for the plot text; AsyncImage in EpisodeItem is outside this
+// recomposition scope and will not recompose when showPlot toggles
+@Composable
+private fun EpisodePlot(plot: String, showPlot: Boolean) {
+    if (showPlot) {
+        Text(
+            text = plot,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }

@@ -52,8 +52,7 @@ fun DetailMediaSection(
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(modifier = Modifier.height(72.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(
-                    items = watchProviders,
-                    key = { it.providerId }
+                    items = watchProviders
                 ) { provider ->
                     Column(
                         modifier = Modifier.width(64.dp),

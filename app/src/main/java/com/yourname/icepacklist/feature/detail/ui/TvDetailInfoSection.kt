@@ -4,12 +4,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,6 +31,16 @@ fun TvDetailInfoSection(
     keywords: List<Keyword>,
     onSeasonClick: (Int, String) -> Unit
 ) {
+    // M10 — networkNames map moved into remember; only recalculates when tvShow changes
+    val networkNames = remember(tvShow) {
+        tvShow.networks.ifEmpty { tvShow.networksList.map { it.name } }
+    }
+
+    // M11 — createdBy map+join moved into remember; only recalculates when tvShow changes
+    val createdBy = remember(tvShow) {
+        tvShow.createdBy.ifEmpty { tvShow.createdByList.map { it.name }.joinToString(", ") }
+    }
+
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -80,7 +91,7 @@ fun TvDetailInfoSection(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
-                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "View Seasons", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "View Seasons", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         tvShow.numberOfEpisodes?.let {
@@ -92,11 +103,11 @@ fun TvDetailInfoSection(
         if (!tvShow.type.isNullOrBlank()) {
             DetailRow(label = "Type", value = tvShow.type)
         }
-        val networkNames = tvShow.networks.ifEmpty { tvShow.networksList.map { it.name } }
+        // M10 — using pre-computed networkNames
         if (networkNames.isNotEmpty()) {
             DetailRow(label = "Network", value = networkNames.joinToString(", "))
         }
-        val createdBy = tvShow.createdBy.ifEmpty { tvShow.createdByList.map { it.name }.joinToString(", ") }
+        // M11 — using pre-computed createdBy
         if (createdBy.isNotBlank()) {
             DetailRow(label = "Created By", value = createdBy)
         }

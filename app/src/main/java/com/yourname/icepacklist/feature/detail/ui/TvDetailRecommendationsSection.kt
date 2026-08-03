@@ -32,7 +32,7 @@ fun TvDetailRecommendationsSection(
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(modifier = Modifier.height(180.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(similar, key = { it.id }) { simShow ->
+                items(similar) { simShow ->
                     TvShowCard(tvShow = simShow, onClick = { onTvShowClick(simShow.id) })
                 }
             }

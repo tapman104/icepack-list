@@ -34,23 +34,27 @@ fun TvDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val entryState by viewModel.entryState.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        when (val state = uiState) {
-            is TvDetailUiState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color(0xFFE50914)
-                )
+    // L1 — outer Box(fillMaxSize) removed to eliminate double measurement with LazyColumn(fillMaxSize).
+    // Loading/Error each have their own Box with centering; Success renders directly.
+    when (val state = uiState) {
+        is TvDetailUiState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color(0xFFE50914))
             }
-            is TvDetailUiState.Error -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+        }
+        is TvDetailUiState.Error -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(R.string.error_loading_details),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -71,26 +75,26 @@ fun TvDetailScreen(
                     }
                 }
             }
-            is TvDetailUiState.Success -> {
-                TvDetailContent(
-                    tvShow = state.tvShow,
-                    credits = state.credits,
-                    videos = state.videos,
-                    similar = state.similar,
-                    watchProviders = state.watchProviders,
-                    keywords = state.keywords,
-                    reviews = state.reviews,
-                    entryState = entryState,
-                    onAddToWatchlist = { viewModel.addToWatchlist(it) },
-                    onSaveEntry = { viewModel.saveEntry(it) },
-                    onRemoveEntry = { viewModel.removeEntry(it) },
-                    onBack = onBack,
-                    onTvShowClick = onTvShowClick,
-                    onPersonClick = onPersonClick,
-                    onSeasonClick = onSeasonClick,
-                    onFullCastClick = onFullCastClick
-                )
-            }
+        }
+        is TvDetailUiState.Success -> {
+            TvDetailContent(
+                tvShow = state.tvShow,
+                credits = state.credits,
+                videos = state.videos,
+                similar = state.similar,
+                watchProviders = state.watchProviders,
+                keywords = state.keywords,
+                reviews = state.reviews,
+                entryState = entryState,
+                onAddToWatchlist = { viewModel.addToWatchlist(it) },
+                onSaveEntry = { viewModel.saveEntry(it) },
+                onRemoveEntry = { viewModel.removeEntry(it) },
+                onBack = onBack,
+                onTvShowClick = onTvShowClick,
+                onPersonClick = onPersonClick,
+                onSeasonClick = onSeasonClick,
+                onFullCastClick = onFullCastClick
+            )
         }
     }
 }

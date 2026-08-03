@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +26,9 @@ import com.yourname.icepacklist.R
 import com.yourname.icepacklist.feature.home.domain.Cast
 import com.yourname.icepacklist.feature.home.domain.Crew
 
+// H12 — crewJobs constant at top level; never allocated inside the composable or LazyColumn DSL
+private val CREW_JOBS = setOf("Director", "Writer", "Screenplay", "Creator", "Executive Producer")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullCastScreen(
@@ -34,7 +38,7 @@ fun FullCastScreen(
     onPersonClick: (Int) -> Unit = {}
 ) {
     val credits = CreditsHolder.credits
-    
+
     DisposableEffect(Unit) {
         onDispose {
             CreditsHolder.credits = null
@@ -44,6 +48,11 @@ fun FullCastScreen(
     if (credits == null) {
         LaunchedEffect(Unit) { onBack() }
         return
+    }
+
+    // H12 — crewList computed in remember above the LazyColumn; no computation inside the DSL block
+    val crewList = remember(credits) {
+        credits.crew.filter { it.job in CREW_JOBS }
     }
 
     Scaffold(
@@ -60,7 +69,7 @@ fun FullCastScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        
+
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -70,19 +79,20 @@ fun FullCastScreen(
                 item {
                     Text("Cast", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 }
-                items(credits.cast, key = { "cast_${it.id}_${it.character}" }) { person ->
+                // M3 — Cast id is unique; plain Int key, no string template allocation
+                items(credits.cast, key = { it.id }) { person ->
                     FullCastItem(person, onClick = { onPersonClick(person.id) })
                 }
             }
-            
-            val crewJobs = listOf("Director", "Writer", "Screenplay", "Creator", "Executive Producer")
-            val crewList = credits.crew.filter { it.job in crewJobs }
+
+            // H12 — crewList is pre-computed above; no filter or listOf inside the DSL
             if (crewList.isNotEmpty()) {
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Crew", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 }
-                items(crewList, key = { "crew_${it.id}_${it.job}" }) { person ->
+                // M4 — compound Int key for crew (same person can have two jobs); no string allocation
+                items(crewList, key = { it.id * 31 + (it.job?.hashCode() ?: 0) }) { person ->
                     FullCrewItem(person, onClick = { onPersonClick(person.id) })
                 }
             }
