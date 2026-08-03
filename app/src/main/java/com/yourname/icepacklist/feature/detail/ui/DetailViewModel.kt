@@ -85,29 +85,19 @@ class DetailViewModel @Inject constructor(
             _uiState.value = DetailUiState.Loading
             try {
                 coroutineScope {
-                    val movieDef = async { apiService.getMovieDetails(movieId) }
-                    val similarDef = async { apiService.getSimilarMovies(movieId) }
-                    val providersDef = async { apiService.getMovieWatchProviders(movieId) }
-                    val keywordsDef = async { apiService.getMovieKeywords(movieId) }
-                    val reviewsDef = async { apiService.getMovieReviews(movieId) }
+                    val result = repository.getMovieDetailFull(movieId)
+                    val fullResponse = result.getOrThrow()
 
-                    awaitAll(movieDef, similarDef, providersDef, keywordsDef, reviewsDef)
-
-                    val movie = movieDef.await()
-                    val similarResponse = similarDef.await()
-                    val providersResponse = providersDef.await()
-                    val keywordsResponse = keywordsDef.await()
-                    val reviewsResponse = reviewsDef.await()
-
-                    val credits = movie.creditsResponse ?: CreditsResponse(id = movieId)
-                    val videosResponse = movie.videoResponse
+                    val movie = fullResponse.toMovieDetail()
+                    val credits = fullResponse.creditsResponse ?: CreditsResponse(id = movieId)
+                    val videosResponse = fullResponse.videoResponse
 
                     val director = credits.crew.firstOrNull { it.job == "Director" }?.name ?: ""
                     val videoResults = videosResponse?.results
                         ?.filter { it.type == "Trailer" && it.site == "YouTube" }
                         ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
                         ?: emptyList()
-                    val similarMovies = similarResponse.results.distinctBy { it.id }.take(12)
+                    val similarMovies = fullResponse.similarResponse?.results?.distinctBy { it.id }?.take(12) ?: emptyList()
 
                     val updatedMovie = movie.copy(
                         director = director,
@@ -115,9 +105,9 @@ class DetailViewModel @Inject constructor(
                         similar = similarMovies
                     )
 
-                    val inProviders = providersResponse.results?.get("IN")?.flatrate ?: emptyList()
-                    val keywords = keywordsResponse.keywords ?: keywordsResponse.results ?: emptyList()
-                    val reviews = reviewsResponse.results
+                    val inProviders = fullResponse.watchProvidersResponse?.results?.get("IN")?.flatrate ?: emptyList()
+                    val keywords = fullResponse.keywordsResponse?.keywords ?: fullResponse.keywordsResponse?.results ?: emptyList()
+                    val reviews = fullResponse.reviewsResponse?.results ?: emptyList()
 
                     _uiState.value = DetailUiState.Success(
                         movie = updatedMovie,
