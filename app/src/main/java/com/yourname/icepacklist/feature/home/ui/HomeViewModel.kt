@@ -30,7 +30,8 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val selectedTab: Int = 0
 )
 
 @HiltViewModel
@@ -54,6 +55,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun setSelectedTab(tab: Int) {
+        if (_uiState.value.selectedTab == tab) return
+        _uiState.update { it.copy(selectedTab = tab) }
+        refresh(lastFilter)
+    }
+
     fun retry() {
         refresh(lastFilter)
     }
@@ -62,21 +69,25 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isError = false, errorMessage = "", error = null) }
             
-            val trendingMoviesDef = async { repository.getTrendingMovies(filter) }
-            val popularMoviesDef = async { repository.getPopularMovies(filter) }
-            val nowPlayingMoviesDef = async { repository.getNowPlayingMovies(filter) }
-            val upcomingMoviesDef = async { repository.getUpcomingMovies(filter) }
-            val topRatedMoviesDef = async { repository.getTopRatedMovies(filter) }
+            val tab = _uiState.value.selectedTab
+            val fetchMovies = tab == 0 || tab == 1
+            val fetchTv = tab == 0 || tab == 2
+
+            val trendingMoviesDef = if (fetchMovies) async { repository.getTrendingMovies(filter) } else null
+            val popularMoviesDef = if (fetchMovies) async { repository.getPopularMovies(filter) } else null
+            val nowPlayingMoviesDef = if (fetchMovies) async { repository.getNowPlayingMovies(filter) } else null
+            val upcomingMoviesDef = if (fetchMovies) async { repository.getUpcomingMovies(filter) } else null
+            val topRatedMoviesDef = if (fetchMovies) async { repository.getTopRatedMovies(filter) } else null
             
-            val trendingTvShowsDef = async { repository.getTrendingTvShows(filter) }
-            val popularTvShowsDef = async { repository.getPopularTvShows(filter) }
-            val topRatedTvShowsDef = async { repository.getTopRatedTvShows(filter) }
-            val airingTodayTvShowsDef = async { repository.getAiringTodayTvShows(filter) }
+            val trendingTvShowsDef = if (fetchTv) async { repository.getTrendingTvShows(filter) } else null
+            val popularTvShowsDef = if (fetchTv) async { repository.getPopularTvShows(filter) } else null
+            val topRatedTvShowsDef = if (fetchTv) async { repository.getTopRatedTvShows(filter) } else null
+            val airingTodayTvShowsDef = if (fetchTv) async { repository.getAiringTodayTvShows(filter) } else null
             
-            val results = awaitAll(
+            val results = listOfNotNull(
                 trendingMoviesDef, popularMoviesDef, nowPlayingMoviesDef, upcomingMoviesDef, topRatedMoviesDef,
                 trendingTvShowsDef, popularTvShowsDef, topRatedTvShowsDef, airingTodayTvShowsDef
-            )
+            ).awaitAll()
             
             val anyFailure = results.firstOrNull { it.isFailure }
             if (anyFailure != null) {
@@ -90,15 +101,15 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        trendingMovies = trendingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        popularMovies = popularMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        nowPlayingMovies = nowPlayingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        upcomingMovies = upcomingMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        topRatedMovies = topRatedMoviesDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        trendingTvShows = trendingTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        popularTvShows = popularTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        topRatedTvShows = topRatedTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
-                        airingTodayTvShows = airingTodayTvShowsDef.await().getOrDefault(emptyList()).distinctBy { it.id },
+                        trendingMovies = trendingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.trendingMovies,
+                        popularMovies = popularMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.popularMovies,
+                        nowPlayingMovies = nowPlayingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.nowPlayingMovies,
+                        upcomingMovies = upcomingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.upcomingMovies,
+                        topRatedMovies = topRatedMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.topRatedMovies,
+                        trendingTvShows = trendingTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.trendingTvShows,
+                        popularTvShows = popularTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.popularTvShows,
+                        topRatedTvShows = topRatedTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.topRatedTvShows,
+                        airingTodayTvShows = airingTodayTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.airingTodayTvShows,
                     )
                 }
             }

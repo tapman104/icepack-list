@@ -43,7 +43,6 @@ fun HomeScreen(
     onScrollUp: (Boolean) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(stringResource(R.string.tab_all), stringResource(R.string.tab_movies), stringResource(R.string.tab_tv_shows))
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -94,12 +93,12 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 tabs.forEachIndexed { index, title ->
-                    val isSelected = selectedTab == index
+                    val isSelected = uiState.selectedTab == index
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(20.dp))
                             .background(if (isSelected) Color(0xFFE50914) else MaterialTheme.colorScheme.surface)
-                            .clickable { selectedTab = index }
+                            .clickable { viewModel.setSelectedTab(index) }
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
@@ -154,7 +153,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        when (selectedTab) {
+                        when (uiState.selectedTab) {
                             0 -> {
                                 item(key = "all_trending_movies", contentType = "CategoryRow") {
                                     if (uiState.trendingMovies.isNotEmpty()) {
