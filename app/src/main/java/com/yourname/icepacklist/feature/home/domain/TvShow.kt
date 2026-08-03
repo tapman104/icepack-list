@@ -14,5 +14,6 @@ data class TvShow(
     @Json(name = "backdrop_path") val backdropPath: String?,
     @Json(name = "vote_average") val voteAverage: Double,
     @Json(name = "first_air_date") val firstAirDate: String?,
-    @Json(name = "genre_ids") val genreIds: List<Int> = emptyList()
+    @Json(name = "genre_ids") val genreIds: List<Int> = emptyList(),
+    @Json(name = "origin_country") val originCountry: List<String>? = emptyList()
 )

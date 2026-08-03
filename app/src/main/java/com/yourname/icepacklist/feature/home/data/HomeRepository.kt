@@ -41,7 +41,11 @@ class HomeRepository @Inject constructor(
                         apiService.discoverMovie(filter.originCountry, filter.withGenres, filter.withoutGenres, sortBy = "popularity.desc").results.take(12)
                     }
                 } else {
-                    apiService.getMovieRecommendations(seed.id, page = 1).results.take(12)
+                    var rawResults = apiService.getMovieRecommendations(seed.id, page = 1).results
+                    if (filter != ContentFilter.ALL && filter.originCountry != null) {
+                        rawResults = rawResults.filter { it.originCountry?.contains(filter.originCountry) == true }
+                    }
+                    rawResults.take(12)
                 }
                 cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
                 result
@@ -57,7 +61,11 @@ class HomeRepository @Inject constructor(
                 return Result.success(adapter.fromJson(cached.json) ?: emptyList())
             }
             return runCatching {
-                val result = apiService.getTvRecommendations(seed.id, page = 1).results.take(12)
+                var rawResults = apiService.getTvRecommendations(seed.id, page = 1).results
+                if (filter != ContentFilter.ALL && filter.originCountry != null) {
+                    rawResults = rawResults.filter { it.originCountry?.contains(filter.originCountry) == true }
+                }
+                val result = rawResults.take(12)
                 cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
                 result
             }.recoverCatching { error ->

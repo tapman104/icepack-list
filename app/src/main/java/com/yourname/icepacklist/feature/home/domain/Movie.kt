@@ -14,5 +14,6 @@ data class Movie(
     @Json(name = "backdrop_path") val backdropPath: String?,
     @Json(name = "vote_average") val voteAverage: Double,
     @Json(name = "release_date") val releaseDate: String?,
-    @Json(name = "genre_ids") val genreIds: List<Int> = emptyList()
+    @Json(name = "genre_ids") val genreIds: List<Int> = emptyList(),
+    @Json(name = "origin_country") val originCountry: List<String>? = emptyList()
 )
