@@ -50,7 +50,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    val contentFilter: StateFlow<ContentFilter> = apiKeyDataStore.contentFilter
+    val homeContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.homeContentFilter
         .map { ContentFilter.fromKey(it) }
         .stateIn(
             scope = viewModelScope,
@@ -58,12 +58,40 @@ class SettingsViewModel @Inject constructor(
             initialValue = ContentFilter.ALL
         )
 
-    fun setContentFilter(filter: ContentFilter) {
+    fun setHomeContentFilter(filter: ContentFilter) {
         viewModelScope.launch {
-            apiKeyDataStore.setContentFilter(filter.name)
+            apiKeyDataStore.setHomeContentFilter(filter.name)
         }
     }
     
+    val searchContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.searchContentFilter
+        .map { ContentFilter.fromKey(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ContentFilter.ALL
+        )
+
+    fun setSearchContentFilter(filter: ContentFilter) {
+        viewModelScope.launch {
+            apiKeyDataStore.setSearchContentFilter(filter.name)
+        }
+    }
+    
+    val recommendationsContentFilter: StateFlow<ContentFilter> = apiKeyDataStore.recommendationsContentFilter
+        .map { ContentFilter.fromKey(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ContentFilter.ALL
+        )
+
+    fun setRecommendationsContentFilter(filter: ContentFilter) {
+        viewModelScope.launch {
+            apiKeyDataStore.setRecommendationsContentFilter(filter.name)
+        }
+    }
+
     val isDarkTheme: StateFlow<Boolean> = apiKeyDataStore.isDarkTheme
         .stateIn(
             scope = viewModelScope,
@@ -74,32 +102,6 @@ class SettingsViewModel @Inject constructor(
     fun setDarkTheme(enabled: Boolean) {
         viewModelScope.launch {
             apiKeyDataStore.setDarkTheme(enabled)
-        }
-    }
-
-    val recommendationsEnabled: StateFlow<Boolean> = apiKeyDataStore.recommendationsEnabled
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = true
-        )
-
-    fun setRecommendationsEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            apiKeyDataStore.setRecommendationsEnabled(enabled)
-        }
-    }
-
-    val searchFilterEnabled: StateFlow<Boolean> = apiKeyDataStore.searchFilterEnabled
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = false
-        )
-
-    fun setSearchFilterEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            apiKeyDataStore.setSearchFilterEnabled(enabled)
         }
     }
 
