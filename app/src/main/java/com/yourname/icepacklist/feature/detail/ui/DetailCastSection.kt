@@ -66,7 +66,7 @@ fun DetailCastSection(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyRow(modifier = Modifier.height(112.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Cast id is unique per list — Int key, no string allocation
                 items(credits.cast.take(15), key = { it.id }) { person ->
                     CastItemCard(
@@ -96,7 +96,7 @@ fun DetailCastSection(
                 style = MaterialTheme.typography.labelMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(modifier = Modifier.height(92.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyRow(modifier = Modifier.height(112.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // M1 — Crew id is NOT unique (same person can have two jobs); compound Int key via Pair hashCode
                 items(filteredCrew, key = { it.id * 31 + (it.job?.hashCode() ?: 0) }) { person ->
                     CrewItemCard(
