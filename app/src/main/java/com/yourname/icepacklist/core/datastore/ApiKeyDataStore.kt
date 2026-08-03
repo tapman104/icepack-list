@@ -22,6 +22,7 @@ class ApiKeyDataStore @Inject constructor(
     companion object {
         private val API_KEY = stringPreferencesKey("tmdb_api_key")
         private val LAST_IMPORT_TIME = longPreferencesKey("last_import_time")
+        private val CONTENT_FILTER_KEY = stringPreferencesKey("content_filter")
     }
 
     val apiKey: Flow<String?> = context.dataStore.data
@@ -29,6 +30,9 @@ class ApiKeyDataStore @Inject constructor(
         
     val lastImportTime: Flow<Long?> = context.dataStore.data
         .map { prefs -> prefs[LAST_IMPORT_TIME] }
+
+    val contentFilter: Flow<String> = context.dataStore.data
+        .map { prefs -> prefs[CONTENT_FILTER_KEY] ?: "All" }
 
     suspend fun saveApiKey(key: String) {
         context.dataStore.edit { prefs ->
@@ -45,6 +49,12 @@ class ApiKeyDataStore @Inject constructor(
     suspend fun saveLastImportTime(time: Long) {
         context.dataStore.edit { prefs ->
             prefs[LAST_IMPORT_TIME] = time
+        }
+    }
+
+    suspend fun setContentFilter(value: String) {
+        context.dataStore.edit { prefs ->
+            prefs[CONTENT_FILTER_KEY] = value
         }
     }
 }
