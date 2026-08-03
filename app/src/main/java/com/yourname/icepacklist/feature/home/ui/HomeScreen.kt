@@ -167,7 +167,7 @@ fun HomeScreen(
                                     }
                                 }
                                 item(key = "all_recommendations", contentType = "CategoryRow") {
-                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                    if (uiState.recommendations.isNotEmpty()) {
                                         CategoryRow(
                                             title = "Recommended",
                                             items = uiState.recommendations,
@@ -287,7 +287,7 @@ fun HomeScreen(
                                     }
                                 }
                                 item(key = "movies_recommendations", contentType = "CategoryRow") {
-                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                    if (uiState.recommendations.isNotEmpty()) {
                                         CategoryRow(
                                             title = "Recommended",
                                             items = uiState.recommendations,
@@ -363,7 +363,7 @@ fun HomeScreen(
                                     }
                                 }
                                 item(key = "tv_recommendations", contentType = "CategoryRow") {
-                                    if (uiState.recommendationsEnabled && uiState.recommendations.isNotEmpty()) {
+                                    if (uiState.recommendations.isNotEmpty()) {
                                         CategoryRow(
                                             title = "Recommended",
                                             items = uiState.recommendations,

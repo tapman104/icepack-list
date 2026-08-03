@@ -28,7 +28,6 @@ data class HomeUiState(
     val popularTvShows: List<TvShow> = emptyList(),
     val topRatedTvShows: List<TvShow> = emptyList(),
     val airingTodayTvShows: List<TvShow> = emptyList(),
-    val recommendationsEnabled: Boolean = true,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
@@ -45,21 +44,22 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
-    private var lastFilter: ContentFilter = ContentFilter.ALL
-    private var lastRecsEnabled: Boolean = true
+    private var lastHomeFilter: ContentFilter = ContentFilter.ALL
+    private var lastRecsFilter: ContentFilter = ContentFilter.ALL
 
     init {
         viewModelScope.launch {
-            apiKeyDataStore.contentFilter.collect { key ->
+            apiKeyDataStore.homeContentFilter.collect { key ->
                 val filter = ContentFilter.fromKey(key)
-                lastFilter = filter
-                refresh(filter)
+                lastHomeFilter = filter
+                refreshHomeRows(filter)
             }
         }
         viewModelScope.launch {
-            apiKeyDataStore.recommendationsEnabled.collect { enabled ->
-                lastRecsEnabled = enabled
-                refresh(lastFilter)
+            apiKeyDataStore.recommendationsContentFilter.collect { key ->
+                val filter = ContentFilter.fromKey(key)
+                lastRecsFilter = filter
+                refreshRecommendations(filter)
             }
         }
     }
@@ -67,14 +67,20 @@ class HomeViewModel @Inject constructor(
     fun setSelectedTab(tab: Int) {
         if (_uiState.value.selectedTab == tab) return
         _uiState.update { it.copy(selectedTab = tab) }
-        refresh(lastFilter)
+        refreshHomeRows(lastHomeFilter)
+        refreshRecommendations(lastRecsFilter)
     }
 
     fun retry() {
-        refresh(lastFilter)
+        refreshHomeRows(lastHomeFilter)
+        refreshRecommendations(lastRecsFilter)
     }
 
-    fun refresh(filter: ContentFilter = lastFilter) {
+    fun refresh() {
+        retry()
+    }
+
+    private fun refreshHomeRows(filter: ContentFilter) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, isError = false, errorMessage = "", error = null) }
             
@@ -92,11 +98,10 @@ class HomeViewModel @Inject constructor(
             val popularTvShowsDef = if (fetchTv) async { repository.getPopularTvShows(filter) } else null
             val topRatedTvShowsDef = if (fetchTv) async { repository.getTopRatedTvShows(filter) } else null
             val airingTodayTvShowsDef = if (fetchTv) async { repository.getAiringTodayTvShows(filter) } else null
-            val recommendationsDef = if (lastRecsEnabled && (fetchMovies || fetchTv)) async { repository.getRecommendations(filter) } else null
             
             val results = listOfNotNull(
                 trendingMoviesDef, popularMoviesDef, nowPlayingMoviesDef, upcomingMoviesDef, topRatedMoviesDef,
-                trendingTvShowsDef, popularTvShowsDef, topRatedTvShowsDef, airingTodayTvShowsDef, recommendationsDef
+                trendingTvShowsDef, popularTvShowsDef, topRatedTvShowsDef, airingTodayTvShowsDef
             ).awaitAll()
             
             val anyFailure = results.firstOrNull { it.isFailure }
@@ -116,13 +121,37 @@ class HomeViewModel @Inject constructor(
                         nowPlayingMovies = nowPlayingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.nowPlayingMovies,
                         upcomingMovies = upcomingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.upcomingMovies,
                         topRatedMovies = topRatedMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.topRatedMovies,
-                        recommendations = if (lastRecsEnabled) recommendationsDef?.await()?.getOrDefault(emptyList()) ?: it.recommendations else emptyList(),
-                        recommendationsEnabled = lastRecsEnabled,
                         trendingTvShows = trendingTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.trendingTvShows,
                         popularTvShows = popularTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.popularTvShows,
                         topRatedTvShows = topRatedTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.topRatedTvShows,
                         airingTodayTvShows = airingTodayTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.airingTodayTvShows,
                     )
+                }
+            }
+        }
+    }
+    
+    private fun refreshRecommendations(filter: ContentFilter) {
+        viewModelScope.launch {
+            val tab = _uiState.value.selectedTab
+            val fetchMovies = tab == 0 || tab == 1
+            val fetchTv = tab == 0 || tab == 2
+
+            if (filter == ContentFilter.ALL) {
+                _uiState.update { it.copy(recommendations = emptyList()) }
+                return@launch
+            }
+
+            val recommendationsDef = if (fetchMovies || fetchTv) async { repository.getRecommendations(filter) } else null
+            
+            val result = recommendationsDef?.await()
+            if (result != null && result.isSuccess) {
+                _uiState.update {
+                    it.copy(recommendations = result.getOrDefault(emptyList()))
+                }
+            } else if (result != null && result.isFailure) {
+                _uiState.update {
+                    it.copy(recommendations = emptyList())
                 }
             }
         }
