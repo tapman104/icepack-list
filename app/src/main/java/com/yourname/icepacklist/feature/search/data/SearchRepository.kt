@@ -9,9 +9,12 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 import com.yourname.icepacklist.core.datastore.ContentFilter
+import com.yourname.icepacklist.core.database.dao.SearchHistoryDao
+import com.yourname.icepacklist.core.database.entity.SearchHistoryEntity
 
 class SearchRepository @Inject constructor(
-    private val apiService: TmdbApiService
+    private val apiService: TmdbApiService,
+    private val searchHistoryDao: SearchHistoryDao
 ) {
     fun searchMulti(query: String, filter: ContentFilter? = null): Flow<PagingData<MultiSearchResult>> {
         return Pager(
@@ -22,5 +25,21 @@ class SearchRepository @Inject constructor(
             ),
             pagingSourceFactory = { SearchPagingSource(apiService, query, filter) }
         ).flow
+    }
+
+    fun getSearchHistory(): Flow<List<SearchHistoryEntity>> = searchHistoryDao.getSearchHistory()
+
+    suspend fun addSearchQuery(query: String) {
+        if (query.isNotBlank()) {
+            searchHistoryDao.insertSearchQuery(SearchHistoryEntity(query, System.currentTimeMillis()))
+        }
+    }
+
+    suspend fun deleteSearchQuery(query: String) {
+        searchHistoryDao.deleteSearchQuery(query)
+    }
+
+    suspend fun clearSearchHistory() {
+        searchHistoryDao.clearAll()
     }
 }

@@ -28,7 +28,7 @@ object DatabaseModule {
             IcepackDatabase::class.java,
             "icepack_db"
         )
-        .addMigrations(IcepackDatabase.MIGRATION_4_5)
+        .addMigrations(IcepackDatabase.MIGRATION_4_5, IcepackDatabase.MIGRATION_5_6)
         .build()
     }
 
@@ -74,4 +74,9 @@ object DatabaseModule {
     @Singleton
     fun provideSearchCacheDao(database: IcepackDatabase): SearchCacheDao =
         database.searchCacheDao()
+
+    @Provides
+    @Singleton
+    fun provideSearchHistoryDao(database: IcepackDatabase): SearchHistoryDao =
+        database.searchHistoryDao()
 }

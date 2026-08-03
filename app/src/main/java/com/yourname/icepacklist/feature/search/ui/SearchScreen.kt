@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.*
@@ -47,6 +49,7 @@ fun SearchScreen(
     onPersonClick: (Int) -> Unit = {}
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val searchHistory by viewModel.searchHistory.collectAsState()
     val results = viewModel.searchResults.collectAsLazyPagingItems()
 
     Column(
@@ -70,7 +73,18 @@ fun SearchScreen(
                         onRetry = { results.retry() }
                     )
                 }
-                searchQuery.isBlank() -> EmptySearchState()
+                searchQuery.isBlank() -> {
+                    if (searchHistory.isEmpty()) {
+                        EmptySearchState()
+                    } else {
+                        SearchHistoryList(
+                            history = searchHistory,
+                            onQueryClick = viewModel::onSearchQueryChange,
+                            onRemoveClick = viewModel::removeSearchHistoryItem,
+                            onClearAllClick = viewModel::clearSearchHistory
+                        )
+                    }
+                }
                 results.itemCount == 0 && results.loadState.refresh is LoadState.NotLoading -> NoResultsState()
                 else -> SearchResultGrid(results, onMovieClick, onTvShowClick, onPersonClick)
             }
@@ -119,6 +133,71 @@ private fun EmptySearchState() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge
             )
+        }
+    }
+}
+
+@Composable
+private fun SearchHistoryList(
+    history: List<com.yourname.icepacklist.core.database.entity.SearchHistoryEntity>,
+    onQueryClick: (String) -> Unit,
+    onRemoveClick: (String) -> Unit,
+    onClearAllClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Recent Searches",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            TextButton(onClick = onClearAllClick) {
+                Text("Clear All")
+            }
+        }
+        
+        androidx.compose.foundation.lazy.LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
+            items(history.size, key = { history[it].query }) { index ->
+                val item = history[index]
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onQueryClick(item.query) }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = item.query,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { onRemoveClick(item.query) }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Remove",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
@@ -38,6 +39,9 @@ class SearchViewModel @Inject constructor(
         if (filterEnabled) com.yourname.icepacklist.core.datastore.ContentFilter.fromKey(key) else null
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val searchHistory: StateFlow<List<com.yourname.icepacklist.core.database.entity.SearchHistoryEntity>> = repository.getSearchHistory()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val searchResults: Flow<PagingData<MultiSearchResult>> = _searchQuery
         .debounce(300)
         .filter { it.isNotBlank() }
@@ -45,11 +49,26 @@ class SearchViewModel @Inject constructor(
             query to filter
         }
         .flatMapLatest { (query, filter) ->
+            if (query.isNotBlank()) {
+                repository.addSearchQuery(query.trim())
+            }
             repository.searchMulti(query, filter)
         }
         .cachedIn(viewModelScope)
 
     fun onSearchQueryChange(newQuery: String) {
         _searchQuery.value = newQuery
+    }
+
+    fun removeSearchHistoryItem(query: String) {
+        viewModelScope.launch {
+            repository.deleteSearchQuery(query)
+        }
+    }
+
+    fun clearSearchHistory() {
+        viewModelScope.launch {
+            repository.clearSearchHistory()
+        }
     }
 }
