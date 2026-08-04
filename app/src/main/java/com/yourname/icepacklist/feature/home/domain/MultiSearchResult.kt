@@ -23,4 +23,40 @@ data class MultiSearchResult(
     val displayTitle: String get() = title ?: name ?: ""
     val displayDate: String get() = releaseDate ?: firstAirDate ?: ""
     val displayPoster: String get() = posterPath ?: profilePath ?: ""
+
+    companion object {
+        fun fromMovie(movie: Movie): MultiSearchResult {
+            return MultiSearchResult(
+                id = movie.id,
+                mediaType = "movie",
+                title = movie.title,
+                name = null,
+                posterPath = movie.posterPath,
+                profilePath = null,
+                overview = movie.overview,
+                voteAverage = movie.voteAverage,
+                releaseDate = movie.releaseDate,
+                firstAirDate = null,
+                originCountry = null,
+                genreIds = movie.genreIds
+            )
+        }
+
+        fun fromTv(tv: TvShow): MultiSearchResult {
+            return MultiSearchResult(
+                id = tv.id,
+                mediaType = "tv",
+                title = null,
+                name = tv.name,
+                posterPath = tv.posterPath,
+                profilePath = null,
+                overview = tv.overview,
+                voteAverage = tv.voteAverage,
+                releaseDate = null,
+                firstAirDate = tv.firstAirDate,
+                originCountry = tv.originCountry,
+                genreIds = tv.genreIds
+            )
+        }
+    }
 }

@@ -17,7 +17,8 @@ import com.yourname.icepacklist.feature.home.domain.TvShow
 import com.yourname.icepacklist.core.database.WatchlistDao
 import com.yourname.icepacklist.core.database.MediaType
 import javax.inject.Inject
-
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 class HomeRepository @Inject constructor(
     private val apiService: TmdbApiService,
     private val cacheDao: HomeListCacheDao,
@@ -28,7 +29,30 @@ class HomeRepository @Inject constructor(
         val seed = watchlistDao.getLatestWatchlistItem()
         val seedId = seed?.id ?: "popular"
         val key = "recommendations_${filter.cacheKey()}_${seedId}"
-        
+        val originCountry = filter.originCountryParam()
+        val withGenres = filter.withGenresParam()
+        val withoutGenres = filter.withoutGenresParam()
+
+        if (seed != null && !filter.isAll()) {
+            return runCatching {
+                val (movies, tvs) = coroutineScope {
+                    val m = async { apiService.discoverMovie(originCountry = originCountry, withGenres = withGenres, withoutGenres = withoutGenres, sortBy = "popularity.desc", page = 1) }
+                    val t = async { apiService.discoverTv(originCountry = originCountry, withGenres = withGenres, withoutGenres = withoutGenres, sortBy = "popularity.desc", page = 1) }
+                    Pair(m.await(), t.await())
+                }
+                
+                val merged = mutableListOf<Any>()
+                val mIter = movies.results.iterator()
+                val tIter = tvs.results.iterator()
+                while (mIter.hasNext() || tIter.hasNext()) {
+                    if (mIter.hasNext()) merged.add(mIter.next())
+                    if (tIter.hasNext()) merged.add(tIter.next())
+                    if (merged.size >= 20) break
+                }
+                merged.take(20)
+            }
+        }
+
         if (seed == null || seed.mediaType == MediaType.MOVIE) {
             val adapter = moshi.adapter<List<Movie>>(
                 Types.newParameterizedType(List::class.java, Movie::class.java)
@@ -37,9 +61,6 @@ class HomeRepository @Inject constructor(
             if (cached != null && !com.yourname.icepacklist.core.cache.CacheConfig.isStale(cached.fetchedAt)) {
                 return Result.success(adapter.fromJson(cached.json) ?: emptyList())
             }
-            val originCountry = filter.originCountryParam()
-            val withGenres = filter.withGenresParam()
-            val withoutGenres = filter.withoutGenresParam()
             return runCatching {
                 val result = if (seed == null) {
                     if (filter.isAll()) {
@@ -48,12 +69,7 @@ class HomeRepository @Inject constructor(
                         apiService.discoverMovie(originCountry, withGenres, withoutGenres, sortBy = "popularity.desc").results.take(12)
                     }
                 } else {
-                    var rawResults = apiService.getMovieRecommendations(seed.id, page = 1).results
-                    if (!filter.isAll() && originCountry != null) {
-                        val allowedCountries = filter.mapNotNull { it.originCountry }.toSet()
-                        rawResults = rawResults.filter { it.originCountry?.any { c -> c in allowedCountries } == true }
-                    }
-                    rawResults.take(12)
+                    apiService.getMovieRecommendations(seed.id, page = 1).results.take(12)
                 }
                 cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
                 result
@@ -68,14 +84,8 @@ class HomeRepository @Inject constructor(
             if (cached != null && !com.yourname.icepacklist.core.cache.CacheConfig.isStale(cached.fetchedAt)) {
                 return Result.success(adapter.fromJson(cached.json) ?: emptyList())
             }
-            val originCountry = filter.originCountryParam()
             return runCatching {
-                var rawResults = apiService.getTvRecommendations(seed.id, page = 1).results
-                if (!filter.isAll() && originCountry != null) {
-                    val allowedCountries = filter.mapNotNull { it.originCountry }.toSet()
-                    rawResults = rawResults.filter { it.originCountry?.any { c -> c in allowedCountries } == true }
-                }
-                val result = rawResults.take(12)
+                val result = apiService.getTvRecommendations(seed.id, page = 1).results.take(12)
                 cacheDao.upsert(HomeListCacheEntity(key, adapter.toJson(result), System.currentTimeMillis()))
                 result
             }.recoverCatching { error ->
