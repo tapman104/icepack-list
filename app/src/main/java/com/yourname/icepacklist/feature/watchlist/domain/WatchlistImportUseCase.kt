@@ -97,8 +97,8 @@ class WatchlistImportUseCase @Inject constructor(
         } else {
             val multi = tmdbApi.searchMulti(item.title).results
             multi.mapNotNull { 
-                if (it.media_type == "movie") it to MediaType.MOVIE 
-                else if (it.media_type == "tv") it to MediaType.TV 
+                if (it.mediaType == "movie") it to MediaType.MOVIE 
+                else if (it.mediaType == "tv") it to MediaType.TV 
                 else null 
             }
         }
@@ -111,25 +111,25 @@ class WatchlistImportUseCase @Inject constructor(
             val yearInt = item.year.toIntOrNull()
             if (yearInt != null) {
                 val yearMatches = results.filter { result ->
-                    val resultYearStr = (result.first as? Movie)?.release_date?.take(4)
-                        ?: (result.first as? TvShow)?.first_air_date?.take(4)
-                        ?: (result.first as? MultiSearchResult)?.release_date?.take(4)
-                        ?: (result.first as? MultiSearchResult)?.first_air_date?.take(4)
+                    val resultYearStr = (result.first as? Movie)?.releaseDate?.take(4)
+                        ?: (result.first as? TvShow)?.firstAirDate?.take(4)
+                        ?: (result.first as? MultiSearchResult)?.releaseDate?.take(4)
+                        ?: (result.first as? MultiSearchResult)?.firstAirDate?.take(4)
                         
                     val resultYear = resultYearStr?.toIntOrNull()
                     resultYear != null && kotlin.math.abs(resultYear - yearInt) <= 1
                 }
                 
                 if (yearMatches.isNotEmpty()) {
-                    bestMatch = yearMatches.maxByOrNull { getPopularity(it.first) } ?: yearMatches.first()
+                    bestMatch = yearMatches.first()
                 } else {
-                    bestMatch = results.maxByOrNull { getPopularity(it.first) } ?: results.first()
+                    bestMatch = results.first()
                 }
             } else {
-                bestMatch = results.maxByOrNull { getPopularity(it.first) } ?: results.first()
+                bestMatch = results.first()
             }
         } else {
-            bestMatch = results.maxByOrNull { getPopularity(it.first) } ?: results.first()
+            bestMatch = results.first()
         }
 
         val bestItem = bestMatch.first
@@ -146,19 +146,19 @@ class WatchlistImportUseCase @Inject constructor(
             ?: (bestItem as? MultiSearchResult)?.name
             ?: item.title
 
-        val posterPath = (bestItem as? Movie)?.poster_path
-            ?: (bestItem as? TvShow)?.poster_path
-            ?: (bestItem as? MultiSearchResult)?.poster_path
+        val posterPath = (bestItem as? Movie)?.posterPath
+            ?: (bestItem as? TvShow)?.posterPath
+            ?: (bestItem as? MultiSearchResult)?.posterPath
 
-        val voteAverage = (bestItem as? Movie)?.vote_average
-            ?: (bestItem as? TvShow)?.vote_average
-            ?: (bestItem as? MultiSearchResult)?.vote_average
+        val voteAverage = (bestItem as? Movie)?.voteAverage
+            ?: (bestItem as? TvShow)?.voteAverage
+            ?: (bestItem as? MultiSearchResult)?.voteAverage
             ?: 0.0
 
-        val yearStr = (bestItem as? Movie)?.release_date?.take(4)
-            ?: (bestItem as? TvShow)?.first_air_date?.take(4)
-            ?: (bestItem as? MultiSearchResult)?.release_date?.take(4)
-            ?: (bestItem as? MultiSearchResult)?.first_air_date?.take(4)
+        val yearStr = (bestItem as? Movie)?.releaseDate?.take(4)
+            ?: (bestItem as? TvShow)?.firstAirDate?.take(4)
+            ?: (bestItem as? MultiSearchResult)?.releaseDate?.take(4)
+            ?: (bestItem as? MultiSearchResult)?.firstAirDate?.take(4)
 
         return WatchlistEntity(
             id = id,
@@ -174,12 +174,5 @@ class WatchlistImportUseCase @Inject constructor(
             episodesWatched = item.episodesWatched,
             country = item.country
         )
-    }
-
-    private fun getPopularity(item: Any): Double {
-        return (item as? Movie)?.popularity
-            ?: (item as? TvShow)?.popularity
-            ?: (item as? MultiSearchResult)?.popularity
-            ?: 0.0
     }
 }
