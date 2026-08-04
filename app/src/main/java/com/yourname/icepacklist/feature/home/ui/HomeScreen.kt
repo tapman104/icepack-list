@@ -166,6 +166,17 @@ fun HomeScreen(
                                         )
                                     }
                                 }
+                                item(key = "all_trending_tv", contentType = "CategoryRow") {
+                                    if (uiState.trendingTvShows.isNotEmpty()) {
+                                        CategoryRow(
+                                            title = stringResource(R.string.section_trending_shows),
+                                            items = uiState.trendingTvShows,
+                                            onViewAll = { onViewCategory("trending_tv") },
+                                            key = { it.id },
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                        )
+                                    }
+                                }
                                 item(key = "all_recommendations", contentType = "CategoryRow") {
                                     if (uiState.recommendations.isNotEmpty()) {
                                         CategoryRow(
@@ -196,17 +207,6 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item(key = "all_now_playing_movies", contentType = "CategoryRow") {
-                                    if (uiState.nowPlayingMovies.isNotEmpty()) {
-                                        CategoryRow(
-                                            title = stringResource(R.string.section_now_playing),
-                                            items = uiState.nowPlayingMovies,
-                                            onViewAll = { onViewCategory("now_playing") },
-                                            key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                                        )
-                                    }
-                                }
                                 item(key = "all_upcoming_movies", contentType = "CategoryRow") {
                                     if (uiState.upcomingMovies.isNotEmpty()) {
                                         CategoryRow(
@@ -226,17 +226,6 @@ fun HomeScreen(
                                             onViewAll = { onViewCategory("top_rated_movies") },
                                             key = { it.id },
                                             itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                                        )
-                                    }
-                                }
-                                item(key = "all_trending_tv", contentType = "CategoryRow") {
-                                    if (uiState.trendingTvShows.isNotEmpty()) {
-                                        CategoryRow(
-                                            title = stringResource(R.string.section_trending_shows),
-                                            items = uiState.trendingTvShows,
-                                            onViewAll = { onViewCategory("trending_tv") },
-                                            key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
                                         )
                                     }
                                 }
@@ -316,17 +305,7 @@ fun HomeScreen(
                                         )
                                     }
                                 }
-                                item(key = "movies_now_playing", contentType = "CategoryRow") {
-                                    if (uiState.nowPlayingMovies.isNotEmpty()) {
-                                        CategoryRow(
-                                            title = stringResource(R.string.section_now_playing),
-                                            items = uiState.nowPlayingMovies,
-                                            onViewAll = { onViewCategory("now_playing") },
-                                            key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
-                                        )
-                                    }
-                                }
+
                                 item(key = "movies_upcoming", contentType = "CategoryRow") {
                                     if (uiState.upcomingMovies.isNotEmpty()) {
                                         CategoryRow(
