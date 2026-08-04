@@ -61,10 +61,16 @@ fun SettingsScreen(
         }
     }
 
-    val exportLauncher = rememberLauncherForActivityResult(
+    val exportJsonLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
-        uri?.let { viewModel.exportBackup(it, context.contentResolver) }
+        uri?.let { viewModel.exportBackup(it, context.contentResolver, isCsv = false) }
+    }
+
+    val exportCsvLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri?.let { viewModel.exportBackup(it, context.contentResolver, isCsv = true) }
     }
 
     val importLauncher = rememberLauncherForActivityResult(
@@ -255,27 +261,43 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
-                            onClick = {
-                                val dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                                exportLauncher.launch("icepack_watchlist_backup_$dateStr.json")
-                            },
-                            modifier = Modifier.weight(1f),
-                            enabled = backupState != BackupState.Loading && !isImporting
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text("Export Backup")
+                            Button(
+                                onClick = {
+                                    val dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                    exportJsonLauncher.launch("icepack_watchlist_$dateStr.json")
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = backupState != BackupState.Loading && !isImporting
+                            ) {
+                                Text("Export JSON")
+                            }
+
+                            Button(
+                                onClick = {
+                                    val dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                                    exportCsvLauncher.launch("icepack_watchlist_$dateStr.csv")
+                                },
+                                modifier = Modifier.weight(1f),
+                                enabled = backupState != BackupState.Loading && !isImporting
+                            ) {
+                                Text("Export CSV")
+                            }
                         }
 
                         OutlinedButton(
-                            onClick = { importLauncher.launch(arrayOf("application/json")) },
-                            modifier = Modifier.weight(1f),
+                            onClick = { importLauncher.launch(arrayOf("*/*")) },
+                            modifier = Modifier.fillMaxWidth(),
                             enabled = backupState != BackupState.Loading && !isImporting
                         ) {
-                            Text("Import Backup")
+                            Text("Import Watchlist (JSON, CSV, TSV)")
                         }
                     }
 

@@ -28,5 +28,6 @@ data class WatchlistEntity(
     val finishDate: String? = null,
     val notes: String? = null,
     val episodesWatched: Int? = null,
+    val country: String? = null,
     val addedAt: Long = System.currentTimeMillis()
 )

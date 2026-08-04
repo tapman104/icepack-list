@@ -11,7 +11,8 @@ import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.core.datastore.ThemeMode
 import com.yourname.icepacklist.feature.watchlist.data.ImportState
-import com.yourname.icepacklist.feature.watchlist.data.WatchlistRepository
+import com.yourname.icepacklist.feature.watchlist.domain.WatchlistImportUseCase
+import com.yourname.icepacklist.feature.watchlist.domain.WatchlistExportUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -40,9 +41,9 @@ sealed class BackupState {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val apiKeyDataStore: ApiKeyDataStore,
-    private val watchlistRepository: WatchlistRepository,
     private val hiddenItemRepository: HiddenItemRepository,
-    private val moshi: Moshi
+    private val importUseCase: WatchlistImportUseCase,
+    private val exportUseCase: WatchlistExportUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<SettingsState> = combine(
@@ -128,14 +129,14 @@ class SettingsViewModel @Inject constructor(
     private val _importProgress = MutableStateFlow(0f)
     val importProgress = _importProgress.asStateFlow()
 
-    fun exportBackup(uri: Uri, contentResolver: ContentResolver) {
+    fun exportBackup(uri: Uri, contentResolver: ContentResolver, isCsv: Boolean) {
         viewModelScope.launch {
             _backupState.value = BackupState.Loading
             try {
-                val json = watchlistRepository.exportToJson(moshi)
+                val data = if (isCsv) exportUseCase.exportToCsv() else exportUseCase.exportToJson()
                 withContext(Dispatchers.IO) {
                     contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        outputStream.write(json.toByteArray())
+                        outputStream.write(data.toByteArray())
                     }
                 }
                 _backupState.value = BackupState.Success("Backup exported successfully!")
@@ -157,14 +158,15 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
                 if (json != null) {
-                    watchlistRepository.importFromJson(json).collect { state ->
+                    importUseCase.invoke(json).collect { state ->
                         when (state) {
                             is ImportState.Progress -> {
                                 _importProgress.value = if (state.total > 0) state.current.toFloat() / state.total else 0f
                             }
                             is ImportState.Success -> {
                                 if (state.skipped > 0) {
-                                    _backupState.value = BackupState.Success("Imported ${state.imported} items, ${state.skipped} skipped")
+                                    val skippedStr = if (state.skippedTitles.isNotEmpty()) " (Skipped: ${state.skippedTitles.take(3).joinToString(", ")}${if(state.skippedTitles.size>3) "..." else ""})" else ""
+                                    _backupState.value = BackupState.Success("Imported ${state.imported} items, ${state.skipped} skipped$skippedStr")
                                 } else {
                                     _backupState.value = BackupState.Success("Imported ${state.imported} items")
                                 }

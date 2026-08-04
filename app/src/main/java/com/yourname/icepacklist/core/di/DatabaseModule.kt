@@ -28,7 +28,7 @@ object DatabaseModule {
             IcepackDatabase::class.java,
             "icepack_db"
         )
-        .addMigrations(IcepackDatabase.MIGRATION_4_5, IcepackDatabase.MIGRATION_5_6, IcepackDatabase.MIGRATION_6_7)
+        .addMigrations(IcepackDatabase.MIGRATION_4_5, IcepackDatabase.MIGRATION_5_6, IcepackDatabase.MIGRATION_6_7, IcepackDatabase.MIGRATION_7_8)
         .build()
     }
 

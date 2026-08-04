@@ -14,7 +14,7 @@ import com.yourname.icepacklist.core.database.dao.*
         TvDetailCacheEntity::class, PersonCacheEntity::class, SearchCacheEntity::class,
         SearchHistoryEntity::class, HiddenItemEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(WatchlistConverters::class)
@@ -39,6 +39,12 @@ abstract class IcepackDatabase : RoomDatabase() {
         val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `hidden_items` (`id` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `title` TEXT NOT NULL DEFAULT '', `hiddenAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            }
+        }
+        
+        val MIGRATION_7_8 = object : androidx.room.migration.Migration(7, 8) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE watchlist ADD COLUMN country TEXT")
             }
         }
     }
