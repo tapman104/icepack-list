@@ -81,3 +81,29 @@ fun Set<ContentFilter>.withoutGenresParam(): String? {
  */
 fun Set<ContentFilter>.cacheKey(): String =
     if (isAll()) "ALL" else toList().sortedBy { it.name }.joinToString("_") { it.name }
+
+fun com.yourname.icepacklist.feature.home.domain.Movie.matches(filters: Set<ContentFilter>): Boolean {
+    if (filters.isAll()) return true
+    val allowedCountries = filters.mapNotNull { it.originCountry }.toSet()
+    val allowedGenres = filters.flatMap { it.withGenres?.split(",")?.mapNotNull { id -> id.toIntOrNull() } ?: emptyList() }.toSet()
+    val forbiddenGenres = filters.flatMap { it.withoutGenres?.split(",")?.mapNotNull { id -> id.toIntOrNull() } ?: emptyList() }.toSet()
+
+    val hasAllowedCountry = allowedCountries.isEmpty() || originCountry?.any { it in allowedCountries } == true
+    val hasAllowedGenre = allowedGenres.isEmpty() || genreIds.any { it in allowedGenres }
+    val hasForbiddenGenre = forbiddenGenres.isNotEmpty() && genreIds.any { it in forbiddenGenres }
+
+    return hasAllowedCountry && hasAllowedGenre && !hasForbiddenGenre
+}
+
+fun com.yourname.icepacklist.feature.home.domain.TvShow.matches(filters: Set<ContentFilter>): Boolean {
+    if (filters.isAll()) return true
+    val allowedCountries = filters.mapNotNull { it.originCountry }.toSet()
+    val allowedGenres = filters.flatMap { it.withGenres?.split(",")?.mapNotNull { id -> id.toIntOrNull() } ?: emptyList() }.toSet()
+    val forbiddenGenres = filters.flatMap { it.withoutGenres?.split(",")?.mapNotNull { id -> id.toIntOrNull() } ?: emptyList() }.toSet()
+
+    val hasAllowedCountry = allowedCountries.isEmpty() || originCountry?.any { it in allowedCountries } == true
+    val hasAllowedGenre = allowedGenres.isEmpty() || genreIds.any { it in allowedGenres }
+    val hasForbiddenGenre = forbiddenGenres.isNotEmpty() && genreIds.any { it in forbiddenGenres }
+
+    return hasAllowedCountry && hasAllowedGenre && !hasForbiddenGenre
+}

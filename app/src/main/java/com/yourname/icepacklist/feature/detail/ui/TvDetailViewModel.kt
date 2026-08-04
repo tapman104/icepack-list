@@ -28,9 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.Immutable
+import com.yourname.icepacklist.core.datastore.matches
 
 @Immutable
 sealed interface TvDetailUiState {
@@ -53,6 +55,7 @@ class TvDetailViewModel @Inject constructor(
     private val repository: DetailRepository,
     private val watchlistRepository: WatchlistRepository,
     private val hiddenItemRepository: HiddenItemRepository,
+    private val settingsDataStore: com.yourname.icepacklist.core.datastore.ApiKeyDataStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -98,7 +101,12 @@ class TvDetailViewModel @Inject constructor(
                         ?.filter { it.type == "Trailer" && it.site == "YouTube" }
                         ?.map { VideoResult(key = it.key, name = it.name, site = it.site, type = it.type) }
                         ?: emptyList()
-                    val similarShows = fullResponse.similarResponse?.results?.distinctBy { it.id }?.take(12) ?: emptyList()
+                    
+                    val filters = settingsDataStore.recommendationsContentFilter.first()
+                    val similarShows = fullResponse.similarResponse?.results
+                        ?.distinctBy { it.id }
+                        ?.filter { it.matches(filters) }
+                        ?.take(12) ?: emptyList()
 
                     val networkNames = tvShow.networksList.map { it.name }
                     val createdByStr = tvShow.createdByList.map { it.name }.joinToString(", ")
