@@ -94,7 +94,9 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             }
 
             composable(Routes.ApiKey.route) {
-                ApiKeyScreen()
+                ApiKeyScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
 
             composable(Routes.Settings.route) {

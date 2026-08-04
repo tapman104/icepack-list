@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +26,11 @@ import com.yourname.icepacklist.core.datastore.ContentFilter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApiKeyScreen(
-    viewModel: ApiKeyViewModel = hiltViewModel()
+    viewModel: ApiKeyViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit = {}
 ) {
     val savedKey by viewModel.savedKey.collectAsState()
     var inputKey by remember { mutableStateOf("") }
@@ -73,13 +76,23 @@ fun ApiKeyScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { Text("API & Advanced Settings") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
