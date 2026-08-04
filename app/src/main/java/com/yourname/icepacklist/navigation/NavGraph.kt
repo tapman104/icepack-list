@@ -35,8 +35,11 @@ class NavViewModel @Inject constructor(
 }
 
 @Composable
-fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = hiltViewModel()) {
-    val navController = rememberNavController()
+fun IcepackNavGraph(
+    modifier: Modifier = Modifier, 
+    navViewModel: NavViewModel = hiltViewModel(),
+    navController: androidx.navigation.NavHostController = rememberNavController()
+) {
     val apiKey by navViewModel.apiKey.collectAsState(initial = null)
     
     val startDestination = if (apiKey.isNullOrBlank()) Routes.ApiKey.route else Routes.Home.route
@@ -100,7 +103,11 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
             }
 
             composable(Routes.Settings.route) {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val settingsViewModel: com.yourname.icepacklist.feature.settings.SettingsViewModel = 
+                    androidx.hilt.navigation.compose.hiltViewModel(context as androidx.activity.ComponentActivity)
                 SettingsScreen(
+                    viewModel = settingsViewModel,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToApiKey = { navController.navigate(Routes.ApiKey.route) }
                 )
