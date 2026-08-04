@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ fun DetailHeroSection(
     movie: MovieDetail,
     entryState: WatchlistEntity?,
     onBack: () -> Unit,
+    onHide: () -> Unit,
     onAddToWatchlist: (String) -> Unit,
     onShowMyListSheet: () -> Unit
 ) {
@@ -83,14 +85,25 @@ fun DetailHeroSection(
                     .height(100.dp)
                     .background(heroGradient) // H1 — remembered brush
             )
-            IconButton(
-                onClick = onBack,
+            Row(
                 modifier = Modifier
-                    .padding(top = 32.dp, start = 16.dp)
-                    .align(Alignment.TopStart)
-                    .background(overlayColor, CircleShape)
+                    .fillMaxWidth()
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                    .align(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.background(overlayColor, CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                }
+                IconButton(
+                    onClick = onHide,
+                    modifier = Modifier.background(overlayColor, CircleShape)
+                ) {
+                    Icon(Icons.Outlined.VisibilityOff, contentDescription = "Hide", tint = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
 

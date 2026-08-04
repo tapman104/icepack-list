@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.imageLoader
+import com.yourname.icepacklist.core.database.entity.HiddenItemEntity
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.core.datastore.ThemeMode
 import kotlinx.coroutines.launch
@@ -41,6 +42,7 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val backupState by viewModel.backupState.collectAsStateWithLifecycle()
     val isImporting by viewModel.isImporting.collectAsStateWithLifecycle()
+    val hiddenItems by viewModel.hiddenItems.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -186,6 +188,34 @@ fun SettingsScreen(
                                 selectedFilters = uiState.recommendationsContentFilter,
                                 onSelect = viewModel::setRecommendationsContentFilter
                             )
+                        }
+                        ExpandableSettingRow(
+                            title = "Hidden Titles",
+                            isExpanded = expandedSection == "hidden",
+                            onClick = { expandedSection = if (expandedSection == "hidden") null else "hidden" }
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                if (hiddenItems.isEmpty()) {
+                                    Text("No titles are hidden.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                } else {
+                                    hiddenItems.forEach { item ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = item.title,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            TextButton(onClick = { viewModel.unhideItem(item.id, item.mediaType) }) {
+                                                Text("Restore")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

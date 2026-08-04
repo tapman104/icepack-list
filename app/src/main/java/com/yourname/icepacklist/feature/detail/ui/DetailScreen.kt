@@ -82,6 +82,10 @@ fun DetailScreen(
                 onAddToWatchlist = { viewModel.addToWatchlist(it) },
                 onSaveEntry = { viewModel.saveEntry(it) },
                 onRemoveEntry = { viewModel.removeEntry(it) },
+                onHide = {
+                    viewModel.hideItem()
+                    onBack()
+                },
                 onBack = onBack,
                 onMovieClick = onMovieClick,
                 onPersonClick = onPersonClick,
@@ -104,6 +108,7 @@ private fun DetailContent(
     onAddToWatchlist: (String) -> Unit,
     onSaveEntry: (WatchlistEntity) -> Unit,
     onRemoveEntry: (WatchlistEntity) -> Unit,
+    onHide: () -> Unit,
     onBack: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onPersonClick: (Int) -> Unit,
@@ -117,6 +122,7 @@ private fun DetailContent(
                 movie = movie,
                 entryState = entryState,
                 onBack = onBack,
+                onHide = onHide,
                 onAddToWatchlist = onAddToWatchlist,
                 onShowMyListSheet = { showMyListSheet = true }
             )

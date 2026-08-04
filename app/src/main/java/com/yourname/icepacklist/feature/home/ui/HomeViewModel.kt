@@ -2,6 +2,7 @@ package com.yourname.icepacklist.feature.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yourname.icepacklist.core.database.HiddenItemRepository
 import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.feature.home.data.HomeRepository
@@ -11,8 +12,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,16 +43,27 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: HomeRepository,
-    private val apiKeyDataStore: ApiKeyDataStore
+    private val apiKeyDataStore: ApiKeyDataStore,
+    private val hiddenItemRepository: HiddenItemRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
     
+    val hiddenIds: StateFlow<Set<Int>> = hiddenItemRepository.getAllHiddenIds()
+        .map { it.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+    
     private var lastHomeFilter: Set<ContentFilter> = setOf(ContentFilter.ALL)
     private var lastRecsFilter: Set<ContentFilter> = setOf(ContentFilter.ALL)
 
     init {
+        viewModelScope.launch {
+            hiddenIds.drop(1).collect {
+                refreshHomeRows(lastHomeFilter)
+                refreshRecommendations(lastRecsFilter)
+            }
+        }
         viewModelScope.launch {
             apiKeyDataStore.homeContentFilter.collect { filter ->
                 lastHomeFilter = filter
@@ -67,6 +83,12 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(selectedTab = tab) }
         refreshHomeRows(lastHomeFilter)
         refreshRecommendations(lastRecsFilter)
+    }
+
+    fun hideItem(id: Int, mediaType: String, title: String) {
+        viewModelScope.launch {
+            hiddenItemRepository.hide(id, mediaType, title)
+        }
     }
 
     fun retry() {
@@ -114,15 +136,15 @@ class HomeViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        trendingMovies = trendingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.trendingMovies,
-                        popularMovies = popularMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.popularMovies,
-                        nowPlayingMovies = nowPlayingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.nowPlayingMovies,
-                        upcomingMovies = upcomingMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.upcomingMovies,
-                        topRatedMovies = topRatedMoviesDef?.await()?.getOrDefault(emptyList())?.distinctBy { m -> m.id } ?: it.topRatedMovies,
-                        trendingTvShows = trendingTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.trendingTvShows,
-                        popularTvShows = popularTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.popularTvShows,
-                        topRatedTvShows = topRatedTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.topRatedTvShows,
-                        airingTodayTvShows = airingTodayTvShowsDef?.await()?.getOrDefault(emptyList())?.distinctBy { t -> t.id } ?: it.airingTodayTvShows,
+                        trendingMovies = trendingMoviesDef?.await()?.getOrDefault(emptyList())?.filter { m -> m.id !in hiddenIds.value }?.distinctBy { m -> m.id } ?: it.trendingMovies,
+                        popularMovies = popularMoviesDef?.await()?.getOrDefault(emptyList())?.filter { m -> m.id !in hiddenIds.value }?.distinctBy { m -> m.id } ?: it.popularMovies,
+                        nowPlayingMovies = nowPlayingMoviesDef?.await()?.getOrDefault(emptyList())?.filter { m -> m.id !in hiddenIds.value }?.distinctBy { m -> m.id } ?: it.nowPlayingMovies,
+                        upcomingMovies = upcomingMoviesDef?.await()?.getOrDefault(emptyList())?.filter { m -> m.id !in hiddenIds.value }?.distinctBy { m -> m.id } ?: it.upcomingMovies,
+                        topRatedMovies = topRatedMoviesDef?.await()?.getOrDefault(emptyList())?.filter { m -> m.id !in hiddenIds.value }?.distinctBy { m -> m.id } ?: it.topRatedMovies,
+                        trendingTvShows = trendingTvShowsDef?.await()?.getOrDefault(emptyList())?.filter { t -> t.id !in hiddenIds.value }?.distinctBy { t -> t.id } ?: it.trendingTvShows,
+                        popularTvShows = popularTvShowsDef?.await()?.getOrDefault(emptyList())?.filter { t -> t.id !in hiddenIds.value }?.distinctBy { t -> t.id } ?: it.popularTvShows,
+                        topRatedTvShows = topRatedTvShowsDef?.await()?.getOrDefault(emptyList())?.filter { t -> t.id !in hiddenIds.value }?.distinctBy { t -> t.id } ?: it.topRatedTvShows,
+                        airingTodayTvShows = airingTodayTvShowsDef?.await()?.getOrDefault(emptyList())?.filter { t -> t.id !in hiddenIds.value }?.distinctBy { t -> t.id } ?: it.airingTodayTvShows,
                     )
                 }
             }
@@ -145,7 +167,13 @@ class HomeViewModel @Inject constructor(
             val result = recommendationsDef?.await()
             if (result != null && result.isSuccess) {
                 _uiState.update {
-                    it.copy(recommendations = result.getOrDefault(emptyList()))
+                    it.copy(recommendations = result.getOrDefault(emptyList()).filter { item ->
+                        when (item) {
+                            is Movie -> item.id !in hiddenIds.value
+                            is TvShow -> item.id !in hiddenIds.value
+                            else -> true
+                        }
+                    })
                 }
             } else if (result != null && result.isFailure) {
                 _uiState.update {

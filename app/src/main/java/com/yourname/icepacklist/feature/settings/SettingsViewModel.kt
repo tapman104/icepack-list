@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
+import com.yourname.icepacklist.core.database.entity.HiddenItemEntity
+import com.yourname.icepacklist.core.database.HiddenItemRepository
 import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.core.datastore.ThemeMode
@@ -39,6 +41,7 @@ sealed class BackupState {
 class SettingsViewModel @Inject constructor(
     private val apiKeyDataStore: ApiKeyDataStore,
     private val watchlistRepository: WatchlistRepository,
+    private val hiddenItemRepository: HiddenItemRepository,
     private val moshi: Moshi
 ) : ViewModel() {
 
@@ -73,9 +76,22 @@ class SettingsViewModel @Inject constructor(
         initialValue = SettingsState()
     )
 
+    val hiddenItems: StateFlow<List<HiddenItemEntity>> = hiddenItemRepository.getAll()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             apiKeyDataStore.setThemeMode(mode)
+        }
+    }
+
+    fun unhideItem(id: Int, mediaType: String) {
+        viewModelScope.launch {
+            hiddenItemRepository.unhide(id, mediaType)
         }
     }
 

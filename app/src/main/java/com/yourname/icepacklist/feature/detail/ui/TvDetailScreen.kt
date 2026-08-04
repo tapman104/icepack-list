@@ -83,6 +83,10 @@ fun TvDetailScreen(
                 onAddToWatchlist = { viewModel.addToWatchlist(it) },
                 onSaveEntry = { viewModel.saveEntry(it) },
                 onRemoveEntry = { viewModel.removeEntry(it) },
+                onHide = {
+                    viewModel.hideItem()
+                    onBack()
+                },
                 onBack = onBack,
                 onTvShowClick = onTvShowClick,
                 onPersonClick = onPersonClick,
@@ -106,6 +110,7 @@ private fun TvDetailContent(
     onAddToWatchlist: (String) -> Unit,
     onSaveEntry: (WatchlistEntity) -> Unit,
     onRemoveEntry: (WatchlistEntity) -> Unit,
+    onHide: () -> Unit,
     onBack: () -> Unit,
     onTvShowClick: (Int) -> Unit,
     onPersonClick: (Int) -> Unit,
@@ -120,6 +125,7 @@ private fun TvDetailContent(
                 tvShow = tvShow,
                 entryState = entryState,
                 onBack = onBack,
+                onHide = onHide,
                 onAddToWatchlist = onAddToWatchlist,
                 onShowMyListSheet = { showMyListSheet = true }
             )

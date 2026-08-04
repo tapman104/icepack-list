@@ -52,6 +52,9 @@ fun HomeScreen(
         derivedStateOf { listState.firstVisibleItemIndex == 0 || !listState.canScrollBackward }
     }
     
+    var longPressedItem by remember { mutableStateOf<Triple<Int, String, String>?>(null) }
+    val hiddenIds by viewModel.hiddenIds.collectAsStateWithLifecycle()
+
     LaunchedEffect(isScrollingUp) {
         onScrollUp(isScrollingUp)
     }
@@ -162,7 +165,7 @@ fun HomeScreen(
                                             items = uiState.trendingMovies,
                                             onViewAll = { onViewCategory("trending_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -173,7 +176,7 @@ fun HomeScreen(
                                             items = uiState.trendingTvShows,
                                             onViewAll = { onViewCategory("trending_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -188,9 +191,9 @@ fun HomeScreen(
                                             },
                                             itemContent = { item -> 
                                                 if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
-                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "MOVIE", item.title) })
                                                 } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
-                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "TV", item.name) })
                                                 }
                                             }
                                         )
@@ -203,7 +206,7 @@ fun HomeScreen(
                                             items = uiState.popularMovies,
                                             onViewAll = { onViewCategory("popular_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -214,7 +217,7 @@ fun HomeScreen(
                                             items = uiState.upcomingMovies,
                                             onViewAll = { onViewCategory("upcoming") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -225,7 +228,7 @@ fun HomeScreen(
                                             items = uiState.topRatedMovies,
                                             onViewAll = { onViewCategory("top_rated_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -236,7 +239,7 @@ fun HomeScreen(
                                             items = uiState.popularTvShows,
                                             onViewAll = { onViewCategory("popular_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -247,7 +250,7 @@ fun HomeScreen(
                                             items = uiState.topRatedTvShows,
                                             onViewAll = { onViewCategory("top_rated_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -258,7 +261,7 @@ fun HomeScreen(
                                             items = uiState.airingTodayTvShows,
                                             onViewAll = { onViewCategory("airing_today") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -271,7 +274,7 @@ fun HomeScreen(
                                             items = uiState.trendingMovies,
                                             onViewAll = { onViewCategory("trending_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -286,9 +289,9 @@ fun HomeScreen(
                                             },
                                             itemContent = { item -> 
                                                 if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
-                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "MOVIE", item.title) })
                                                 } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
-                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "TV", item.name) })
                                                 }
                                             }
                                         )
@@ -301,7 +304,7 @@ fun HomeScreen(
                                             items = uiState.popularMovies,
                                             onViewAll = { onViewCategory("popular_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -313,7 +316,7 @@ fun HomeScreen(
                                             items = uiState.upcomingMovies,
                                             onViewAll = { onViewCategory("upcoming") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -324,7 +327,7 @@ fun HomeScreen(
                                             items = uiState.topRatedMovies,
                                             onViewAll = { onViewCategory("top_rated_movies") },
                                             key = { it.id },
-                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }) }
+                                            itemContent = { movie -> MovieCard(movie, onClick = { onMovieClick(movie.id) }, onLongClick = { longPressedItem = Triple(movie.id, "MOVIE", movie.title) }) }
                                         )
                                     }
                                 }
@@ -337,7 +340,7 @@ fun HomeScreen(
                                             items = uiState.trendingTvShows,
                                             onViewAll = { onViewCategory("trending_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -352,9 +355,9 @@ fun HomeScreen(
                                             },
                                             itemContent = { item -> 
                                                 if (item is com.yourname.icepacklist.feature.home.domain.Movie) {
-                                                    MovieCard(item, onClick = { onMovieClick(item.id) })
+                                                    MovieCard(item, onClick = { onMovieClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "MOVIE", item.title) })
                                                 } else if (item is com.yourname.icepacklist.feature.home.domain.TvShow) {
-                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) })
+                                                    TvShowCard(item, onClick = { onTvShowClick(item.id) }, onLongClick = { longPressedItem = Triple(item.id, "TV", item.name) })
                                                 }
                                             }
                                         )
@@ -367,7 +370,7 @@ fun HomeScreen(
                                             items = uiState.popularTvShows,
                                             onViewAll = { onViewCategory("popular_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -378,7 +381,7 @@ fun HomeScreen(
                                             items = uiState.topRatedTvShows,
                                             onViewAll = { onViewCategory("top_rated_tv") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -389,7 +392,7 @@ fun HomeScreen(
                                             items = uiState.airingTodayTvShows,
                                             onViewAll = { onViewCategory("airing_today") },
                                             key = { it.id },
-                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }) }
+                                            itemContent = { tvShow -> TvShowCard(tvShow, onClick = { onTvShowClick(tvShow.id) }, onLongClick = { longPressedItem = Triple(tvShow.id, "TV", tvShow.name) }) }
                                         )
                                     }
                                 }
@@ -397,6 +400,49 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    longPressedItem?.let { (itemId, mediaType, title) ->
+        ModalBottomSheet(
+            onDismissRequest = { longPressedItem = null }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                    .navigationBarsPadding()
+            ) {
+                Text(
+                    text = "Hide this title?",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "It won't appear in your home rows. You can restore hidden titles from Settings.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Button(
+                    onClick = {
+                        viewModel.hideItem(itemId, mediaType, title)
+                        longPressedItem = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914))
+                ) {
+                    Text("Hide Title", color = Color.White)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { longPressedItem = null },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cancel")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

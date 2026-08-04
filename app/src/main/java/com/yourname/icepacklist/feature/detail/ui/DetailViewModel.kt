@@ -3,6 +3,7 @@ package com.yourname.icepacklist.feature.detail.ui
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yourname.icepacklist.core.database.HiddenItemRepository
 import com.yourname.icepacklist.core.database.WatchlistEntity
 import com.yourname.icepacklist.core.database.MediaType
 import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
@@ -51,6 +52,7 @@ class DetailViewModel @Inject constructor(
     private val apiService: TmdbApiService,
     private val repository: DetailRepository,
     private val watchlistRepository: WatchlistRepository,
+    private val hiddenItemRepository: HiddenItemRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -165,6 +167,15 @@ class DetailViewModel @Inject constructor(
     fun removeEntry(entry: WatchlistEntity) {
         viewModelScope.launch {
             watchlistRepository.remove(entry.id, entry.mediaType)
+        }
+    }
+
+    fun hideItem() {
+        val currentState = _uiState.value
+        if (currentState is DetailUiState.Success) {
+            viewModelScope.launch {
+                hiddenItemRepository.hide(movieId, "MOVIE", currentState.movie.title)
+            }
         }
     }
 }

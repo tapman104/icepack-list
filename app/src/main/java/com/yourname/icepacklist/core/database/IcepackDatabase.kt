@@ -12,9 +12,9 @@ import com.yourname.icepacklist.core.database.dao.*
         MovieEntity::class, RemoteKeyEntity::class, WatchlistEntity::class,
         HomeListCacheEntity::class, MovieDetailCacheEntity::class,
         TvDetailCacheEntity::class, PersonCacheEntity::class, SearchCacheEntity::class,
-        SearchHistoryEntity::class
+        SearchHistoryEntity::class, HiddenItemEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(WatchlistConverters::class)
@@ -35,6 +35,12 @@ abstract class IcepackDatabase : RoomDatabase() {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `search_history` (`query` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`query`))")
             }
         }
+        
+        val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `hidden_items` (`id` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `title` TEXT NOT NULL DEFAULT '', `hiddenAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+            }
+        }
     }
     
     abstract fun movieDao(): MovieDao
@@ -47,4 +53,5 @@ abstract class IcepackDatabase : RoomDatabase() {
     abstract fun personCacheDao(): PersonCacheDao
     abstract fun searchCacheDao(): SearchCacheDao
     abstract fun searchHistoryDao(): SearchHistoryDao
+    abstract fun hiddenItemDao(): HiddenItemDao
 }

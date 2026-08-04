@@ -2,8 +2,10 @@ package com.yourname.icepacklist.core.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -23,13 +25,17 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.yourname.icepacklist.feature.home.domain.TvShow
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TvShowCard(tvShow: TvShow, onClick: () -> Unit) {
+fun TvShowCard(tvShow: TvShow, onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
     Card(
         modifier = Modifier
             .width(120.dp)
             .aspectRatio(2f / 3f)
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = { onLongClick?.invoke() }
+            ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
