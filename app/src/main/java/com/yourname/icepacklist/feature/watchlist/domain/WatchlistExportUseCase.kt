@@ -22,35 +22,32 @@ class WatchlistExportUseCase @Inject constructor(
         val list = dao.getAll().first()
         val header = "TMDB_ID,Title,MediaType,Year,Country,Status,UserRating,EpisodesWatched,StartDate,FinishDate,Notes"
         val rows = list.map { entity ->
-            val titleEscaped = if (entity.title.contains(",") || entity.title.contains("\"")) {
-                "\"${entity.title.replace("\"", "\"\"")}\""
-            } else {
-                entity.title
-            }
-            
-            val notesEscaped = if (entity.notes != null && (entity.notes.contains(",") || entity.notes.contains("\"") || entity.notes.contains("\n"))) {
-                "\"${entity.notes.replace("\"", "\"\"")}\""
-            } else {
-                entity.notes ?: ""
-            }
-
             listOf(
                 entity.id.toString(),
-                titleEscaped,
+                escapeCsv(entity.title),
                 entity.mediaType.name,
-                entity.year ?: "",
-                entity.country ?: "",
-                entity.status,
-                entity.rating?.toString() ?: "",
-                entity.episodesWatched?.toString() ?: "",
-                entity.startDate ?: "",
-                entity.finishDate ?: "",
-                notesEscaped
+                escapeCsv(entity.year),
+                escapeCsv(entity.country),
+                escapeCsv(entity.status),
+                escapeCsv(entity.rating?.toString()),
+                escapeCsv(entity.episodesWatched?.toString()),
+                escapeCsv(entity.startDate),
+                escapeCsv(entity.finishDate),
+                escapeCsv(entity.notes)
             ).joinToString(",")
         }
         return buildString {
             appendLine(header)
             rows.forEach { appendLine(it) }
+        }
+    }
+
+    private fun escapeCsv(value: String?): String {
+        if (value == null) return ""
+        return if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            "\"${value.replace("\"", "\"\"")}\""
+        } else {
+            value
         }
     }
 }

@@ -165,7 +165,11 @@ class SettingsViewModel @Inject constructor(
                             }
                             is ImportState.Success -> {
                                 if (state.skipped > 0) {
-                                    val skippedStr = if (state.skippedTitles.isNotEmpty()) " (Skipped: ${state.skippedTitles.take(3).joinToString(", ")}${if(state.skippedTitles.size>3) "..." else ""})" else ""
+                                    val skippedStr = if (state.skippedTitles.isNotEmpty()) {
+                                        val displayNames = state.skippedTitles.take(3).joinToString(", ")
+                                        val remaining = state.skippedTitles.size - 3
+                                        if (remaining > 0) " (Skipped: $displayNames and $remaining more)" else " (Skipped: $displayNames)"
+                                    } else ""
                                     _backupState.value = BackupState.Success("Imported ${state.imported} items, ${state.skipped} skipped$skippedStr")
                                 } else {
                                     _backupState.value = BackupState.Success("Imported ${state.imported} items")

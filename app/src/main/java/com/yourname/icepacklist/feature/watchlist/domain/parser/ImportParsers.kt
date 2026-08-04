@@ -109,12 +109,12 @@ class MdlTsvParser @Inject constructor() : ImportParser {
                 } else null
             } else null
 
-            val year = if (yearIdx != -1 && cols.size > yearIdx) cols[yearIdx].takeIf { it.isNotBlank() } else null
-            val rating = if (scoreIdx != -1 && cols.size > scoreIdx) cols[scoreIdx].toFloatOrNull() else null
-            val country = if (countryIdx != -1 && cols.size > countryIdx) cols[countryIdx].takeIf { it.isNotBlank() } else null
-            val episodes = if (epIdx != -1 && cols.size > epIdx) cols[epIdx].toIntOrNull() else null
-            val startDate = if (startedIdx != -1 && cols.size > startedIdx) cols[startedIdx].takeIf { it.isNotBlank() } else null
-            val finishDate = if (finishedIdx != -1 && cols.size > finishedIdx) cols[finishedIdx].takeIf { it.isNotBlank() } else null
+            val year = if (yearIdx != -1 && cols.size > yearIdx) cols[yearIdx].takeIf { it.isNotBlank() && it != "—" && it != "-" } else null
+            val rating = if (scoreIdx != -1 && cols.size > scoreIdx) cols[scoreIdx].takeIf { it != "—" && it != "-" }?.toFloatOrNull() else null
+            val country = if (countryIdx != -1 && cols.size > countryIdx) cols[countryIdx].takeIf { it.isNotBlank() && it != "—" && it != "-" } else null
+            val episodes = if (epIdx != -1 && cols.size > epIdx) cols[epIdx].takeIf { it != "—" && it != "-" }?.toIntOrNull() else null
+            val startDate = if (startedIdx != -1 && cols.size > startedIdx) cols[startedIdx].takeIf { it.isNotBlank() && it != "—" && it != "-" } else null
+            val finishDate = if (finishedIdx != -1 && cols.size > finishedIdx) cols[finishedIdx].takeIf { it.isNotBlank() && it != "—" && it != "-" } else null
 
             val status = if (finishDate != null) "COMPLETED" else if (startDate != null) "WATCHING" else "PLAN_TO_WATCH"
 
