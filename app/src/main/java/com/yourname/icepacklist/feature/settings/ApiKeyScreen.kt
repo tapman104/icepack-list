@@ -28,11 +28,13 @@ fun ApiKeyScreen(
     val savedKey by viewModel.savedKey.collectAsState()
     var inputKey by remember { mutableStateOf("") }
     var keyVisible by remember { mutableStateOf(false) }
+    var initialized by remember { mutableStateOf(false) }
 
-    // Pre-fill field if a key is already saved
+    // Pre-fill field if a key is already saved, but only once
     LaunchedEffect(savedKey) {
-        if (inputKey.isEmpty() && savedKey != null) {
+        if (!initialized && savedKey != null) {
             inputKey = savedKey!!
+            initialized = true
         }
     }
 

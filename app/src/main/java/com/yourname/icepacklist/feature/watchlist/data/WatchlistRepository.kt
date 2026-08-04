@@ -81,18 +81,9 @@ class WatchlistRepository @Inject constructor(
                         continue
                     }
 
-                    if (mediaType == MediaType.MOVIE) {
-                        val detail = tmdbApi.getMovieDetails(id)
-                        val adapter = moshi.adapter(MovieDetail::class.java)
-                        val detailJson = adapter.toJson(detail)
-                        movieCacheDao.upsert(MovieDetailCacheEntity(id, detailJson, System.currentTimeMillis()))
-                    } else if (mediaType == MediaType.TV) {
-                        val detail = tmdbApi.getTvShowDetails(id)
-                        val adapter = moshi.adapter(TvShowDetail::class.java)
-                        val detailJson = adapter.toJson(detail)
-                        tvCacheDao.upsert(TvDetailCacheEntity(id, detailJson, System.currentTimeMillis()))
-                    }
-                    
+                    // We do not fetch details during import anymore to prevent rate limits
+                    // and allow importing even if the API key is not set yet.
+                    // The details will be fetched when the user opens the DetailScreen.
                     val title = itemObj.optString("title", "")
                     val voteAverage = itemObj.optDouble("voteAverage", 0.0)
                     val posterPath = itemObj.optString("posterPath").ifEmpty {

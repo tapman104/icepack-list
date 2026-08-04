@@ -131,13 +131,6 @@ class SettingsViewModel @Inject constructor(
 
     fun importBackup(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
-            val lastTime = apiKeyDataStore.lastImportTime.first() ?: 0L
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - lastTime < 60_000L) {
-                _backupState.value = BackupState.Error("Please wait before importing again.")
-                return@launch
-            }
-
             _isImporting.value = true
             _importProgress.value = 0f
             _backupState.value = BackupState.Loading
