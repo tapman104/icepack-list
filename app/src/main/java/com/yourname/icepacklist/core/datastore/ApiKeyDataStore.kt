@@ -27,7 +27,9 @@ class ApiKeyDataStore @Inject constructor(
         private val HOME_CONTENT_FILTER_KEY = stringPreferencesKey("home_content_filter")
         private val SEARCH_CONTENT_FILTER_KEY = stringPreferencesKey("search_content_filter")
         private val RECOMMENDATIONS_CONTENT_FILTER_KEY = stringPreferencesKey("recommendations_content_filter")
-        private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme")
+        private val DARK_THEME_KEY = booleanPreferencesKey("dark_theme") // Legacy
+        private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+        private val ADULT_CONTENT_KEY = booleanPreferencesKey("adult_content")
     }
 
     val apiKey: Flow<String?> = context.dataStore.data
@@ -51,6 +53,18 @@ class ApiKeyDataStore @Inject constructor(
         
     val isDarkTheme: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[DARK_THEME_KEY] ?: true }
+
+    val themeMode: Flow<ThemeMode> = context.dataStore.data
+        .map { prefs ->
+            try {
+                ThemeMode.valueOf(prefs[THEME_MODE_KEY] ?: ThemeMode.SYSTEM.name)
+            } catch (e: Exception) {
+                ThemeMode.SYSTEM
+            }
+        }
+
+    val adultContentEnabled: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[ADULT_CONTENT_KEY] ?: false }
 
     suspend fun saveApiKey(key: String) {
         context.dataStore.edit { prefs ->
@@ -98,6 +112,18 @@ class ApiKeyDataStore @Inject constructor(
     suspend fun setDarkTheme(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[DARK_THEME_KEY] = enabled
+        }
+    }
+
+    suspend fun setThemeMode(mode: ThemeMode) {
+        context.dataStore.edit { prefs ->
+            prefs[THEME_MODE_KEY] = mode.name
+        }
+    }
+
+    suspend fun setAdultContentEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[ADULT_CONTENT_KEY] = enabled
         }
     }
 }
