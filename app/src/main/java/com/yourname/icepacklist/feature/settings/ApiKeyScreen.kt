@@ -26,8 +26,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel()
+fun ApiKeyScreen(
+    viewModel: ApiKeyViewModel = hiltViewModel()
 ) {
     val savedKey by viewModel.savedKey.collectAsState()
     var inputKey by remember { mutableStateOf("") }

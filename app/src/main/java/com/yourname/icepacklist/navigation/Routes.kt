@@ -4,6 +4,7 @@ sealed class Routes(val route: String) {
     data object Home : Routes("home")
     data object Search : Routes("search")
     data object Settings : Routes("settings")
+    data object ApiKey : Routes("api_key")
     data object Watchlist : Routes("watchlist")
     data object Detail : Routes("detail/{movieId}") {
         const val ARG_MOVIE_ID = "movieId"

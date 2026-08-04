@@ -13,6 +13,7 @@ import com.yourname.icepacklist.feature.home.ui.HomeScreen
 import com.yourname.icepacklist.feature.home.ui.CategoryListScreen
 import com.yourname.icepacklist.feature.person.ui.PersonDetailScreen
 import com.yourname.icepacklist.feature.search.ui.SearchScreen
+import com.yourname.icepacklist.feature.settings.ApiKeyScreen
 import com.yourname.icepacklist.feature.settings.SettingsScreen
 import com.yourname.icepacklist.feature.watchlist.ui.WatchlistScreen
 import androidx.lifecycle.ViewModel
@@ -38,7 +39,7 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
     val navController = rememberNavController()
     val apiKey by navViewModel.apiKey.collectAsState(initial = null)
     
-    val startDestination = if (apiKey.isNullOrBlank()) Routes.Settings.route else Routes.Home.route
+    val startDestination = if (apiKey.isNullOrBlank()) Routes.ApiKey.route else Routes.Home.route
     var isScrollingUp by remember { mutableStateOf(true) }
 
     IcepackScaffold(
@@ -90,6 +91,10 @@ fun IcepackNavGraph(modifier: Modifier = Modifier, navViewModel: NavViewModel = 
                     onMovieClick = { navController.navigate(Routes.Detail.buildRoute(it)) },
                     onTvShowClick = { navController.navigate(Routes.TvDetail.buildRoute(it)) }
                 )
+            }
+
+            composable(Routes.ApiKey.route) {
+                ApiKeyScreen()
             }
 
             composable(Routes.Settings.route) {
