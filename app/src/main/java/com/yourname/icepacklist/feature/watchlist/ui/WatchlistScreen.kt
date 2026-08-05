@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -33,9 +34,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.yourname.icepacklist.core.database.WatchlistEntity
 import com.yourname.icepacklist.core.database.MediaType
+import com.yourname.icepacklist.feature.watchlist.data.SortOrder
 import com.yourname.icepacklist.feature.watchlist.domain.WatchlistStatus
 import java.util.Locale
 
@@ -64,8 +67,12 @@ fun WatchlistScreen(
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val currentTab = tabs[selectedTabIndex]
-    val itemsFlow = remember(currentTab.status) { viewModel.getByStatus(currentTab.status.name) }
-    val itemsList by itemsFlow.collectAsState(initial = emptyList())
+    
+    LaunchedEffect(currentTab.status.name) {
+        viewModel.setStatus(currentTab.status.name)
+    }
+    
+    val itemsList by viewModel.visibleItems.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -98,18 +105,90 @@ fun WatchlistScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            LazyRow(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                itemsIndexed(tabs, key = { _, tab -> tab.title }) { index, tab ->
-                    WatchlistTabItem(
-                        tab = tab,
-                        isSelected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index }
-                    )
+                LazyRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(tabs, key = { _, tab -> tab.title }) { index, tab ->
+                        WatchlistTabItem(
+                            tab = tab,
+                            isSelected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index }
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                var sortMenuExpanded by remember { mutableStateOf(false) }
+                val currentSortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
+                Box {
+                    IconButton(onClick = { sortMenuExpanded = true }) {
+                        Icon(Icons.Default.Sort, contentDescription = "Sort")
+                    }
+                    DropdownMenu(
+                        expanded = sortMenuExpanded,
+                        onDismissRequest = { sortMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "Date Added", 
+                                    fontWeight = if (currentSortOrder == SortOrder.DATE_ADDED) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (currentSortOrder == SortOrder.DATE_ADDED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
+                            onClick = { 
+                                viewModel.setSortOrder(SortOrder.DATE_ADDED)
+                                sortMenuExpanded = false 
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "Title (A-Z)", 
+                                    fontWeight = if (currentSortOrder == SortOrder.TITLE_AZ) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (currentSortOrder == SortOrder.TITLE_AZ) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
+                            onClick = { 
+                                viewModel.setSortOrder(SortOrder.TITLE_AZ)
+                                sortMenuExpanded = false 
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "Rating", 
+                                    fontWeight = if (currentSortOrder == SortOrder.RATING) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (currentSortOrder == SortOrder.RATING) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
+                            onClick = { 
+                                viewModel.setSortOrder(SortOrder.RATING)
+                                sortMenuExpanded = false 
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "Year", 
+                                    fontWeight = if (currentSortOrder == SortOrder.YEAR) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (currentSortOrder == SortOrder.YEAR) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
+                            onClick = { 
+                                viewModel.setSortOrder(SortOrder.YEAR)
+                                sortMenuExpanded = false 
+                            }
+                        )
+                    }
                 }
             }
 

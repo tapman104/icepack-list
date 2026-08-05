@@ -20,13 +20,31 @@ interface WatchlistDao {
     suspend fun delete(item: WatchlistEntity)
 
     @Query("SELECT * FROM watchlist ORDER BY addedAt DESC")
-    fun getAll(): Flow<List<WatchlistEntity>>
+    fun getAllByDateAdded(): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist ORDER BY title ASC")
+    fun getAllByTitleAz(): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist ORDER BY voteAverage DESC")
+    fun getAllByRating(): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist ORDER BY year DESC")
+    fun getAllByYear(): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist ORDER BY addedAt DESC LIMIT 1")
     suspend fun getLatestWatchlistItem(): WatchlistEntity?
 
     @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY addedAt DESC")
-    fun getByStatus(status: String): Flow<List<WatchlistEntity>>
+    fun getByStatusByDateAdded(status: String): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY title ASC")
+    fun getByStatusByTitleAz(status: String): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY voteAverage DESC")
+    fun getByStatusByRating(status: String): Flow<List<WatchlistEntity>>
+
+    @Query("SELECT * FROM watchlist WHERE status = :status ORDER BY year DESC")
+    fun getByStatusByYear(status: String): Flow<List<WatchlistEntity>>
 
     @Query("SELECT * FROM watchlist WHERE id = :id AND mediaType = :mediaType LIMIT 1")
     suspend fun getItem(id: Int, mediaType: MediaType): WatchlistEntity?

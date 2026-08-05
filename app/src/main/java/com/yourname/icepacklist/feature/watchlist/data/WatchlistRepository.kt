@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.Dispatchers
 
+enum class SortOrder { DATE_ADDED, TITLE_AZ, RATING, YEAR }
+
 @Singleton
 class WatchlistRepository @Inject constructor(
     private val dao: WatchlistDao,
@@ -28,8 +30,19 @@ class WatchlistRepository @Inject constructor(
     private val tvCacheDao: TvDetailCacheDao,
     private val moshi: Moshi
 ) {
-    fun getAll(): Flow<List<WatchlistEntity>> = dao.getAll()
-    fun getByStatus(status: String): Flow<List<WatchlistEntity>> = dao.getByStatus(status)
+    fun getAll(sortOrder: SortOrder = SortOrder.DATE_ADDED): Flow<List<WatchlistEntity>> = when (sortOrder) {
+        SortOrder.DATE_ADDED -> dao.getAllByDateAdded()
+        SortOrder.TITLE_AZ -> dao.getAllByTitleAz()
+        SortOrder.RATING -> dao.getAllByRating()
+        SortOrder.YEAR -> dao.getAllByYear()
+    }
+    
+    fun getByStatus(status: String, sortOrder: SortOrder = SortOrder.DATE_ADDED): Flow<List<WatchlistEntity>> = when (sortOrder) {
+        SortOrder.DATE_ADDED -> dao.getByStatusByDateAdded(status)
+        SortOrder.TITLE_AZ -> dao.getByStatusByTitleAz(status)
+        SortOrder.RATING -> dao.getByStatusByRating(status)
+        SortOrder.YEAR -> dao.getByStatusByYear(status)
+    }
     suspend fun add(item: WatchlistEntity) = dao.insert(item)
     suspend fun update(item: WatchlistEntity) = dao.update(item)
     suspend fun remove(id: Int, mediaType: MediaType) = dao.delete(WatchlistEntity(id, mediaType, "", null, 0.0, null, "WATCHING"))
