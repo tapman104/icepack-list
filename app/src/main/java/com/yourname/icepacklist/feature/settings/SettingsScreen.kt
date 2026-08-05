@@ -27,6 +27,7 @@ import coil.imageLoader
 import com.yourname.icepacklist.core.database.entity.HiddenItemEntity
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.core.datastore.ThemeMode
+import com.yourname.icepacklist.feature.watchlist.ui.ImportProgressDialog
 import kotlinx.coroutines.launch
 import com.yourname.icepacklist.BuildConfig
 import java.time.LocalDateTime
@@ -41,7 +42,7 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val backupState by viewModel.backupState.collectAsStateWithLifecycle()
-    val isImporting by viewModel.isImporting.collectAsStateWithLifecycle()
+    val importState by viewModel.importState.collectAsStateWithLifecycle()
     val hiddenItems by viewModel.hiddenItems.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -60,6 +61,11 @@ fun SettingsScreen(
             else -> {}
         }
     }
+
+    ImportProgressDialog(
+        state = importState,
+        onDismiss = viewModel::resetImportState,
+    )
 
     val exportJsonLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -275,7 +281,7 @@ fun SettingsScreen(
                                     exportJsonLauncher.launch("icepack_watchlist_$dateStr.json")
                                 },
                                 modifier = Modifier.weight(1f),
-                                enabled = backupState != BackupState.Loading && !isImporting
+                                enabled = backupState != BackupState.Loading && importState is com.yourname.icepacklist.feature.watchlist.data.ImportState.Idle
                             ) {
                                 Text("Export JSON")
                             }
@@ -286,7 +292,7 @@ fun SettingsScreen(
                                     exportCsvLauncher.launch("icepack_watchlist_$dateStr.csv")
                                 },
                                 modifier = Modifier.weight(1f),
-                                enabled = backupState != BackupState.Loading && !isImporting
+                                enabled = backupState != BackupState.Loading && importState is com.yourname.icepacklist.feature.watchlist.data.ImportState.Idle
                             ) {
                                 Text("Export CSV")
                             }
@@ -295,17 +301,12 @@ fun SettingsScreen(
                         OutlinedButton(
                             onClick = { importLauncher.launch(arrayOf("*/*")) },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = backupState != BackupState.Loading && !isImporting
+                            enabled = backupState != BackupState.Loading && importState is com.yourname.icepacklist.feature.watchlist.data.ImportState.Idle
                         ) {
                             Text("Import Watchlist (JSON, CSV, TSV)")
                         }
                     }
-
-                    if (isImporting) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        val progress by viewModel.importProgress.collectAsStateWithLifecycle()
-                        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
-                    } else if (backupState == BackupState.Loading) {
+                    if (backupState == BackupState.Loading && importState is com.yourname.icepacklist.feature.watchlist.data.ImportState.Idle) {
                         Spacer(modifier = Modifier.height(8.dp))
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                     }

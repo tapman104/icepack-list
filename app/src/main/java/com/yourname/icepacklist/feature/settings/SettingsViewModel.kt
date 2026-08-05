@@ -10,6 +10,7 @@ import com.yourname.icepacklist.core.database.HiddenItemRepository
 import com.yourname.icepacklist.core.datastore.ApiKeyDataStore
 import com.yourname.icepacklist.core.datastore.ContentFilter
 import com.yourname.icepacklist.core.datastore.ThemeMode
+import com.yourname.icepacklist.feature.watchlist.data.ImportPhase
 import com.yourname.icepacklist.feature.watchlist.data.ImportState
 import com.yourname.icepacklist.feature.watchlist.domain.WatchlistImportUseCase
 import com.yourname.icepacklist.feature.watchlist.domain.WatchlistExportUseCase
@@ -120,14 +121,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private val _importState = MutableStateFlow<ImportState>(ImportState.Idle)
+    val importState = _importState.asStateFlow()
+
+    fun resetImportState() {
+        _importState.value = ImportState.Idle
+    }
+
     private val _backupState = MutableStateFlow<BackupState>(BackupState.Idle)
     val backupState = _backupState.asStateFlow()
-
-    private val _isImporting = MutableStateFlow(false)
-    val isImporting = _isImporting.asStateFlow()
-
-    private val _importProgress = MutableStateFlow(0f)
-    val importProgress = _importProgress.asStateFlow()
 
     fun exportBackup(uri: Uri, contentResolver: ContentResolver, isCsv: Boolean) {
         viewModelScope.launch {
@@ -148,8 +150,7 @@ class SettingsViewModel @Inject constructor(
 
     fun importBackup(uri: Uri, contentResolver: ContentResolver) {
         viewModelScope.launch {
-            _isImporting.value = true
-            _importProgress.value = 0f
+            _importState.value = ImportState.Progress(0, 1, "Initializing...", ImportPhase.Parsing)
             _backupState.value = BackupState.Loading
             try {
                 val json = withContext(Dispatchers.IO) {
@@ -160,36 +161,38 @@ class SettingsViewModel @Inject constructor(
                 if (json != null) {
                     importUseCase.invoke(json).collect { state ->
                         when (state) {
+                            is ImportState.Idle -> {}
                             is ImportState.Progress -> {
-                                _importProgress.value = if (state.total > 0) state.current.toFloat() / state.total else 0f
+                                _importState.value = state
                             }
                             is ImportState.Success -> {
-                                if (state.skipped > 0) {
+                                _importState.value = state
+                                val skipped = state.skippedTitles.size
+                                if (skipped > 0) {
                                     val skippedStr = if (state.skippedTitles.isNotEmpty()) {
                                         val displayNames = state.skippedTitles.take(3).joinToString(", ")
                                         val remaining = state.skippedTitles.size - 3
                                         if (remaining > 0) " (Skipped: $displayNames and $remaining more)" else " (Skipped: $displayNames)"
                                     } else ""
-                                    _backupState.value = BackupState.Success("Imported ${state.imported} items, ${state.skipped} skipped$skippedStr")
+                                    _backupState.value = BackupState.Success("Imported ${state.importedCount} items, $skipped skipped$skippedStr")
                                 } else {
-                                    _backupState.value = BackupState.Success("Imported ${state.imported} items")
+                                    _backupState.value = BackupState.Success("Imported ${state.importedCount} items")
                                 }
-                                _isImporting.value = false
                                 apiKeyDataStore.saveLastImportTime(System.currentTimeMillis())
                             }
                             is ImportState.Error -> {
-                                _backupState.value = BackupState.Error(state.message ?: "Import failed")
-                                _isImporting.value = false
+                                _importState.value = state
+                                _backupState.value = BackupState.Error(state.message)
                             }
                         }
                     }
                 } else {
                     _backupState.value = BackupState.Error("Failed to read file.")
-                    _isImporting.value = false
+                    _importState.value = ImportState.Error("Failed to read file.")
                 }
             } catch (e: Exception) {
                 _backupState.value = BackupState.Error(e.message ?: "Failed to import backup")
-                _isImporting.value = false
+                _importState.value = ImportState.Error(e.message ?: "Failed to import backup")
             }
         }
     }

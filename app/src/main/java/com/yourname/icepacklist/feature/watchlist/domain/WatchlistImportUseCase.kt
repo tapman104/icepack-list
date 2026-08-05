@@ -7,6 +7,7 @@ import com.yourname.icepacklist.core.network.TmdbApiService
 import com.yourname.icepacklist.feature.home.domain.Movie
 import com.yourname.icepacklist.feature.home.domain.MultiSearchResult
 import com.yourname.icepacklist.feature.home.domain.TvShow
+import com.yourname.icepacklist.feature.watchlist.data.ImportPhase
 import com.yourname.icepacklist.feature.watchlist.data.ImportState
 import com.yourname.icepacklist.feature.watchlist.domain.parser.*
 import kotlinx.coroutines.Dispatchers
@@ -58,14 +59,14 @@ class WatchlistImportUseCase @Inject constructor(
                     skippedTitles.add(item.title)
                 }
                 
-                emit(ImportState.Progress(i + 1, total))
+                emit(ImportState.Progress(i + 1, total, item.title, ImportPhase.Resolving))
             }
 
-            emit(ImportState.Success(importedCount, skippedTitles.size, skippedTitles))
+            emit(ImportState.Success(importedCount, skippedTitles))
             
         } catch (e: Exception) {
             e.printStackTrace()
-            emit(ImportState.Error(e.message))
+            emit(ImportState.Error(e.message ?: "Unknown error"))
         }
     }.flowOn(Dispatchers.IO)
 
